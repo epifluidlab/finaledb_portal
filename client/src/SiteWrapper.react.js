@@ -50,7 +50,7 @@ const navBarItems: Array<navItem> = [
   },
   {
     value: "Query",
-    to: "/form-elements",
+    to: "/query",
     icon: "search",
     LinkComponent: withRouter(NavLink),
   },
@@ -64,85 +64,19 @@ const navBarItems: Array<navItem> = [
         LinkComponent: withRouter(NavLink),
       },
       { value: "Charts", to: "/charts", LinkComponent: withRouter(NavLink) },
-      {
-        value: "Pricing Cards",
-        to: "/pricing-cards",
-        LinkComponent: withRouter(NavLink),
-      },
     ],
   },
   {
     value: "Components",
     icon: "calendar",
     subItems: [
-      { value: "Maps", to: "/maps", LinkComponent: withRouter(NavLink) },
       { value: "Icons", to: "/icons", LinkComponent: withRouter(NavLink) },
       { value: "Store", to: "/store", LinkComponent: withRouter(NavLink) },
-      { value: "Blog", to: "/blog", LinkComponent: withRouter(NavLink) },
-    ],
-  },
-  {
-    value: "Pages",
-    icon: "file",
-    subItems: [
-      { value: "Profile", to: "/profile", LinkComponent: withRouter(NavLink) },
-      { value: "Login", to: "/login", LinkComponent: withRouter(NavLink) },
-      {
-        value: "Register",
-        to: "/register",
-        LinkComponent: withRouter(NavLink),
-      },
-      {
-        value: "Forgot password",
-        to: "/forgot-password",
-        LinkComponent: withRouter(NavLink),
-      },
-      { value: "400 error", to: "/400", LinkComponent: withRouter(NavLink) },
-      { value: "401 error", to: "/401", LinkComponent: withRouter(NavLink) },
-      { value: "403 error", to: "/403", LinkComponent: withRouter(NavLink) },
-      { value: "404 error", to: "/404", LinkComponent: withRouter(NavLink) },
-      { value: "500 error", to: "/500", LinkComponent: withRouter(NavLink) },
-      { value: "503 error", to: "/503", LinkComponent: withRouter(NavLink) },
-      { value: "Email", to: "/email", LinkComponent: withRouter(NavLink) },
-      {
-        value: "Empty page",
-        to: "/empty-page",
-        LinkComponent: withRouter(NavLink),
-      },
-      { value: "RTL", to: "/rtl", LinkComponent: withRouter(NavLink) },
     ],
   },
 
-  {
-    value: "Gallery",
-    to: "/gallery",
-    icon: "image",
-    LinkComponent: withRouter(NavLink),
-  },
-  {
-    icon: "file-text",
-    value: "Documentation",
-    to:
-      process.env.NODE_ENV === "production"
-        ? "https://tabler.github.io/tabler-react/documentation"
-        : "/documentation",
-  },
 ];
 
-const accountDropdownProps = {
-  avatarURL: "./demo/faces/female/25.jpg",
-  name: "Jane Pearson",
-  description: "Administrator",
-  options: [
-    { icon: "user", value: "Profile" },
-    { icon: "settings", value: "Settings" },
-    { icon: "mail", value: "Inbox", badge: "6" },
-    { icon: "send", value: "Message" },
-    { isDivider: true },
-    { icon: "help-circle", value: "Need help?" },
-    { icon: "log-out", value: "Sign out" },
-  ],
-};
 
 class SiteWrapper extends React.Component<Props, State> {
   state = {
@@ -192,7 +126,7 @@ class SiteWrapper extends React.Component<Props, State> {
         headerProps={{
           href: "/",
           alt: "Tabler React",
-          imageURL: "./demo/brand/tabler.svg",
+          imageURL: "./demo/brand/logo.svg",
           navItems: (
             <Nav.Item type="div" className="d-none d-md-flex">
               <Button
@@ -229,23 +163,11 @@ class SiteWrapper extends React.Component<Props, State> {
               ),
             unread: unreadCount,
           },
-          accountDropdown: accountDropdownProps,
         }}
         navProps={{ itemsObjects: navBarItems }}
         routerContextComponentType={withRouter(RouterContextProvider)}
         footerProps={{
-          links: [
-            <a href="#">First Link</a>,
-            <a href="#">Second Link</a>,
-            <a href="#">Third Link</a>,
-            <a href="#">Fourth Link</a>,
-            <a href="#">Five Link</a>,
-            <a href="#">Sixth Link</a>,
-            <a href="#">Seventh Link</a>,
-            <a href="#">Eigth Link</a>,
-          ],
-          note:
-            "Premium and Open Source dashboard template with responsive and high quality UI. For Free!",
+
           copyright: (
             <React.Fragment>
               Copyright © 2019
