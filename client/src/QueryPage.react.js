@@ -53,7 +53,7 @@ function FormElements() {
                   </Table.Row>
                   <Table.Row>
                     <Table.Col>
-                      <Form.Group label="Project">
+                      <Form.Group label="Repository">
                         <Form.Checkbox
                           name="example-radios"
                           label="NCBI"
@@ -61,7 +61,7 @@ function FormElements() {
                         />
                         <Form.Checkbox
                           name="example-radios"
-                          label="ENCODE"
+                          label="dbGaP"
                           value="option2"
                         />
                         <Form.Checkbox
@@ -105,6 +105,82 @@ function FormElements() {
                         <Form.Checkbox
                           name="example-radios"
                           label="paird-ended"
+                          value="option2"
+                        />
+                      </Form.Group>
+                    </Table.Col>
+                  </Table.Row>
+                  <Table.Row>
+                    <Table.Col>
+                      <Form.Group label="Read length">
+                        <Form.Checkbox
+                          name="example-radios"
+                          label="50"
+                          value="option1"
+                        />
+                        <Form.Checkbox
+                          name="example-radios"
+                          label="120"
+                          value="option2"
+                        />
+                      </Form.Group>
+                    </Table.Col>
+                  </Table.Row>
+                  <Table.Row>
+                    <Table.Col>
+                      <Form.Group label="Age">
+                        <Form.Checkbox
+                          isInline
+                          name="0-10"
+                          label="0-10"
+                          value="option1"
+                        />
+                        <Form.Checkbox
+                          isInline
+                          name="example-radios"
+                          label="11-20"
+                          value="option2"
+                        />
+                        <Form.Checkbox
+                          isInline
+                          name="example-radios"
+                          label="21-30"
+                          value="option2"
+                        />
+                        <Form.Checkbox
+                          isInline
+                          name="example-radios"
+                          label="31-40"
+                          value="option2"
+                        />
+                        <Form.Checkbox
+                          isInline
+                          name="example-radios"
+                          label="41-50"
+                          value="option2"
+                        />
+                        <Form.Checkbox
+                          isInline
+                          name="example-radios"
+                          label="51-60"
+                          value="option2"
+                        />
+                        <Form.Checkbox
+                          isInline
+                          name="example-radios"
+                          label="61-70"
+                          value="option2"
+                        />
+                        <Form.Checkbox
+                          isInline
+                          name="example-radios"
+                          label="71-80"
+                          value="option2"
+                        />
+                        <Form.Checkbox
+                          isInline
+                          name="example-radios"
+                          label="81-90"
                           value="option2"
                         />
                       </Form.Group>
@@ -181,7 +257,7 @@ function FormElements() {
                     <Table.ColHeader>Sex</Table.ColHeader>
                     <Table.ColHeader>Age</Table.ColHeader>
                     <Table.ColHeader>Run type</Table.ColHeader>
-                    <Table.ColHeader>Read length</Table.ColHeader>
+                    <Table.ColHeader>len.</Table.ColHeader>
                     <Table.ColHeader>Datatype</Table.ColHeader>
                     <Table.ColHeader>PMID</Table.ColHeader>
                     <Table.ColHeader alignContent="center">
@@ -190,314 +266,6 @@ function FormElements() {
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  <Table.Row>
-                    <Table.Col>
-                      <div>Sample Name</div>
-                      <Text size="sm" muted>
-                        SRA ID
-                      </Text>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Lung cancer</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Female</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>PAIRED</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>WGS</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <Button link size="sm">
-                        26771485
-                      </Button>
-                    </Table.Col>
-                    <Table.Col alignContent="center">
-                      <Button.List>
-                        <Button icon="download" size="sm" />
-                        <Button icon="check" size="sm" />
-                      </Button.List>
-                    </Table.Col>
-                  </Table.Row>
-
-
-                  <Table.Row>
-                    <Table.Col>
-                      <div>Sample Name</div>
-                      <Text size="sm" muted>
-                        SRA ID
-                      </Text>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Lung cancer</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Female</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>PAIRED</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>WGS</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <Button link size="sm">
-                        26771485
-                      </Button>
-                    </Table.Col>
-                    <Table.Col alignContent="center">
-                      <Button.List>
-                        <Button icon="download" size="sm" />
-                        <Button icon="check" size="sm" />
-                      </Button.List>
-                    </Table.Col>
-                  </Table.Row>
-
-
-                  <Table.Row>
-                    <Table.Col>
-                      <div>Sample Name</div>
-                      <Text size="sm" muted>
-                        SRA ID
-                      </Text>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Lung cancer</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Female</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>PAIRED</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>WGS</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <Button link size="sm">
-                        26771485
-                      </Button>
-                    </Table.Col>
-                    <Table.Col alignContent="center">
-                      <Button.List>
-                        <Button icon="download" size="sm" />
-                        <Button icon="check" size="sm" />
-                      </Button.List>
-                    </Table.Col>
-                  </Table.Row>
-
-
-                  <Table.Row>
-                    <Table.Col>
-                      <div>Sample Name</div>
-                      <Text size="sm" muted>
-                        SRA ID
-                      </Text>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Lung cancer</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Female</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>PAIRED</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>WGS</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <Button link size="sm">
-                        26771485
-                      </Button>
-                    </Table.Col>
-                    <Table.Col alignContent="center">
-                      <Button.List>
-                        <Button icon="download" size="sm" />
-                        <Button icon="check" size="sm" />
-                      </Button.List>
-                    </Table.Col>
-                  </Table.Row>
-
-
-                  <Table.Row>
-                    <Table.Col>
-                      <div>Sample Name</div>
-                      <Text size="sm" muted>
-                        SRA ID
-                      </Text>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Lung cancer</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Female</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>PAIRED</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>WGS</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <Button link size="sm">
-                        26771485
-                      </Button>
-                    </Table.Col>
-                    <Table.Col alignContent="center">
-                      <Button.List>
-                        <Button icon="download" size="sm" />
-                        <Button icon="check" size="sm" />
-                      </Button.List>
-                    </Table.Col>
-                  </Table.Row>
-
-                  <Table.Row>
-                    <Table.Col>
-                      <div>Sample Name</div>
-                      <Text size="sm" muted>
-                        SRA ID
-                      </Text>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Lung cancer</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Female</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>PAIRED</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>WGS</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <Button link size="sm">
-                        26771485
-                      </Button>
-                    </Table.Col>
-                    <Table.Col alignContent="center">
-                      <Button.List>
-                        <Button icon="download" size="sm" />
-                        <Button icon="check" size="sm" />
-                      </Button.List>
-                    </Table.Col>
-                  </Table.Row>
-
-                  <Table.Row>
-                    <Table.Col>
-                      <div>Sample Name</div>
-                      <Text size="sm" muted>
-                        SRA ID
-                      </Text>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Lung cancer</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Female</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>PAIRED</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>WGS</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <Button link size="sm">
-                        26771485
-                      </Button>
-                    </Table.Col>
-                    <Table.Col alignContent="center">
-                      <Button.List>
-                        <Button icon="download" size="sm" />
-                        <Button icon="check" size="sm" />
-                      </Button.List>
-                    </Table.Col>
-                  </Table.Row>
-
-                  <Table.Row>
-                    <Table.Col>
-                      <div>Sample Name</div>
-                      <Text size="sm" muted>
-                        SRA ID
-                      </Text>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Lung cancer</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Female</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>PAIRED</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>WGS</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <Button link size="sm">
-                        26771485
-                      </Button>
-                    </Table.Col>
-                    <Table.Col alignContent="center">
-                      <Button.List>
-                        <Button icon="download" size="sm" />
-                        <Button icon="check" size="sm" />
-                      </Button.List>
-                    </Table.Col>
-                  </Table.Row>
-
                   <Table.Row>
                     <Table.Col>
                       <div>Sample Name</div>

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
@@ -15,7 +14,7 @@ state = {
   }
     // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
   callBackendAPI = async () => {
-    const response = await fetch('/express_backend');
+    const response = await fetch('/express');
     const body = await response.json();
 
     if (response.status !== 200) {
@@ -28,7 +27,6 @@ state = {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
         </header>
         // Render the newly fetched data inside of this.state.data 
