@@ -123,41 +123,18 @@ const getPublications = (request, response) => {
         link: row.link,
       };
 
-      // publication.set ('author', row.pub_author);
-      // publication.set ('year', row.pub_author);
-      // publication.set ('journal', row.pub_journal);
-      // publication.set ('pmid', row.pmid);
-      // publication.set ('doi', row.doi);
-      // publication.set ('link', row.link);
       publicationsList.push (publication);
     }
 
     console.log(publicationsList);
-    response.status(200).json({ 
 
+    response.status(200).json({ 
       publications: publicationsList,
     });
 
-  // pool.query('SELECT * FROM publications', (error, results) => {
-  //   if (error) {
-  //     throw error
-  //   }
-
-  //   response.status(200).json({ 
-  //     publications: "hi"
-  //   });
-  // })
   });
 
 }
-
-
- // const getPlatforms = (request, response) => {
- //   pool.query('SELECT * FROM metadata', (error, results) => {
- //     if (error) {
- //       throw error
- //     }
- // }
 
 
   module.exports = {

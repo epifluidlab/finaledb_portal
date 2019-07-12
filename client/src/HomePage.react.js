@@ -49,32 +49,51 @@ const posts = [
   {id: 2, title: 'Installation', content: 'You can install React from npm.'}
 ];
 
-function Blog(props) {
-  console.log(props.posts);
 
+function Blog(props) {
   const sidebar = (
-    <ul>
-      {props.posts.map((post) =>
-        <li key={post.id}>
-          {post.title}
-        </li>
-      )}
-    </ul>
+    <Table.Header>
+    <Table.Row>
+      <Table.ColHeader>Publication Name</Table.ColHeader>
+      <Table.ColHeader>PMID</Table.ColHeader>
+      <Table.ColHeader>Author</Table.ColHeader>
+      <Table.ColHeader>Year</Table.ColHeader>
+      <Table.ColHeader>Journal</Table.ColHeader>
+      <Table.ColHeader>Samples</Table.ColHeader>
+      <Table.ColHeader>DOI</Table.ColHeader>
+
+    </Table.Row>
+  </Table.Header>
+  //<Table.Body>
   );
-  const content = props.posts.map((post) =>
-    <div key={post.id}>
-      <h3>{post.title}</h3>
-      <p>{post.content}</p>
-    </div>
+  const content = props.pubs.map((pub) =>
+  <Table.Row>
+  <Table.Col>
+    Cell-free DNA Comprises an In Vivo Nucleosome Footprint
+    that Informs Its Tissues-Of-Origin.
+  </Table.Col>
+  <Table.Col>{pub.pmid}</Table.Col>
+  <Table.Col>{pub.author}</Table.Col>
+  <Table.Col>{pub.year}</Table.Col>
+  <Table.Col>{pub.journal}</Table.Col>
+  <Table.Col>60</Table.Col>
+  <Table.Col>{pub.doi}</Table.Col>
+
+</Table.Row>
+// <div key={pub.author}>
+//   <h3>{pub.year}</h3>
+//   <p>{pub.year}</p>
+// </div>
   );
   return (
     <div>
       {sidebar}
-      <hr />
-      {content}
+      <Table.Body>
+      {content} </Table.Body>
     </div>
   );
 }
+
 
 
 
@@ -135,8 +154,7 @@ class Home extends Component {
                   <Card.Title>About</Card.Title>
                 </Card.Header>
                 <Card.Body>
-                <Blog posts={posts2}/>
-                <div>{publications}</div>
+                <Blog pubs={publications}/>
 
                 </Card.Body>
               </Card>
@@ -540,79 +558,12 @@ class Home extends Component {
                   cards
                   className="text-nowrap"
                 >
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColHeader>Publication Name</Table.ColHeader>
-                      <Table.ColHeader>PMID</Table.ColHeader>
-                      <Table.ColHeader>First Author</Table.ColHeader>
-                      <Table.ColHeader>Date Published</Table.ColHeader>
-                      <Table.ColHeader>Journal</Table.ColHeader>
-                      <Table.ColHeader>Samples</Table.ColHeader>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    <Table.Row>
-                      <Table.Col>
-                        Cell-free DNA Comprises an In Vivo Nucleosome Footprint
-                        that Informs Its Tissues-Of-Origin.
-                      </Table.Col>
-                      <Table.Col>26771485</Table.Col>
-                      <Table.Col>Snyder</Table.Col>
-                      <Table.Col>2016 Jan 14</Table.Col>
-                      <Table.Col>Cell</Table.Col>
-                      <Table.Col>60</Table.Col>
-                    </Table.Row>
-                    <Table.Row>
-                      <Table.Col>
-                        Cell-free DNA Comprises an In Vivo Nucleosome Footprint
-                        that Informs Its Tissues-Of-Origin.
-                      </Table.Col>
-                      <Table.Col>26771485</Table.Col>
-                      <Table.Col>Snyder</Table.Col>
-                      <Table.Col>2016 Jan 14</Table.Col>
-                      <Table.Col>Cell</Table.Col>
-                      <Table.Col>60</Table.Col>
-                    </Table.Row>
-                    <Table.Row>
-                      <Table.Col>
-                        Cell-free DNA Comprises an In Vivo Nucleosome Footprint
-                        that Informs Its Tissues-Of-Origin.
-                      </Table.Col>
-                      <Table.Col>26771485</Table.Col>
-                      <Table.Col>Snyder</Table.Col>
-                      <Table.Col>2016 Jan 14</Table.Col>
-                      <Table.Col>Cell</Table.Col>
-                      <Table.Col>60</Table.Col>
-                    </Table.Row>
-                    <Table.Row>
-                      <Table.Col>
-                        Cell-free DNA Comprises an In Vivo Nucleosome Footprint
-                        that Informs Its Tissues-Of-Origin.
-                      </Table.Col>
-                      <Table.Col>26771485</Table.Col>
-                      <Table.Col>Snyder</Table.Col>
-                      <Table.Col>2016 Jan 14</Table.Col>
-                      <Table.Col>Cell</Table.Col>
-                      <Table.Col>60</Table.Col>
-                    </Table.Row>
-                    <Table.Row>
-                      <Table.Col>
-                        Cell-free DNA Comprises an In Vivo Nucleosome Footprint
-                        that Informs Its Tissues-Of-Origin.
-                      </Table.Col>
-                      <Table.Col>26771485</Table.Col>
-                      <Table.Col>Snyder</Table.Col>
-                      <Table.Col>2016 Jan 14</Table.Col>
-                      <Table.Col>Cell</Table.Col>
-                      <Table.Col>60</Table.Col>
-                    </Table.Row>
-                  </Table.Body>
+
+                  <Blog pubs={publications}/>
                 </Table>
               </Card>
             </Grid.Col>
           </Grid.Row>
-          
-          
           
           
         </Page.Content>
