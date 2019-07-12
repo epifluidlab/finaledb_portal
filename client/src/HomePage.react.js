@@ -21,19 +21,39 @@ import SiteWrapper from "./SiteWrapper.react";
 
 const diseases =  [[1, 2], [3, 4], [5]];
 
+function ListItem(props) {
+  // Correct! There is no need to specify the key here:
+  return <li>{props.value}</li>;
+}
 
+function DiseaseList(props) {
+  console.log(props);
+  const diseases = props.diseases;
+  const listItems = diseases.map((disease) =>
+    // Correct! Key should be specified inside the array.
+    <ListItem key={disease.toString()}
+              value={disease} />
+  );
+  return (
+    <ul>
+      {listItems}
+    </ul>
+  );
+}
 
 
 class Home extends Component {
-  state = {
-      data: null
-    };
+
+    constructor(props) {
+      super(props);
+      this.state={data: null};
+    }
     componentDidMount() {
       // Call our fetch function below once the component mounts
-    this.callBackendAPI()
-      .then(res => this.setState({ data: res.nice }))
-      .catch(err => console.log(err));
-  }
+      this.callBackendAPI()
+      //.then(res => this.setState({ data: res.nice }))
+      //.catch(err => console.log(err));
+    }
     // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
     callBackendAPI = async () => {
       const response = await fetch('/users');
@@ -42,31 +62,18 @@ class Home extends Component {
       if (response.status !== 200) {
         throw Error(body.message) 
       }
-      return body;
+
+      console.log(body);
+      this.setState({ data: body.nice });
     };
 
 
   render() {
-    const {data} = this.state;
-    function ListItem(props) {
-      // Correct! There is no need to specify the key here:
-      return <li>{props.value}</li>;
-    }
-    
-    function DiseaseList(props) {
-      const diseases = props.diseases;
-      const listItems = diseases.map((disease) =>
-        // Correct! Key should be specified inside the array.
-        <ListItem key={disease.toString()}
-                  value={disease} />
-      );
-      return (
-        <ul>
-          {listItems}
-        </ul>
-      );
-    }
 
+    const {data} = this.state;
+    console.log(data);
+
+    if (!data) return null;
     return (
       <SiteWrapper>
         <Page.Content>
@@ -333,8 +340,8 @@ class Home extends Component {
                     <C3Chart
                       style={{ height: "12rem" }}
                       data={{
-                        columns: 
-                        <DiseaseList diseases={this.state.data} />,
+                        columns: data,
+                        //<DiseaseList diseases={data} />,
                         
                         //[
                           // each columns data
