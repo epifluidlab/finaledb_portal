@@ -10,7 +10,6 @@ import {
   Grid,
   Card,
   Table,
-  colors,
   StampCard,
 } from "tabler-react";
 
@@ -18,8 +17,6 @@ import C3Chart from "react-c3js";
 
 import SiteWrapper from "./SiteWrapper.react";
 
-
-const diseases =  [[1, 2], [3, 4], [5]];
 
 function ListItem(props) {
   // Correct! There is no need to specify the key here:
@@ -41,6 +38,45 @@ function DiseaseList(props) {
   );
 }
 
+const posts2 = [
+  {id: 'sny', title: 12},
+  {id: 'sny2', title: 15}, 
+  {id: 'sny2', title: 15}, 
+];
+
+const posts = [
+  {id: 1, title: 'Hello World', content: 'Welcome to learning React!'},
+  {id: 2, title: 'Installation', content: 'You can install React from npm.'}
+];
+
+function Blog(props) {
+  console.log(props.posts);
+
+  const sidebar = (
+    <ul>
+      {props.posts.map((post) =>
+        <li key={post.id}>
+          {post.title}
+        </li>
+      )}
+    </ul>
+  );
+  const content = props.posts.map((post) =>
+    <div key={post.id}>
+      <h3>{post.title}</h3>
+      <p>{post.content}</p>
+    </div>
+  );
+  return (
+    <div>
+      {sidebar}
+      <hr />
+      {content}
+    </div>
+  );
+}
+
+
 
 class Home extends Component {
 
@@ -51,29 +87,44 @@ class Home extends Component {
     componentDidMount() {
       // Call our fetch function below once the component mounts
       this.callBackendAPI()
-      //.then(res => this.setState({ data: res.nice }))
-      //.catch(err => console.log(err));
     }
     // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
     callBackendAPI = async () => {
-      const response = await fetch('/users');
-      const body = await response.json();
-  
-      if (response.status !== 200) {
-        throw Error(body.message) 
+      var [response_data, response_pub] = await Promise.all ([ 
+        fetch('/data'),
+        fetch('/publications'),
+      ]);
+      const body_data = await response_data.json();
+      const body_pub = await response_pub.json();
+
+      if (response_data.status !== 200 || response_pub.status !== 200) {
+        throw Error(body_data.message) 
       }
 
-      console.log(body);
-      this.setState({ data: body.nice });
+      console.log(body_data);
+      console.log(body_pub);
+      this.setState({ 
+        diseases: body_data.diseases,
+        platforms: body_data.platforms,
+        libraryLayouts: body_data.libraryLayouts,
+        readLengths: body_data.readLengths,
+        publications: body_pub.publications,
+       });
     };
 
 
   render() {
 
-    const {data} = this.state;
-    console.log(data);
+    const {diseases} = this.state;
+    const {platforms} = this.state;
+    const {libraryLayouts} = this.state;
+    const {readLengths} = this.state;
+    const {publications} = this.state;
 
-    if (!data) return null;
+
+
+    if (!diseases || !platforms || !libraryLayouts || !readLengths || !publications) return null;
+
     return (
       <SiteWrapper>
         <Page.Content>
@@ -84,19 +135,9 @@ class Home extends Component {
                   <Card.Title>About</Card.Title>
                 </Card.Header>
                 <Card.Body>
-                <div>{data}</div>
-                <DiseaseList diseases={diseases} />
-                  React, JSX, ES6, TypeScript and Flow syntax support. Language
-                  extras beyond ES6 like the object spread operator. Autoprefixed
-                  CSS, so you don’t need -webkit- or other prefixes. A fast
-                  interactive unit test runner with built-in support for coverage
-                  reporting. A live development server that warns about common
-                  mistakes. A build script to bundle JS, CSS, and images for
-                  production, with hashes and sourcemaps. An offline-first service
-                  worker and a web app manifest, meeting all the Progressive Web
-                  App criteria. (Note: Using the service worker is opt-in as of
-                  react-scripts@2.0.0 and higher) Hassle-free updates for the
-                  above tools with a single dependency.
+                <Blog posts={posts2}/>
+                <div>{publications}</div>
+
                 </Card.Body>
               </Card>
   
@@ -246,14 +287,15 @@ class Home extends Component {
                       ],
                     ],
                     type: "bar", // default type of chart
-                    groups: [["data1", "data2", "data3"]],
-                    colors: {
-                      data1: colors["blue"],
-                    },
-                    names: {
-                      // name of each serie
-                      data1: "Samples",
-                    },
+                    // groups: [["data1", "data2", "data3"]],
+                    // colors: {
+                    //   data1: colors["blue"],
+                    // },
+                    // names: {
+                    //   //name of each serie
+                    //  data1: "Samples",
+                    //  data2: " hello"
+                    // },
                   }}
                   axis={{
                     y: {
@@ -340,9 +382,7 @@ class Home extends Component {
                     <C3Chart
                       style={{ height: "12rem" }}
                       data={{
-                        columns: data,
-                        //<DiseaseList diseases={data} />,
-                        
+                        columns: diseases,                        
                         //[
                           // each columns data
                          // ["data1", 63],
@@ -360,7 +400,7 @@ class Home extends Component {
                         //},
                       }}
                       legend={{
-                        show: true, //hide legend
+                        show: false, //hide legend
                       }}
                       padding={{
                         bottom: 0,
@@ -374,36 +414,30 @@ class Home extends Component {
               <Grid.Row>
                 <Card>
                   <Card.Header>
-                    <Card.Title>Platform</Card.Title>
+                    <Card.Title>Platforms</Card.Title>
                   </Card.Header>
                   <Card.Body>
                     <C3Chart
                       style={{ height: "12rem" }}
                       data={{
-                        columns: [
-                          // each columns data
-                          ["data1", 63],
-                          ["data2", 44],
-                          ["data3", 12],
-                          ["data4", 14],
-                        ],
-                        type: "pie", // default type of chart
-                        colors: {
-                          data1: colors["yellow-lighter"],
-                          data2: colors["yellow-light"],
-                          data3: colors["yellow"],
-                          data4: colors["yellow-dark"],
-                        },
-                        names: {
-                          // name of each serie
-                          data1: "A",
-                          data2: "B",
-                          data3: "C",
-                          data4: "D",
-                        },
+                        columns: platforms,
+                        type: "donut", // default type of chart
+                        // colors: {
+                        //   data1: colors["yellow-lighter"],
+                        //   data2: colors["yellow-light"],
+                        //   data3: colors["yellow"],
+                        //   data4: colors["yellow-dark"],
+                        // },
+                        // names: {
+                        //   // name of each serie
+                        //   data1: "A",
+                        //   data2: "B",
+                        //   data3: "C",
+                        //   data4: "D",
+                        // },
                       }}
                       legend={{
-                        show: true, //hide legend
+                        show: false, //hide legend
                       }}
                       padding={{
                         bottom: 0,
@@ -413,9 +447,85 @@ class Home extends Component {
                   </Card.Body>
                 </Card>
               </Grid.Row>
+
+              <Grid.Row>
+                <Card>
+                  <Card.Header>
+                    <Card.Title>Library Layouts</Card.Title>
+                  </Card.Header>
+                  <Card.Body>
+                    <C3Chart
+                      style={{ height: "12rem" }}
+                      data={{
+                        columns: libraryLayouts,
+                        type: "donut", // default type of chart
+                        // colors: {
+                        //   data1: colors["yellow-lighter"],
+                        //   data2: colors["yellow-light"],
+                        //   data3: colors["yellow"],
+                        //   data4: colors["yellow-dark"],
+                        // },
+                        // names: {
+                        //   // name of each serie
+                        //   data1: "A",
+                        //   data2: "B",
+                        //   data3: "C",
+                        //   data4: "D",
+                        // },
+                      }}
+                      legend={{
+                        show: false, //hide legend
+                      }}
+                      padding={{
+                        bottom: 0,
+                        top: 0,
+                      }}
+                    />
+                  </Card.Body>
+                </Card>
+              </Grid.Row>
+
+              <Grid.Row>
+                <Card>
+                  <Card.Header>
+                    <Card.Title>Read lengths</Card.Title>
+                  </Card.Header>
+                  <Card.Body>
+                    <C3Chart
+                      style={{ height: "12rem" }}
+                      data={{
+                        columns: readLengths,
+                        type: "donut", // default type of chart
+                        // colors: {
+                        //   data1: colors["yellow-lighter"],
+                        //   data2: colors["yellow-light"],
+                        //   data3: colors["yellow"],
+                        //   data4: colors["yellow-dark"],
+                        // },
+                        // names: {
+                        //   // name of each serie
+                        //   data1: "A",
+                        //   data2: "B",
+                        //   data3: "C",
+                        //   data4: "D",
+                        // },
+                      }}
+                      legend={{
+                        show: false, //hide legend
+                      }}
+                      padding={{
+                        bottom: 0,
+                        top: 0,
+                      }}
+                    />
+                  </Card.Body>
+                </Card>
+              </Grid.Row>
+
             </Grid.Col>
           </Grid.Row>
   
+
           <Grid.Row cards={true}>
             <Grid.Col width={12}>
               <Card>

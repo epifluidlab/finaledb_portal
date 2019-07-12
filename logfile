@@ -1,0 +1,44 @@
+2019-07-12 09:06:50.735 EDT [4028] LOG:  listening on IPv6 address "::1", port 5432
+2019-07-12 09:06:50.735 EDT [4028] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2019-07-12 09:06:50.736 EDT [4028] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2019-07-12 09:06:50.760 EDT [4029] LOG:  database system was interrupted; last known up at 2019-07-11 13:37:07 EDT
+2019-07-12 09:06:50.857 EDT [4029] LOG:  database system was not properly shut down; automatic recovery in progress
+2019-07-12 09:06:50.861 EDT [4029] LOG:  redo starts at 0/168AB68
+2019-07-12 09:06:50.861 EDT [4029] LOG:  invalid record length at 0/168AC48: wanted 24, got 0
+2019-07-12 09:06:50.861 EDT [4029] LOG:  redo done at 0/168AC10
+2019-07-12 09:06:50.883 EDT [4028] LOG:  database system is ready to accept connections
+2019-07-12 09:07:17.117 EDT [4335] FATAL:  role "postgres" does not exist
+2019-07-12 09:07:46.877 EDT [4568] ERROR:  relation "metadata" does not exist at character 15
+2019-07-12 09:07:46.877 EDT [4568] STATEMENT:  SELECT * FROM metadata
+2019-07-12 13:43:56.635 EDT [21477] ERROR:  syntax error at or near "VEIW" at character 6
+2019-07-12 13:43:56.635 EDT [21477] STATEMENT:  DROP VEIW publications;
+2019-07-12 13:44:00.471 EDT [21477] ERROR:  syntax error at or near "VEIW" at character 6
+2019-07-12 13:44:00.471 EDT [21477] STATEMENT:  DROP VEIW publications;
+2019-07-12 13:48:31.837 EDT [21477] ERROR:  syntax error at or near ".2015" at character 119
+2019-07-12 13:48:31.837 EDT [21477] STATEMENT:  CREATE VIEW publications AS SELECT pub_author, pub_year, pub_journal, pmid, doi FROM metadata WHERE doi=10.1016/j.cell.2015.11.050;
+2019-07-12 13:49:35.986 EDT [21477] ERROR:  syntax error at or near "SELECT" at character 54
+2019-07-12 13:49:35.986 EDT [21477] STATEMENT:  ALTER TABLE publications ADD COLUMN link varchar(80)
+	SELECT * FROM publications;
+2019-07-12 13:49:45.082 EDT [21477] ERROR:  "publications" is not a table, composite type, or foreign table
+2019-07-12 13:49:45.082 EDT [21477] STATEMENT:  ALTER TABLE publications ADD COLUMN link varchar(80);
+2019-07-12 13:50:56.200 EDT [21477] ERROR:  syntax error at or near "TABLE" at character 8
+2019-07-12 13:50:56.200 EDT [21477] STATEMENT:  UPDATE TABLE metadata SET doi='10.1016/j.cell.2015.11.050';
+2019-07-12 13:51:35.115 EDT [21477] ERROR:  relation "metadatal" does not exist at character 15
+2019-07-12 13:51:35.115 EDT [21477] STATEMENT:  SELECT * FROM metadatal
+	;
+2019-07-12 13:52:21.949 EDT [21477] ERROR:  syntax error at or near "as" at character 25
+2019-07-12 13:52:21.949 EDT [21477] STATEMENT:  ALTER VIEW publications as SELECT link FROM metadatal
+	;
+2019-07-12 13:52:24.401 EDT [21477] ERROR:  syntax error at or near "as" at character 25
+2019-07-12 13:52:24.401 EDT [21477] STATEMENT:  ALTER VIEW publications as SELECT link FROM metadata;
+2019-07-12 13:52:57.938 EDT [21477] ERROR:  syntax error at or near "as" at character 25
+2019-07-12 13:52:57.938 EDT [21477] STATEMENT:  ALTER VIEW publications as SELECT link, link FROM metadata;
+2019-07-12 13:53:27.717 EDT [21477] ERROR:  syntax error at or near "as" at character 25
+2019-07-12 13:53:27.717 EDT [21477] STATEMENT:  ALTER VIEW publications as SELECT link, link FROM metadata;
+2019-07-12 13:53:31.768 EDT [21477] ERROR:  syntax error at or near "SELECT" at character 25
+2019-07-12 13:53:31.768 EDT [21477] STATEMENT:  ALTER VIEW publications SELECT link, link FROM metadata;
+2019-07-12 13:56:42.965 EDT [21477] ERROR:  column "ctid" does not exist at character 48
+2019-07-12 13:56:42.965 EDT [21477] HINT:  Perhaps you meant to reference the column "publications.pmid" or the column "publications.pmid".
+2019-07-12 13:56:42.965 EDT [21477] STATEMENT:  DELETE FROM publications WHERE ctid IN (SELECT ctid FROM publications LIMIT 59);
+2019-07-12 14:02:27.847 EDT [21477] ERROR:  column "metadata.pub_author" must appear in the GROUP BY clause or be used in an aggregate function at character 36
+2019-07-12 14:02:27.847 EDT [21477] STATEMENT:  CREATE VIEW publications AS SELECT pub_author, pub_year, pub_journal, pmid, doi, link FROM metadata GROUP BY doi;

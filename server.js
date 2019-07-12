@@ -8,9 +8,9 @@ const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
 // create a GET route
-app.get('/express', (req, res) => {
-  res.send({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
-});
+//app.get('/express', (req, res) => {
+//  res.send({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
+//});
 
 app.use(bodyParser.json())
 app.use(
@@ -20,4 +20,5 @@ app.use(
 )
 
 
-app.get('/users', db.getUsers)
+app.get('/data', db.getData)
+app.get('/publications', db.getPublications)
