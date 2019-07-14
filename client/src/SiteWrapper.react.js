@@ -12,14 +12,16 @@ import {
   RouterContextProvider,
 } from "tabler-react";
 
-import type { NotificationProps } from "tabler-react";
+// import type { DownloadProps } from  "./components/Download/index.js"; //"tabler-react";
+import type { DownloadProps } from "./components/Download/Download.react";
+
 
 type Props = {|
   +children: React.Node,
 |};
 
 type State = {|
-  notificationsObjects: Array<NotificationProps>,
+  downloadsObjects: Array<DownloadProps>,
 |};
 
 type subNavItem = {|
@@ -55,8 +57,11 @@ const navBarItems: Array<navItem> = [
     LinkComponent: withRouter(NavLink),
   },
   {
-    value: "Interface",
+    value: "Visualization",
     icon: "box",
+    to: "/visualization",
+    LinkComponent: withRouter(NavLink),
+
     subItems: [
       {
         value: "Cards Design",
@@ -80,7 +85,7 @@ const navBarItems: Array<navItem> = [
 
 class SiteWrapper extends React.Component<Props, State> {
   state = {
-    notificationsObjects: [
+    downloadsObjects: [
       {
         unread: true,
         avatarURL: "demo/faces/male/41.jpg",
@@ -116,8 +121,8 @@ class SiteWrapper extends React.Component<Props, State> {
   };
 
   render(): React.Node {
-    const notificationsObjects = this.state.notificationsObjects || [];
-    const unreadCount = this.state.notificationsObjects.reduce(
+    const downloadsObjects = this.state.downloadsObjects || [];
+    const unreadCount = this.state.downloadsObjects.reduce(
       (a, v) => a || v.unread,
       false
     );
@@ -141,12 +146,12 @@ class SiteWrapper extends React.Component<Props, State> {
               </Button>
             </Nav.Item>
           ),
-          notificationsTray: {
-            notificationsObjects,
+          downloadTray: {
+            downloadsObjects,
             markAllAsRead: () =>
               this.setState(
                 () => ({
-                  notificationsObjects: this.state.notificationsObjects.map(
+                  downloadsObjects: this.state.downloadsObjects.map(
                     v => ({ ...v, unread: false })
                   ),
                 }),
@@ -154,7 +159,7 @@ class SiteWrapper extends React.Component<Props, State> {
                   setTimeout(
                     () =>
                       this.setState({
-                        notificationsObjects: this.state.notificationsObjects.map(
+                        downloadsObjects: this.state.downloadsObjects.map(
                           v => ({ ...v, unread: true })
                         ),
                       }),

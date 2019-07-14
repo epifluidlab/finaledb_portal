@@ -38,18 +38,6 @@ function DiseaseList(props) {
   );
 }
 
-const posts2 = [
-  {id: 'sny', title: 12},
-  {id: 'sny2', title: 15}, 
-  {id: 'sny2', title: 15}, 
-];
-
-const posts = [
-  {id: 1, title: 'Hello World', content: 'Welcome to learning React!'},
-  {id: 2, title: 'Installation', content: 'You can install React from npm.'}
-];
-
-
 function Blog(props) {
   const sidebar = (
     <Table.Header>
@@ -80,10 +68,6 @@ function Blog(props) {
   <Table.Col>{pub.doi}</Table.Col>
 
 </Table.Row>
-// <div key={pub.author}>
-//   <h3>{pub.year}</h3>
-//   <p>{pub.year}</p>
-// </div>
   );
   return (
     <div>
@@ -140,8 +124,6 @@ class Home extends Component {
     const {readLengths} = this.state;
     const {publications} = this.state;
 
-
-
     if (!diseases || !platforms || !libraryLayouts || !readLengths || !publications) return null;
 
     return (
@@ -154,8 +136,7 @@ class Home extends Component {
                   <Card.Title>About</Card.Title>
                 </Card.Header>
                 <Card.Body>
-                <Blog pubs={publications}/>
-
+                  <Blog pubs={publications}/>
                 </Card.Body>
               </Card>
   

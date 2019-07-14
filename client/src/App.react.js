@@ -4,10 +4,9 @@ import { Error404} from "./pages";
 
 import HomePage from "./HomePage.react";
 import QueryPage from "./QueryPage.react";
-import CardsDesignPage from "./interface/CardsDesignPage.react";
+import VisualizationPage from "./VisualizationPage.react";
 import StoreCardsPage from "./components/StoreCardsPage.react.js";
 import IconPage from "./components/IconPage.react.js";
-import ChartsPage from "./interface/ChartsPage.react";
 
 import "tabler-react/dist/Tabler.css";
 
@@ -19,10 +18,8 @@ function App(props: Props): React.Node {
       <Router>
         <Switch>
           <Route exact path="/" component={HomePage} />
-
-          <Route exact path="/cards" component={CardsDesignPage} />
-          <Route exact path="/charts" component={ChartsPage} />
           <Route exact path="/query" component={QueryPage} />
+          <Route exact path="/visualization" component={VisualizationPage} />
           <Route exact path="/icons" component={IconPage} />
           <Route exact path="/store" component={StoreCardsPage} />
           <Route component={Error404} />
