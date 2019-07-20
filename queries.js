@@ -71,7 +71,7 @@ function getReadLengths (rows) {
       readLengths.set(row.read_length, 0);
     }
     
-    readLengths.set(row.read_length, readLengths.get(row.read_length) + 1);
+    //readLengths.set(row.read_length, readLengths.get(row.read_length) + 1);
     // console.log(row.disease);
     // console.log(diseases.get(row.disease));
   }

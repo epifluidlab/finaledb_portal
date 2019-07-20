@@ -18,62 +18,40 @@ import C3Chart from "react-c3js";
 import SiteWrapper from "./SiteWrapper.react";
 
 
-function ListItem(props) {
-  // Correct! There is no need to specify the key here:
-  return <li>{props.value}</li>;
-}
-
-function DiseaseList(props) {
-  console.log(props);
-  const diseases = props.diseases;
-  const listItems = diseases.map((disease) =>
-    // Correct! Key should be specified inside the array.
-    <ListItem key={disease.toString()}
-              value={disease} />
-  );
-  return (
-    <ul>
-      {listItems}
-    </ul>
-  );
-}
-
 function Blog(props) {
   const sidebar = (
     <Table.Header>
-    <Table.Row>
-      <Table.ColHeader>Publication Name</Table.ColHeader>
-      <Table.ColHeader>PMID</Table.ColHeader>
-      <Table.ColHeader>Author</Table.ColHeader>
-      <Table.ColHeader>Year</Table.ColHeader>
-      <Table.ColHeader>Journal</Table.ColHeader>
-      <Table.ColHeader>Samples</Table.ColHeader>
-      <Table.ColHeader>DOI</Table.ColHeader>
-
-    </Table.Row>
-  </Table.Header>
-  //<Table.Body>
+      <Table.Row>
+        <Table.ColHeader>Publication Name</Table.ColHeader>
+        <Table.ColHeader>PMID</Table.ColHeader>
+        <Table.ColHeader>Author</Table.ColHeader>
+        <Table.ColHeader>Year</Table.ColHeader>
+        <Table.ColHeader>Journal</Table.ColHeader>
+        <Table.ColHeader>Samples</Table.ColHeader>
+        <Table.ColHeader>DOI</Table.ColHeader>
+      </Table.Row>
+    </Table.Header>
   );
   const content = props.pubs.map((pub) =>
-  <Table.Row>
-  <Table.Col>
-    Cell-free DNA Comprises an In Vivo Nucleosome Footprint
-    that Informs Its Tissues-Of-Origin.
-  </Table.Col>
-  <Table.Col>{pub.pmid}</Table.Col>
-  <Table.Col>{pub.author}</Table.Col>
-  <Table.Col>{pub.year}</Table.Col>
-  <Table.Col>{pub.journal}</Table.Col>
-  <Table.Col>60</Table.Col>
-  <Table.Col>{pub.doi}</Table.Col>
-
-</Table.Row>
+    <Table.Row>
+      <Table.Col>
+        Cell-free DNA Comprises an In Vivo Nucleosome Footprint
+        that Informs Its Tissues-Of-Origin.
+      </Table.Col>
+      <Table.Col>{pub.pmid}</Table.Col>
+      <Table.Col>{pub.author}</Table.Col>
+      <Table.Col>{pub.year}</Table.Col>
+      <Table.Col>{pub.journal}</Table.Col>
+      <Table.Col>60</Table.Col>
+      <Table.Col>{pub.doi}</Table.Col>
+    </Table.Row>
   );
   return (
     <div>
       {sidebar}
       <Table.Body>
-      {content} </Table.Body>
+        {content}
+      </Table.Body>
     </div>
   );
 }
