@@ -1,7 +1,22 @@
-import Download from "./Download.react";
-import type Props from "./Download.react";
+import React from 'react';
+import { connect } from 'react-redux';
+import { Button, Dropdown } from 'tabler-react';
 
-export { Download as default };
-export type { Props as DownloadProps };
+class Download extends React.Component {
+  render() {
+    const { downloads } = this.props;
+    return (
+      <Button.Dropdown icon="shopping-bag">
+        {
+          downloads.map(download => <Dropdown.Item>{download.sample_name}</Dropdown.Item>)
+        }
+      </Button.Dropdown>
+    )
+  }
+}
 
-console.log('in index');
+const mapStateToProps = state => ({
+  downloads: state.downloads.downloads
+});
+
+export default connect(mapStateToProps, null)(Download);

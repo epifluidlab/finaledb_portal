@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { Page, Grid, StoreCard, Table, Card, Badge } from "tabler-react";
 
-import SiteWrapper from "../SiteWrapper.react";
+import SiteWrapper from "../pages/SiteWrapper.react";
 
 function StoreCardsPage(): React.Node {
   return (

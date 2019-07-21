@@ -2,8 +2,6 @@
 
 import * as React from "react";
 import { Component } from "react";
-
-
 import {
   Page,
   Card,
@@ -13,67 +11,8 @@ import {
   Button,
   Text,
 } from "tabler-react";
-
 import SiteWrapper from "./SiteWrapper.react";
-
-
-function SamplesTable(props) {
-  const header = (
-    <Table.Header>
-    <Table.Row>
-      <Table.ColHeader>Sample Name</Table.ColHeader>
-      <Table.ColHeader>Disease status</Table.ColHeader>
-      <Table.ColHeader>Run type</Table.ColHeader>
-      <Table.ColHeader>len.</Table.ColHeader>
-      <Table.ColHeader>Datatype</Table.ColHeader>
-      <Table.ColHeader>Publication</Table.ColHeader>
-      <Table.ColHeader alignContent="center">
-        <i className="icon-settings" />
-      </Table.ColHeader>
-    </Table.Row>
-  </Table.Header>
-  );
-  const content = props.samples.map((sample) =>
-    <Table.Row>
-      <Table.Col>
-        <div>{sample.sample_name}</div>
-        <Text size="sm" muted>
-          {sample.sra_id}
-        </Text>
-      </Table.Col>
-      <Table.Col> 
-        {sample.disease}
-        <Text size="sm" muted>
-          {sample.sex}     {sample.age}
-        </Text>
-      </Table.Col>
-      <Table.Col> {sample.se_pe} </Table.Col>
-      <Table.Col> {sample.read_length} </Table.Col>
-      <Table.Col> {sample.datatype} </Table.Col>
-      <Table.Col>
-        <Button link size="sm" RootComponent="a" href={sample.link} target="_blank">
-          {sample.doi}
-        </Button>
-      </Table.Col>
-      <Table.Col alignContent="center">
-        <Button.List>
-          <Button icon="download" size="sm" />
-          <Button icon="plus" size="sm" />
-        </Button.List>
-      </Table.Col>
-    </Table.Row>
-  );
-  return (
-    <div>
-      {header}
-      <Table.Body>
-        {content}
-      </Table.Body>
-    </div>
-  );
-}
-
-
+import SamplesTable from '../components/SamplesTable';
 
 function GetReadLengths(props) {
   const content = props.read_lengths.map((read_length) =>
