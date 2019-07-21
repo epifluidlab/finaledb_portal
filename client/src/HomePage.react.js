@@ -19,7 +19,7 @@ import SiteWrapper from "./SiteWrapper.react";
 
 
 function Blog(props) {
-  const sidebar = (
+  const header = (
     <Table.Header>
       <Table.Row>
         <Table.ColHeader>Publication Name</Table.ColHeader>
@@ -48,7 +48,7 @@ function Blog(props) {
   );
   return (
     <div>
-      {sidebar}
+      {header}
       <Table.Body>
         {content}
       </Table.Body>
@@ -114,10 +114,18 @@ class Home extends Component {
                   <Card.Title>About</Card.Title>
                 </Card.Header>
                 <Card.Body>
-                  <Blog pubs={publications}/>
+                There has been a recent surge in cfDNA studies and datasets, making it imperative to build a platform to collect and uniformly process published data. Through a publicly accessible database that makes all datasets from current published and preprint studies reusable and comparable, researchers will be able to further understand the genetics and epigenetics behind cfDNA and its diagnostic implications. Here, we developed a comprehensive cfDNA database dedicated to integrating, analyzing, and visualizing cfDNA data for the benefit of the cfDNA research community. Beginning with a large collection of raw sequence data from available studies and uniformly processing this raw data for effective presentation and interpretation, cfDNA database provides a user-friendly web interface with powerful browse and search capacities, as well as data visualization and downloading functions. 
                 </Card.Body>
               </Card>
-  
+              <Card>
+                <Card.Header>
+                  <Card.Title>What is cfDNA?</Card.Title>
+                </Card.Header>
+                <Card.Body>
+                  Cell-free DNA (cfDNA) is freely circulating DNA in blood plasma primarily derived from the apoptosis of normal cells in healthy individuals. However, with disease such as cancer, elevated levels of cfDNA is observed, possibly the result of excessive apoptotic and necrotic tissue damage. In various studies in the past years, cfDNA has been demonstrated to be a useful biomarker for a multitude of diseases and conditions, including but not limited to carcinomas, pregnancy, myocardial infarction, stroke, sepsis, aseptic inflammation and autoimmune disease. Such implications have high importance for viable approaches in inexpensive, noninvasive liquid biopsy diagnosis and monitoring of tumor progression and therapy efficacy. 
+                </Card.Body>
+              </Card>
+
               <Card>
                 <Card.Header>
                   <Card.Title>Updates</Card.Title>

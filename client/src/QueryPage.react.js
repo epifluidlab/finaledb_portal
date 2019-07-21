@@ -16,28 +16,144 @@ import {
 
 import SiteWrapper from "./SiteWrapper.react";
 
-function GetReadLengths(props) {
-  console.log(props.read_lengths);
-  const content = props.read_lengths.map((read_length) =>
-        <Form.Checkbox
-          name="example-radios"
-          label={read_length}
-          value="option1"
-        />
+
+function SamplesTable(props) {
+  const header = (
+    <Table.Header>
+    <Table.Row>
+      <Table.ColHeader>Sample Name</Table.ColHeader>
+      <Table.ColHeader>Disease status</Table.ColHeader>
+      <Table.ColHeader>Run type</Table.ColHeader>
+      <Table.ColHeader>len.</Table.ColHeader>
+      <Table.ColHeader>Datatype</Table.ColHeader>
+      <Table.ColHeader>Publication</Table.ColHeader>
+      <Table.ColHeader alignContent="center">
+        <i className="icon-settings" />
+      </Table.ColHeader>
+    </Table.Row>
+  </Table.Header>
+  );
+  const content = props.samples.map((sample) =>
+    <Table.Row>
+      <Table.Col>
+        <div>{sample.sample_name}</div>
+        <Text size="sm" muted>
+          {sample.sra_id}
+        </Text>
+      </Table.Col>
+      <Table.Col> 
+        {sample.disease}
+        <Text size="sm" muted>
+          {sample.sex}     {sample.age}
+        </Text>
+      </Table.Col>
+      <Table.Col> {sample.se_pe} </Table.Col>
+      <Table.Col> {sample.read_length} </Table.Col>
+      <Table.Col> {sample.datatype} </Table.Col>
+      <Table.Col>
+        <Button link size="sm" RootComponent="a" href={sample.link} target="_blank">
+          {sample.doi}
+        </Button>
+      </Table.Col>
+      <Table.Col alignContent="center">
+        <Button.List>
+          <Button icon="download" size="sm" />
+          <Button icon="plus" size="sm" />
+        </Button.List>
+      </Table.Col>
+    </Table.Row>
   );
   return (
     <div>
-      <Table.Col>
-        <Form.Group label="Read length">
-          {content}
-        </Form.Group>
-      </Table.Col>
+      {header}
+      <Table.Body>
+        {content}
+      </Table.Body>
     </div>
   );
 }
 
 
 
+function GetReadLengths(props) {
+  const content = props.read_lengths.map((read_length) =>
+        <Form.Checkbox
+          name="example-radios"
+          label={read_length[0]}
+          value={read_length[0]}
+        />
+  );
+  return (
+    <Table.Row>
+      <Table.Col>
+        <Form.Group label="Read length">
+          {content}
+        </Form.Group>
+      </Table.Col>
+    </Table.Row>
+  );
+}
+
+function GetPlatforms(props) {
+  const content = props.platforms.map((platform) =>
+        <Form.Checkbox
+          isInline
+          name="example-radios"
+          label={platform[0]}
+          value={platform[0]}
+        />
+  );
+  return (
+    <Table.Row>
+      <Table.Col>
+        <Form.Group label="Instrument">
+          {content}
+        </Form.Group>
+      </Table.Col>
+    </Table.Row>
+  );
+}
+
+function GetDiseases(props) {
+  const content = props.diseases.map((disease) =>
+        <Form.Checkbox
+          isInline
+          name="example-radios"
+          label={disease[0]}
+          value={disease[0]}
+        />
+  );
+  return (
+    <Table.Row>
+      <Table.Col>
+        <Form.Group label="Disease status">
+          {content}
+        </Form.Group>
+      </Table.Col>
+    </Table.Row>
+  );
+}
+
+
+function GetLibraryLayouts(props) {
+  const content = props.library_layouts.map((library_layout) =>
+        <Form.Checkbox
+          isInline
+          name="example-radios"
+          label={library_layout[0]}
+          value={library_layout[0]}
+        />
+  );
+  return (
+    <Table.Row>
+      <Table.Col>
+        <Form.Group label="Library layout">
+          {content}
+        </Form.Group>
+      </Table.Col>
+    </Table.Row>
+  );
+}
 
 class FormElements extends Component {
 
@@ -45,33 +161,6 @@ class FormElements extends Component {
     super(props);
     this.state={data: null};
   }
-  componentDidMount() {
-    // Call our fetch function below once the component mounts
-    this.callBackendAPI()
-  }
-  // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
-  callBackendAPI = async () => {
-    var [response_data, response_pub] = await Promise.all ([ 
-      fetch('/data'),
-      fetch('/publications'),
-    ]);
-    const body_data = await response_data.json();
-    const body_pub = await response_pub.json();
-
-    if (response_data.status !== 200 || response_pub.status !== 200) {
-      throw Error(body_data.message) 
-    }
-
-    console.log(body_data);
-    console.log(body_pub);
-    this.setState({ 
-      diseases: body_data.diseases,
-      platforms: body_data.platforms,
-      libraryLayouts: body_data.libraryLayouts,
-      readLengths: body_data.readLengths,
-      publications: body_pub.publications,
-     });
-  };
 
   componentDidMount() {
     // Call our fetch function below once the component mounts
@@ -98,8 +187,8 @@ class FormElements extends Component {
       libraryLayouts: body_data.libraryLayouts,
       readLengths: body_data.readLengths,
       publications: body_pub.publications,
+      samples: body_data.samples,
      });
-
 
   };
 
@@ -110,11 +199,12 @@ class FormElements extends Component {
     const {libraryLayouts} = this.state;
     const {readLengths} = this.state;
     const {publications} = this.state;
+    const {samples} = this.state;
 
     console.log(publications);
     console.log(readLengths);
 
-    if (!diseases || !platforms || !libraryLayouts || !readLengths || !publications) return null;
+    if (!diseases || !platforms || !libraryLayouts || !readLengths || !publications || !samples) return null;
     return (
       <SiteWrapper>
         <Page.Content title="Search samples">
@@ -129,7 +219,7 @@ class FormElements extends Component {
           </Grid.Row>
 
           <Grid.Row cards={true}>
-            <Grid.Col md={2}>
+            <Grid.Col >
               <Card>
                 <Table className="card-table table-vcenter">
                   <Table.Body>
@@ -173,46 +263,9 @@ class FormElements extends Component {
                         </Form.Group>
                       </Table.Col>
                     </Table.Row>
-                    <Table.Row>
-                      <Table.Col>
-                        <Form.Group label="Platform">
-                          <Form.Checkbox
-                            name="example-radios"
-                            label="Ilumina HiSeq 2000"
-                            value="option1"
-                          />
-                          <Form.Checkbox
-                            name="example-radios"
-                            label="Ilumina HiSeq 2500"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            name="example-radios"
-                            label="Ilumina HiSeq 4000"
-                            value="option3"
-                          />
-                        </Form.Group>
-                      </Table.Col>
-                    </Table.Row>
-                    <Table.Row>
-                      <Table.Col>
-                        <Form.Group label="Run type">
-                          <Form.Checkbox
-                            name="example-radios"
-                            label="single-ended"
-                            value="option1"
-                          />
-                          <Form.Checkbox
-                            name="example-radios"
-                            label="paird-ended"
-                            value="option2"
-                          />
-                        </Form.Group>
-                      </Table.Col>
-                    </Table.Row>
-                    <Table.Row>
+                      <GetPlatforms platforms={platforms}/>
+                      <GetLibraryLayouts library_layouts={libraryLayouts}/>
                       <GetReadLengths read_lengths={readLengths}/>
-                    </Table.Row>
                     <Table.Row>
                       <Table.Col>
                         <Form.Group label="Age">
@@ -273,37 +326,7 @@ class FormElements extends Component {
                         </Form.Group>
                       </Table.Col>
                     </Table.Row>
-                    <Table.Row>
-                      <Table.Col>
-                        <Form.Group label="Disease status">
-                          <Form.Checkbox
-                            name="example-radios"
-                            label="healthy"
-                            value="option1"
-                          />
-                          <Form.Checkbox
-                            name="example-radios"
-                            label="lung cancer"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            name="example-radios"
-                            label="athersclerosis"
-                            value="option3"
-                          />
-                          <Form.Checkbox
-                            name="example-radios"
-                            label="athersclerosis"
-                            value="option3"
-                          />
-                          <Form.Checkbox
-                            name="example-radios"
-                            label="athersclerosis"
-                            value="option3"
-                          />
-                        </Form.Group>
-                      </Table.Col>
-                    </Table.Row>
+                    <GetDiseases diseases={diseases}/>
                   </Table.Body>
                 </Table>
               </Card>
@@ -320,62 +343,7 @@ class FormElements extends Component {
                   cards
                   className="text-nowrap"
                 >
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColHeader>Sample Name</Table.ColHeader>
-                      <Table.ColHeader>Disease status</Table.ColHeader>
-                      <Table.ColHeader>Sex</Table.ColHeader>
-                      <Table.ColHeader>Age</Table.ColHeader>
-                      <Table.ColHeader>Run type</Table.ColHeader>
-                      <Table.ColHeader>len.</Table.ColHeader>
-                      <Table.ColHeader>Datatype</Table.ColHeader>
-                      <Table.ColHeader>PMID</Table.ColHeader>
-                      <Table.ColHeader alignContent="center">
-                        <i className="icon-settings" />
-                      </Table.ColHeader>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    <Table.Row>
-                      <Table.Col>
-                        <div>Sample Name</div>
-                        <Text size="sm" muted>
-                          SRA ID
-                        </Text>
-                      </Table.Col>
-                      <Table.Col>
-                        <div>Lung cancer</div>
-                      </Table.Col>
-                      <Table.Col>
-                        <div>Female</div>
-                      </Table.Col>
-                      <Table.Col>
-                        <div>39</div>
-                      </Table.Col>
-                      <Table.Col>
-                        <div>PAIRED</div>
-                      </Table.Col>
-                      <Table.Col>
-                        <div>39</div>
-                      </Table.Col>
-                      <Table.Col>
-                        <div>WGS</div>
-                      </Table.Col>
-                      <Table.Col>
-                        <Button link size="sm">
-                          26771485
-                        </Button>
-                      </Table.Col>
-                      <Table.Col alignContent="center">
-                        <Button.List>
-                          <Button icon="download" size="sm" />
-                          <Button icon="check" size="sm" />
-                        </Button.List>
-                      </Table.Col>
-                    </Table.Row>
-
-
-                  </Table.Body>
+                  <SamplesTable samples={samples}/>
                 </Table>
               </Card>
             </Grid.Col>
