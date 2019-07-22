@@ -42,3 +42,9 @@
 2019-07-12 13:56:42.965 EDT [21477] STATEMENT:  DELETE FROM publications WHERE ctid IN (SELECT ctid FROM publications LIMIT 59);
 2019-07-12 14:02:27.847 EDT [21477] ERROR:  column "metadata.pub_author" must appear in the GROUP BY clause or be used in an aggregate function at character 36
 2019-07-12 14:02:27.847 EDT [21477] STATEMENT:  CREATE VIEW publications AS SELECT pub_author, pub_year, pub_journal, pmid, doi, link FROM metadata GROUP BY doi;
+2019-07-15 11:46:49.122 EDT [78572] ERROR:  relation "metadata" does not exist at character 15
+2019-07-15 11:46:49.122 EDT [78572] STATEMENT:  SELECT * FROM metadata;
+2019-07-16 10:39:50.598 EDT [4028] LOG:  received smart shutdown request
+2019-07-16 10:39:50.600 EDT [4028] LOG:  background worker "logical replication launcher" (PID 4039) exited with exit code 1
+2019-07-16 10:39:50.600 EDT [4034] LOG:  shutting down
+2019-07-16 10:39:50.606 EDT [4028] LOG:  database system is shut down
