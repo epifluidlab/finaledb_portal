@@ -97,8 +97,8 @@ function FormElements() {
                     </Table.Col>
                     <Table.Col alignContent="center">
                       <Button.List>
-                        <Button icon="download" size="sm" />
-                        <Button icon="check" size="sm" />
+                        <Button icon="download" size="sm" color='secondary'/>
+                        <Button icon="check" size="sm"color='secondary' />
                       </Button.List>
                     </Table.Col>
                   </Table.Row>

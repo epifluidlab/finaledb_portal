@@ -32,11 +32,12 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
       </Table.Col>
       <Table.Col alignContent="center">
         <Button.List>
-          <Button icon="download" size="sm" />
+          <Button icon="download" size="sm" color='secondary'/>
           <Button
             size="sm"
             onClick={sampleInBasket ? removeFromBasket : addToBasket}
             icon={sampleInBasket ? "x" : "plus"}
+            color='secondary'
           />
         </Button.List>
       </Table.Col>

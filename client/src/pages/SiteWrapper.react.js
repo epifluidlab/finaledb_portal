@@ -32,10 +32,6 @@ const navBarItems = [
     to: "/visualization",
     LinkComponent: withRouter(NavLink),
   },
-  {
-    value: "Components",
-    icon: "calendar",
-  },
 ];
 
 
