@@ -1,12 +1,4 @@
-const Pool = require('pg').Pool
-const pool = new Pool({
-  user: 'zhu1lx', 
-  host:  'localhost', // '216.68.249.18',
-  database: 'postgres',
-  password: 'Chmc3634',
-  port: 5432,
-})
-
+const db = require('./db');
 
 function getDiseases (rows) {
     // TODO: match with master disease list
@@ -23,12 +15,12 @@ function getDiseases (rows) {
       if ( !diseases.has(general_disease)) {
         diseases.set(general_disease, 0);
       }
-      
+
       diseases.set(general_disease, diseases.get(general_disease) + 1);
       // console.log(row.disease);
       // console.log(diseases.get(row.disease));
     }
-    
+
     return Array.from(diseases);
 }
 
@@ -41,12 +33,12 @@ function getPlatforms (rows) {
     if ( !platforms.has(row.platform)) {
       platforms.set(row.platform, 0);
     }
-    
+
     platforms.set(row.platform, platforms.get(row.platform) + 1);
     // console.log(row.disease);
     // console.log(diseases.get(row.disease));
   }
-  
+
   return Array.from(platforms);
 }
 
@@ -59,12 +51,12 @@ function getLibraryLayouts (rows) {
       if ( !libraryLayouts.has(row.se_pe)) {
         libraryLayouts.set(row.se_pe, 0);
       }
-      
+
       libraryLayouts.set(row.se_pe, libraryLayouts.get(row.se_pe) + 1);
       // console.log(row.disease);
       // console.log(diseases.get(row.disease));
     }
-    
+
     return Array.from(libraryLayouts);
 }
 
@@ -79,7 +71,7 @@ function getReadLengths (rows) {
     if ( !readLengths.has(row.read_length)) {
      readLengths.set(row.read_length, 0);
     }
-    
+
     readLengths.set(row.read_length, readLengths.get(row.read_length) + 1);
 
     //readLengthsList.push (readLength);
@@ -89,7 +81,7 @@ function getReadLengths (rows) {
 }
 
 const getData = (request, response) => {
-    pool.query('SELECT * FROM metadata', (error, results) => {
+    db.query('SELECT * FROM metadata', (error, results) => {
       if (error) {
         throw error
       }
@@ -124,7 +116,7 @@ const getData = (request, response) => {
 
 
       // send data
-      response.status(200).json({ 
+      response.status(200).json({
         diseases: diseaseList,
         platforms: platformList,
         libraryLayouts: libraryLayoutList,
@@ -138,7 +130,7 @@ const getData = (request, response) => {
 
 
 const getPublications = (request, response) => {
-  pool.query('SELECT * FROM publications', (error, results) => {
+  db.query('SELECT * FROM publications', (error, results) => {
     if (error) {
       throw error
     }
@@ -161,7 +153,7 @@ const getPublications = (request, response) => {
 
     console.log(publicationsList);
 
-    response.status(200).json({ 
+    response.status(200).json({
       publications: publicationsList,
     });
 
