@@ -8,14 +8,13 @@ Install and update missing dependencies
 ```
 pip install -r requirements.txt
 yarn
-yarn add -D nodemon
 cd client
 yarn
 ```
 
 Start server
 ```
-npx nodemon server.js
+yarn start:dev
 ```
 
 Start frontend
