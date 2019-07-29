@@ -48,3 +48,74 @@
 2019-07-16 10:39:50.600 EDT [4028] LOG:  background worker "logical replication launcher" (PID 4039) exited with exit code 1
 2019-07-16 10:39:50.600 EDT [4034] LOG:  shutting down
 2019-07-16 10:39:50.606 EDT [4028] LOG:  database system is shut down
+2019-07-22 09:33:49.580 EDT [94821] LOG:  listening on IPv6 address "::1", port 5432
+2019-07-22 09:33:49.580 EDT [94821] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2019-07-22 09:33:49.580 EDT [94821] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2019-07-22 09:33:49.603 EDT [94822] LOG:  database system was shut down at 2019-07-16 10:39:50 EDT
+2019-07-22 09:33:49.620 EDT [94821] LOG:  database system is ready to accept connections
+2019-07-22 09:34:10.620 EDT [95124] FATAL:  role "postgres" does not exist
+2019-07-22 09:34:10.620 EDT [95125] FATAL:  role "postgres" does not exist
+2019-07-22 09:36:21.031 EDT [95607] FATAL:  role "postgres" does not exist
+2019-07-22 09:36:21.031 EDT [95608] FATAL:  role "postgres" does not exist
+2019-07-22 09:36:40.432 EDT [95730] FATAL:  role "postgres" does not exist
+2019-07-22 09:36:40.433 EDT [95731] FATAL:  role "postgres" does not exist
+2019-07-22 09:36:55.293 EDT [95854] ERROR:  relation "publications" does not exist at character 15
+2019-07-22 09:36:55.293 EDT [95854] STATEMENT:  SELECT * FROM publications
+2019-07-22 09:36:55.293 EDT [95853] ERROR:  relation "metadata" does not exist at character 15
+2019-07-22 09:36:55.293 EDT [95853] STATEMENT:  SELECT * FROM metadata
+2019-07-22 09:36:55.298 EDT [95853] LOG:  could not receive data from client: Connection reset by peer
+2019-07-24 12:00:26.811 EDT [33999] ERROR:  column "librarylayout" of relation "metadata" does not exist at character 64
+2019-07-24 12:00:26.811 EDT [33999] STATEMENT:   INSERT INTO metadata (sample_name, sra_id, disease, age, sex, librarylayout, instrument, read_length, assay_type, mbases, tissue, other)
+	                  VALUES ('GSM1833219', 'SRR2129993', 'Healthy', '', 'mixed', 'PAIRED', 'Illumina HiSeq 2000', '101', 'WGS', '283506', 'blood plasma', '' )
+	                  ON CONFLICT ON CONSTRAINT uniq_sample
+	                  DO
+	                      UPDATE
+	                      SET sample_name = EXCLUDED.sample_name,
+	                          disease = EXCLUDED.disease,
+	                          age = EXCLUDED.age,
+	                          sex = EXCLUDED.sex,
+	                          librarylayout = EXCLUDED.librarylayout,
+	                          instrument = EXCLUDED.instrument,
+	                          read_length = EXCLUDED.read_length,
+	                          assay_type = EXCLUDED.assay_type,
+	                          mbases = EXCLUDED.mbases,
+	                          tissue = EXCLUDED.tissue,
+	                          other = EXCLUDED.other
+	                  
+2019-07-24 12:06:44.523 EDT [35521] ERROR:  constraint "uniq_sample" for table "metadata" does not exist
+2019-07-24 12:06:44.523 EDT [35521] STATEMENT:   INSERT INTO metadata (sample_name, sra_id, disease, age, sex, library_format, instrument, read_length, assay_type, mbases, tissue, other)
+	                  VALUES ('GSM1833219', 'SRR2129993', 'Healthy', '', 'mixed', 'PAIRED', 'Illumina HiSeq 2000', '101', 'WGS', '283506', 'blood plasma', '' )
+	                  ON CONFLICT ON CONSTRAINT uniq_sample
+	                  DO
+	                      UPDATE
+	                      SET sample_name = EXCLUDED.sample_name,
+	                          disease = EXCLUDED.disease,
+	                          age = EXCLUDED.age,
+	                          sex = EXCLUDED.sex,
+	                          library_format = EXCLUDED.library_format,
+	                          instrument = EXCLUDED.instrument,
+	                          read_length = EXCLUDED.read_length,
+	                          assay_type = EXCLUDED.assay_type,
+	                          mbases = EXCLUDED.mbases,
+	                          tissue = EXCLUDED.tissue,
+	                          other = EXCLUDED.other
+	                  
+2019-07-24 12:11:37.614 EDT [36853] ERROR:  "publications_old" is not a table
+2019-07-24 12:11:37.614 EDT [36853] HINT:  Use DROP VIEW to remove a view.
+2019-07-24 12:11:37.614 EDT [36853] STATEMENT:  DROP TABLE publications_old
+	;
+2019-07-24 12:11:53.926 EDT [36853] ERROR:  syntax error at or near "ls" at character 1
+2019-07-24 12:11:53.926 EDT [36853] STATEMENT:  ls
+	SELECT * FROM publications
+	;
+2019-07-24 12:15:00.944 EDT [36853] ERROR:  syntax error at or near "DNA" at character 97
+2019-07-24 12:15:00.944 EDT [36853] STATEMENT:  INSERT INTO publications (pub_author, pub_year, pub_journal, pmid, doi, link) VALUES (Cell-free DNA Comprises an In Vivo Nucleosome Footprint that Informs Its Tissues-Of-Origin, 2016 Jan 14, Cell, 26771485, 10.1016/j.cell.2015.11.050, https://www.ncbi.nlm.nih.gov/pubmed/26771485)
+	;
+2019-07-24 12:16:07.221 EDT [36853] ERROR:  value too long for type character varying(80)
+2019-07-24 12:16:07.221 EDT [36853] STATEMENT:  INSERT INTO publications (pub_author, pub_year, pub_journal, pmid, doi, link) VALUES ('Cell-free DNA Comprises an In Vivo Nucleosome Footprint that Informs Its Tissues-Of-Origin', '2016 Jan 14', 'Cell', '26771485', '10.1016/j.cell.2015.11.050', 'https://www.ncbi.nlm.nih.gov/pubmed/26771485')
+	;
+2019-07-26 15:46:34.708 EDT [94821] LOG:  received fast shutdown request
+2019-07-26 15:46:34.715 EDT [94821] LOG:  aborting any active transactions
+2019-07-26 15:46:34.716 EDT [94821] LOG:  background worker "logical replication launcher" (PID 94828) exited with exit code 1
+2019-07-26 15:46:34.717 EDT [94823] LOG:  shutting down
+2019-07-26 15:46:34.724 EDT [94821] LOG:  database system is shut down

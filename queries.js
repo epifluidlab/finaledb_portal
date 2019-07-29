@@ -8,7 +8,7 @@ function getDiseases (rows) {
       end_index = row.disease.indexOf('(') - 1;
       general_disease = row.disease;
 
-      if (end_index != -1) {
+      if (end_index != -2) {
         general_disease = general_disease.substring(0, end_index);
       }
 
@@ -27,19 +27,28 @@ function getDiseases (rows) {
 
 function getPlatforms (rows) {
   // TODO: match with master disease list
-  var platforms = new Map();
+  var instruments = new Map();
 
   for (const row of rows) {
-    if ( !platforms.has(row.platform)) {
-      platforms.set(row.platform, 0);
+    if ( !instruments.has(row.instrument)) {
+      instruments.set(row.instrument, 0);
     }
 
-    platforms.set(row.platform, platforms.get(row.platform) + 1);
+    instruments.set(row.instrument, instruments.get(row.instrument) + 1);
     // console.log(row.disease);
     // console.log(diseases.get(row.disease));
   }
 
-  return Array.from(platforms);
+  instruments.set('Illumina HiSeq 2500', 0);
+  instruments.set('Illumina HiSeq 4000', 0);
+  instruments.set('HiSeq X Ten', 0);
+  instruments.set('NovaSeq 6000', 0);
+
+  instruments.set('NextSeq 500', 0);
+
+
+
+  return Array.from(instruments);
 }
 
 
@@ -48,14 +57,16 @@ function getLibraryLayouts (rows) {
     var libraryLayouts = new Map();
 
     for (const row of rows) {
-      if ( !libraryLayouts.has(row.se_pe)) {
-        libraryLayouts.set(row.se_pe, 0);
+      if ( !libraryLayouts.has(row.library_format)) {
+        libraryLayouts.set(row.library_format, 0);
       }
 
-      libraryLayouts.set(row.se_pe, libraryLayouts.get(row.se_pe) + 1);
+      libraryLayouts.set(row.library_format, libraryLayouts.get(row.library_format) + 1);
       // console.log(row.disease);
       // console.log(diseases.get(row.disease));
     }
+
+    libraryLayouts.set('SINGLE', 0)
 
     return Array.from(libraryLayouts);
 }
@@ -90,6 +101,15 @@ const getData = (request, response) => {
       var samplesList = [];
 
       for (const row of results.rows) {
+
+
+        end_index = row.disease.indexOf('(') - 1;
+        general_disease = row.disease;
+  
+        if (end_index != -2) {
+          general_disease = general_disease.substring(0, end_index);
+        }
+
         var sample = {
           sample_name: row.sample_name,
           sra_id: row.sra_id,
@@ -97,11 +117,11 @@ const getData = (request, response) => {
           link: row.link,
           age: row.age,
           sex: row.sex,
-          se_pe: row.se_pe,
-          platform: row.platform,
+          library_format: row.library_format,
+          platform: row.instrument,
           read_length: row.read_length,
-          datatype: row.datatype,
-          disease: row.disease,
+          datatype: row.assay_type,
+          disease: general_disease,
         };
         samplesList.push (sample);
       }

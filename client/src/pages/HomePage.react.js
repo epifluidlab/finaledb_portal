@@ -315,6 +315,44 @@ class Home extends Component {
                 </Card>
               </Grid.Row>
   
+
+              <Grid.Row>
+                <Card>
+                  <Card.Header>
+                    <Card.Title>Read lengths</Card.Title>
+                  </Card.Header>
+                  <Card.Body>
+                    <C3Chart
+                      style={{ height: "12rem" }}
+                      data={{
+                        columns: readLengths,
+                        type: "donut", // default type of chart
+                        // colors: {
+                        //   data1: colors["yellow-lighter"],
+                        //   data2: colors["yellow-light"],
+                        //   data3: colors["yellow"],
+                        //   data4: colors["yellow-dark"],
+                        // },
+                        // names: {
+                        //   // name of each serie
+                        //   data1: "A",
+                        //   data2: "B",
+                        //   data3: "C",
+                        //   data4: "D",
+                        // },
+                      }}
+                      legend={{
+                        show: false, //hide legend
+                      }}
+                      padding={{
+                        bottom: 0,
+                        top: 0,
+                      }}
+                    />
+                  </Card.Body>
+                </Card>
+              </Grid.Row>
+
               <Grid.Row>
                 <Card>
                   <Card.Header>
@@ -389,42 +427,7 @@ class Home extends Component {
                 </Card>
               </Grid.Row>
 
-              <Grid.Row>
-                <Card>
-                  <Card.Header>
-                    <Card.Title>Read lengths</Card.Title>
-                  </Card.Header>
-                  <Card.Body>
-                    <C3Chart
-                      style={{ height: "12rem" }}
-                      data={{
-                        columns: readLengths,
-                        type: "donut", // default type of chart
-                        // colors: {
-                        //   data1: colors["yellow-lighter"],
-                        //   data2: colors["yellow-light"],
-                        //   data3: colors["yellow"],
-                        //   data4: colors["yellow-dark"],
-                        // },
-                        // names: {
-                        //   // name of each serie
-                        //   data1: "A",
-                        //   data2: "B",
-                        //   data3: "C",
-                        //   data4: "D",
-                        // },
-                      }}
-                      legend={{
-                        show: false, //hide legend
-                      }}
-                      padding={{
-                        bottom: 0,
-                        top: 0,
-                      }}
-                    />
-                  </Card.Body>
-                </Card>
-              </Grid.Row>
+
 
             </Grid.Col>
           </Grid.Row>

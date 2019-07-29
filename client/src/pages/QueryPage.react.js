@@ -17,6 +17,7 @@ import SamplesTable from '../components/SamplesTable';
 function GetReadLengths(props) {
   const content = props.read_lengths.map((read_length) =>
         <Form.Checkbox
+          isInline
           name="example-radios"
           label={read_length[0]}
           value={read_length[0]}
@@ -26,7 +27,7 @@ function GetReadLengths(props) {
     <Table.Row>
       <Table.Col>
         <Form.Group label="Read length">
-          {content}
+         {content}
         </Form.Group>
       </Table.Col>
     </Table.Row>
@@ -86,7 +87,7 @@ function GetLibraryLayouts(props) {
   return (
     <Table.Row>
       <Table.Col>
-        <Form.Group label="Library layout">
+        <Form.Group label="Library format">
           {content}
         </Form.Group>
       </Table.Col>
@@ -184,17 +185,20 @@ class FormElements extends Component {
                       <Table.Col>
                         <Form.Group label="Repository">
                           <Form.Checkbox
+                            isInline
                             name="example-radios"
-                            label="NCBI"
+                            label="GEO"
                             value="option1"
                           />
                           <Form.Checkbox
+                            isInline
                             name="example-radios"
                             label="dbGaP"
                             value="option2"
                           />
                           <Form.Checkbox
                             disabled
+                            isInline
                             name="example-radios"
                             label="ENA"
                             value="option3"
@@ -204,7 +208,76 @@ class FormElements extends Component {
                     </Table.Row>
                       <GetPlatforms platforms={platforms}/>
                       <GetLibraryLayouts library_layouts={libraryLayouts}/>
-                      <GetReadLengths read_lengths={readLengths}/>
+
+                      <Table.Row>
+                      <Table.Col>
+                        <Form.Group label="Read length">
+                          <Form.Checkbox
+                            isInline
+                            name="0-20"
+                            label="0-50"
+                            value="option1"
+                          />
+                          <Form.Checkbox
+                            isInline
+                            name="example-radios"
+                            label="51-100"
+                            value="option2"
+                          />
+                          <Form.Checkbox
+                            isInline
+                            name="example-radios"
+                            label="101-150"
+                            value="option2"
+                          />
+                          <Form.Checkbox
+                            isInline
+                            name="example-radios"
+                            label="151-200"
+                            value="option2"
+                          />
+                          <Form.Checkbox
+                            isInline
+                            name="example-radios"
+                            label="201-250"
+                            value="option2"
+                          />
+                          <Form.Checkbox
+                            isInline
+                            name="example-radios"
+                            label="251-300"
+                            value="option2"
+                          />
+                          <Form.Checkbox
+                            isInline
+                            name="example-radios"
+                            label="301-350"
+                            value="option2"
+                          />
+                          <Form.Checkbox
+                            isInline
+                            name="example-radios"
+                            label="351-400"
+                            value="option2"
+                          />
+                          <Form.Checkbox
+                            isInline
+                            name="example-radios"
+                            label="401-450"
+                            value="option2"
+                          />
+                          <Form.Checkbox
+                            isInline
+                            name="example-radios"
+                            label="451-500"
+                            value="option2"
+                          />
+                        </Form.Group>
+                      </Table.Col>
+                    </Table.Row>
+                    
+                    <GetDiseases diseases={diseases}/>
+
                     <Table.Row>
                       <Table.Col>
                         <Form.Group label="Age">
@@ -265,7 +338,6 @@ class FormElements extends Component {
                         </Form.Group>
                       </Table.Col>
                     </Table.Row>
-                    <GetDiseases diseases={diseases}/>
                   </Table.Body>
                 </Table>
               </Card>

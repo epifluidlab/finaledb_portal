@@ -8,6 +8,9 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
   const addToBasket = () => addDownload(sample);
   const removeFromBasket = () => removeDownload(sample.sra_id);
 
+
+
+
   return (
     <Table.Row>
       <Table.Col>
@@ -19,10 +22,10 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
       <Table.Col>
         {sample.disease}
         <Text size="sm" muted>
-          {sample.sex}     {sample.age}
+          {sample.sex}{sample.age ? ', '+ sample.age : sample.age}
         </Text>
       </Table.Col>
-      <Table.Col> {sample.se_pe} </Table.Col>
+      <Table.Col> {sample.library_format} </Table.Col>
       <Table.Col> {sample.read_length} </Table.Col>
       <Table.Col> {sample.datatype} </Table.Col>
       <Table.Col>
@@ -32,18 +35,20 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
       </Table.Col>
       <Table.Col alignContent="center">
         <Button.List>
-          <Button icon="download" size="sm" color='secondary'/>
+          <Button icon="download" size="sm" color="secondary"/>
           <Button
             size="sm"
             onClick={sampleInBasket ? removeFromBasket : addToBasket}
             icon={sampleInBasket ? "x" : "plus"}
-            color='secondary'
+            color={sampleInBasket ? "danger" : "secondary"}
           />
+          <Button icon="box" size="sm" color="secondary" RootComponent="a" href="/visualization"/>
         </Button.List>
       </Table.Col>
     </Table.Row>
   )
 };
+
 
 const mapStateToProps = (state) => ({
   downloads: state.downloads.downloads,
