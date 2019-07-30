@@ -14,6 +14,12 @@ import {
 import SiteWrapper from "./SiteWrapper.react";
 import SamplesTable from '../components/SamplesTable';
 
+import 'nouislider';
+import 'nouislider/distribute/nouislider.css';
+
+
+
+
 function GetReadLengths(props) {
   const content = props.read_lengths.map((read_length) =>
         <Form.Checkbox
@@ -208,75 +214,28 @@ class FormElements extends Component {
                     </Table.Row>
                       <GetPlatforms platforms={platforms}/>
                       <GetLibraryLayouts library_layouts={libraryLayouts}/>
+                      <GetDiseases diseases={diseases}/>
 
                       <Table.Row>
                       <Table.Col>
                         <Form.Group label="Read length">
-                          <Form.Checkbox
-                            isInline
-                            name="0-20"
-                            label="0-50"
-                            value="option1"
+                          <div>Min</div>
+                          <Form.Ratio
+                            defaultValue={0}
+                            max={500}
+                            min={0}
+                            step={1}
                           />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="51-100"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="101-150"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="151-200"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="201-250"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="251-300"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="301-350"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="351-400"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="401-450"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="451-500"
-                            value="option2"
+                          <Form.Ratio
+                            defaultValue={500}
+                            max={500}
+                            min={0}
+                            step={1}
                           />
                         </Form.Group>
                       </Table.Col>
                     </Table.Row>
                     
-                    <GetDiseases diseases={diseases}/>
 
                     <Table.Row>
                       <Table.Col>

@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "nouislider": "^14.0.2",
     "pg": "^7.11.0",
     "react-native-hyperlink": "0.0.14",
     "tabler-react": "^1.30.1"

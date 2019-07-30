@@ -303,6 +303,13 @@ class Home extends Component {
                         //  data2: "Minimum",
                         //},
                       }}
+                      donut={{
+                        label: {
+                          format: function (value, ratio, id){
+                            return value;
+                          }
+                        }
+                      }}
                       legend={{
                         show: false, //hide legend
                       }}
