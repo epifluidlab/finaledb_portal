@@ -160,15 +160,18 @@ const getPublications = (request, response) => {
 
     for (const row of results.rows) {
       var publication = {
-        author: row.pub_author,
-        year: row.pub_year,
-        journal: row.pub_journal,
+        author: row.author,
+        // TODO FIX DATE
+        date: row.date,
+        journal: row.journal,
         pmid: row.pmid,
         doi: row.doi,
         link: row.link,
+        title: row.title,
+        datastore: row.datastore,
       };
 
-      publicationsList.push (publication);
+      publicationsList.push(publication);
     }
 
     console.log(publicationsList);

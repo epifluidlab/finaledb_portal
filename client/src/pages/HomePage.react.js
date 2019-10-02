@@ -25,7 +25,7 @@ function Blog(props) {
         <Table.ColHeader>Publication Name</Table.ColHeader>
         <Table.ColHeader>PMID</Table.ColHeader>
         <Table.ColHeader>Author</Table.ColHeader>
-        <Table.ColHeader>Year</Table.ColHeader>
+        <Table.ColHeader>Date</Table.ColHeader>
         <Table.ColHeader>Journal</Table.ColHeader>
         <Table.ColHeader>Samples</Table.ColHeader>
         <Table.ColHeader>DOI</Table.ColHeader>
@@ -34,13 +34,10 @@ function Blog(props) {
   );
   const content = props.pubs.map((pub) =>
     <Table.Row>
-      <Table.Col>
-        Cell-free DNA Comprises an In Vivo Nucleosome Footprint
-        that Informs Its Tissues-Of-Origin.
-      </Table.Col>
+      <Table.Col>{pub.title}</Table.Col>
       <Table.Col>{pub.pmid}</Table.Col>
       <Table.Col>{pub.author}</Table.Col>
-      <Table.Col>{pub.year}</Table.Col>
+      <Table.Col>{pub.date}</Table.Col>
       <Table.Col>{pub.journal}</Table.Col>
       <Table.Col>60</Table.Col>
       <Table.Col>{pub.doi}</Table.Col>

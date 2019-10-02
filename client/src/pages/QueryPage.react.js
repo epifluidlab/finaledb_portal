@@ -88,6 +88,7 @@ function GetLibraryLayouts(props) {
           name="example-radios"
           label={library_layout[0]}
           value={library_layout[0]}
+          onChange={props.onChange('libraryFormat', library_layout[0])}
         />
   );
   return (
@@ -105,7 +106,22 @@ class FormElements extends Component {
 
   constructor(props) {
     super(props);
-    this.state={data: null};
+    this.initialFormState = {
+      genomeAssembly: {},
+      repository: {},
+      instrument: {},
+      libraryFormat: {},
+      diseaseStatus: {},
+      minReadLength: 10,
+      maxReadLength: 100,
+      minAge: 10,
+      maxAge: 100,
+    }
+
+    this.state = {
+      data: null,
+      form: this.initialFormState,
+    };
   }
 
   componentDidMount() {
@@ -134,30 +150,62 @@ class FormElements extends Component {
       readLengths: body_data.readLengths,
       publications: body_pub.publications,
       samples: body_data.samples,
-     });
 
+      form: {
+        ...this.state.form,
+        libraryLayouts: body_data.libraryLayouts.reduce((acc, curr) => acc[curr] = false, {}),
+      }
+     });
   };
+
+  updateFormMultipleValues = (name, value) => () => {
+    this.setState({
+      form: {
+        ...this.state.form,
+        [name]: {
+          ...this.state.form[name],
+          [value]: !this.state.form[name][value]
+        }
+      }
+    });
+  }
+
+  updateFormValue = (e) => {
+    this.setState({
+      form: {
+        ...this.state.form,
+        [e.target.name]: e.target.value
+      }
+    });
+  }
+
+  resetForm = () => {
+    this.setState({
+      form: this.initialFormState,
+    });
+  }
 
   render() {
 
-    const {diseases} = this.state;
-    const {platforms} = this.state;
-    const {libraryLayouts} = this.state;
-    const {readLengths} = this.state;
-    const {publications} = this.state;
-    const {samples} = this.state;
-
-    console.log(publications);
-    console.log(readLengths);
+    const {
+      diseases,
+      platforms,
+      libraryLayouts,
+      readLengths,
+      publications,
+      samples,
+      form
+    } = this.state;
 
     if (!diseases || !platforms || !libraryLayouts || !readLengths || !publications || !samples) return null;
+
     return (
       <SiteWrapper>
         <Page.Content title="Search samples">
           <Grid.Row cards={true} justifyContent="flex-end">
             <Grid.Col>
               <Button.List>
-                <Button link icon="x">
+                <Button link icon="x" onClick={this.resetForm}>
                   Clear all fields
                 </Button>
               </Button.List>
@@ -165,23 +213,27 @@ class FormElements extends Component {
           </Grid.Row>
 
           <Grid.Row cards={true}>
-            <Grid.Col >
+            <Grid.Col>
               <Card>
                 <Table className="card-table table-vcenter">
                   <Table.Body>
                     <Table.Row>
                       <Table.Col>
                         <Form.Group label="Genome assembly">
-                          <Form.SelectGroup>
+                          <Form.SelectGroup canSelectMultiple>
                             <Form.SelectGroupItem
                               name="device"
                               label="hg19"
                               value="hg19"
+                              checked={form.genomeAssembly['hg19']}
+                              onChange={this.updateFormMultipleValues('genomeAssembly', 'hg19')}
                             />
                             <Form.SelectGroupItem
                               name="device"
                               label="hg38"
                               value="hg39"
+                              checked={form.genomeAssembly['hg38']}
+                              onChange={this.updateFormMultipleValues('genomeAssembly', 'hg38')}
                             />
                           </Form.SelectGroup>
                         </Form.Group>
@@ -195,12 +247,16 @@ class FormElements extends Component {
                             name="example-radios"
                             label="GEO"
                             value="option1"
+                            checked={form.repository['GEO']}
+                            onChange={this.updateFormMultipleValues('repository', 'GEO')}
                           />
                           <Form.Checkbox
                             isInline
                             name="example-radios"
                             label="dbGaP"
                             value="option2"
+                            checked={form.repository['dbGaP']}
+                            onChange={this.updateFormMultipleValues('repository', 'dbGaP')}
                           />
                           <Form.Checkbox
                             disabled
@@ -208,93 +264,75 @@ class FormElements extends Component {
                             name="example-radios"
                             label="ENA"
                             value="option3"
+                            checked={form.repository['ENA']}
+                            onChange={this.updateFormMultipleValues('repository', 'ENA')}
                           />
                         </Form.Group>
                       </Table.Col>
                     </Table.Row>
-                      <GetPlatforms platforms={platforms}/>
-                      <GetLibraryLayouts library_layouts={libraryLayouts}/>
-                      <GetDiseases diseases={diseases}/>
+                    <GetPlatforms platforms={platforms}/>
+                    <GetLibraryLayouts
+                      library_layouts={form.libraryFormat}
+                      onChange={this.updateFormMultipleValues}
+                    />
+                    <GetDiseases diseases={diseases}/>
 
-                      <Table.Row>
+                    <Table.Row>
                       <Table.Col>
-                        <Form.Group label="Read length">
-                          <div>Min</div>
-                          <Form.Ratio
-                            defaultValue={0}
-                            max={500}
-                            min={0}
-                            step={1}
-                          />
-                          <Form.Ratio
-                            defaultValue={500}
-                            max={500}
-                            min={0}
-                            step={1}
-                          />
-                        </Form.Group>
+                        <Grid.Row>
+                          <Grid.Col>
+                            <Form.Group label="Minimum read length">
+                              <Form.Input
+                                name="minReadLength"
+                                placeholder={10}
+                                type='number'
+                                value={form.minReadLength}
+                                onChange={this.updateFormValue}
+                              />
+                            </Form.Group>
+                          </Grid.Col>
+                          <Grid.Col>
+                            <Form.Group label="Maximum read length">
+                              <Form.Input
+                                name="maxReadLength"
+                                value={form.maxReadLength}
+                                placeholder={100}
+                                type='number'
+                                onChange={this.updateFormValue}
+                              />
+                            </Form.Group>
+                          </Grid.Col>
+                        </Grid.Row>
                       </Table.Col>
                     </Table.Row>
                     
 
                     <Table.Row>
                       <Table.Col>
-                        <Form.Group label="Age">
-                          <Form.Checkbox
-                            isInline
-                            name="0-10"
-                            label="0-10"
-                            value="option1"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="11-20"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="21-30"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="31-40"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="41-50"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="51-60"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="61-70"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="71-80"
-                            value="option2"
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="81-90"
-                            value="option2"
-                          />
-                        </Form.Group>
+                        <Grid.Row>
+                          <Grid.Col>
+                            <Form.Group label="Minimum age">
+                              <Form.Input
+                                name="minAge"
+                                placeholder={10}
+                                type='number'
+                                value={form.minAge}
+                                onChange={this.updateFormValue}
+                              />
+                            </Form.Group>
+                          </Grid.Col>
+                          <Grid.Col>
+                            <Form.Group label="Maximum age">
+                              <Form.Input
+                                name="maxAge"
+                                placeholder={100}
+                                type='number'
+                                value={form.maxAge}
+                                onChange={this.updateFormValue}
+                              />
+                            </Form.Group>
+                          </Grid.Col>
+                        </Grid.Row>
                       </Table.Col>
                     </Table.Row>
                   </Table.Body>
