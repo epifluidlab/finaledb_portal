@@ -14,12 +14,12 @@ yarn
 
 Start server
 ```
+# in `/cfdna_frontend`
 yarn start:dev
 ```
 
 Start frontend
 ```
-# on new terminal
-cd client
+# in `/cfdna_frontend/client` in new terminal tab
 yarn start
 ```
