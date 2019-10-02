@@ -150,11 +150,6 @@ class FormElements extends Component {
       readLengths: body_data.readLengths,
       publications: body_pub.publications,
       samples: body_data.samples,
-
-      form: {
-        ...this.state.form,
-        libraryLayouts: body_data.libraryLayouts.reduce((acc, curr) => acc[curr] = false, {}),
-      }
      });
   };
 
@@ -272,7 +267,7 @@ class FormElements extends Component {
                     </Table.Row>
                     <GetPlatforms platforms={platforms}/>
                     <GetLibraryLayouts
-                      library_layouts={form.libraryFormat}
+                      library_layouts={libraryLayouts}
                       onChange={this.updateFormMultipleValues}
                     />
                     <GetDiseases diseases={diseases}/>
