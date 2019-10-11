@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser')
@@ -19,6 +20,11 @@ app.use(
   })
 )
 
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 app.get('/data', db.getData)
 app.get('/publications', db.getPublications)
+
+app.get('*', (req,res) =>{
+  res.sendFile(path.join(__dirname+'/client/build/index.html'));
+});
