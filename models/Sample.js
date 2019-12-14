@@ -1,7 +1,13 @@
 const { Model, DataTypes } = require('sequelize');
 const db = require('../db');
 
-class Sample extends Model { }
+class Sample extends Model {
+  static col(attribute) {
+    const attrOptions = this.rawAttributes[attribute];
+      const field = (attrOptions && attrOptions.field) || attribute;
+      return this.sequelize.col(field);
+  }
+}
 
 Sample.init({
   sampleName: {
@@ -14,10 +20,17 @@ Sample.init({
   },
   age: DataTypes.NUMBER,
   sex: DataTypes.STRING,
-  libraryFormat: DataTypes.STRING,
-  datatype: {
+  libraryLayout: {
+    type: DataTypes.STRING,
+    field: 'library_format',
+  },
+  platform: {
     type: DataTypes.STRING,
     field: 'instrument',
+  },
+  datatype: {
+    type: DataTypes.STRING,
+    field: 'assay_type',
   },
   readLength: DataTypes.NUMBER,
   assayType: DataTypes.STRING,

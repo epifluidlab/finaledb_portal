@@ -27,6 +27,7 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
       </Table.Col>
       <Table.Col> {sample.libraryFormat} </Table.Col>
       <Table.Col> {sample.readLength} </Table.Col>
+      <Table.Col>{sample.platform}</Table.Col>
       <Table.Col> {sample.datatype} </Table.Col>
       <Table.Col>
         <Button link size="sm" RootComponent="a" href={sample.link} target="_blank">
@@ -67,6 +68,7 @@ const SamplesTable = ({ samples }) => {
         <Table.ColHeader>Disease status</Table.ColHeader>
         <Table.ColHeader>Run type</Table.ColHeader>
         <Table.ColHeader>len.</Table.ColHeader>
+        <Table.ColHeader>Platform</Table.ColHeader>
         <Table.ColHeader>Datatype</Table.ColHeader>
         <Table.ColHeader>Publication</Table.ColHeader>
         <Table.ColHeader alignContent="center">

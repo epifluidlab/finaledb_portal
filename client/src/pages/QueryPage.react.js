@@ -1,5 +1,3 @@
-// @flow
-
 import * as React from "react";
 import { Component } from "react";
 import {
@@ -16,24 +14,25 @@ import SamplesTable from '../components/SamplesTable';
 
 import 'nouislider';
 import 'nouislider/distribute/nouislider.css';
+import request from "../utils/request";
 
 
 
 
 function GetReadLengths(props) {
   const content = props.read_lengths.map((read_length) =>
-        <Form.Checkbox
-          isInline
-          name="example-radios"
-          label={read_length[0]}
-          value={read_length[0]}
-        />
+    <Form.Checkbox
+      isInline
+      name="example-radios"
+      label={read_length[0]}
+      value={read_length[0]}
+    />
   );
   return (
     <Table.Row>
       <Table.Col>
         <Form.Group label="Read length">
-         {content}
+          {content}
         </Form.Group>
       </Table.Col>
     </Table.Row>
@@ -41,18 +40,19 @@ function GetReadLengths(props) {
 }
 
 function GetPlatforms(props) {
-  const content = props.platforms.map((platform) =>
-        <Form.Checkbox
-          isInline
-          name="example-radios"
-          label={platform[0]}
-          value={platform[0]}
-        />
+  const content = props.platforms.map(({ platform }) =>
+    <Form.Checkbox
+      isInline
+      name="example-radios"
+      label={platform}
+      value={platform}
+      onChange={props.onChange('platform', platform)}
+    />
   );
   return (
     <Table.Row>
       <Table.Col>
-        <Form.Group label="Instrument">
+        <Form.Group label="Platform">
           {content}
         </Form.Group>
       </Table.Col>
@@ -62,12 +62,12 @@ function GetPlatforms(props) {
 
 function GetDiseases(props) {
   const content = props.diseases.map((disease) =>
-        <Form.Checkbox
-          isInline
-          name="example-radios"
-          label={disease[0]}
-          value={disease[0]}
-        />
+    <Form.Checkbox
+      isInline
+      name="example-radios"
+      label={disease[0]}
+      value={disease[0]}
+    />
   );
   return (
     <Table.Row>
@@ -82,14 +82,14 @@ function GetDiseases(props) {
 
 
 function GetLibraryLayouts(props) {
-  const content = props.library_layouts.map((library_layout) =>
-        <Form.Checkbox
-          isInline
-          name="example-radios"
-          label={library_layout[0]}
-          value={library_layout[0]}
-          onChange={props.onChange('libraryFormat', library_layout[0])}
-        />
+  const content = props.libraryLayouts.map((layout) =>
+    <Form.Checkbox
+      isInline
+      name="example-radios"
+      label={layout}
+      value={layout}
+      onChange={props.onChange('libraryLayout', layout)}
+    />
   );
   return (
     <Table.Row>
@@ -109,8 +109,8 @@ class FormElements extends Component {
     this.initialFormState = {
       genomeAssembly: {},
       repository: {},
-      instrument: {},
-      libraryFormat: {},
+      platform: {},
+      libraryLayout: {},
       diseaseStatus: {},
       minReadLength: 10,
       maxReadLength: 100,
@@ -128,30 +128,57 @@ class FormElements extends Component {
     // Call our fetch function below once the component mounts
     this.callBackendAPI()
   }
+
   // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
   callBackendAPI = async () => {
-    var [response_data, response_pub] = await Promise.all ([ 
-      fetch('/data'),
-      fetch('/publications'),
+    const [data, samples, platforms, publications] = await Promise.all([
+      request('/data'),
+      request('/samples'),
+      request('/samples/platforms'),
+      request('/publications'),
     ]);
-    const body_data = await response_data.json();
-    const body_pub = await response_pub.json();
 
-    if (response_data.status !== 200 || response_pub.status !== 200) {
-      throw Error(body_data.message) 
+    this.setState({
+      diseases: data.diseases,
+      platforms,
+      libraryLayouts: data.libraryLayouts,
+      readLengths: data.readLengths,
+      publications,
+      samples,
+    });
+  }
+
+  fetchSamples = async () => {
+    const samples = await request('/samples' + this.formToQueryString());
+    this.setState({
+      samples,
+    });
+  }
+
+  formToQueryString = () => {
+    let qs = '?';
+    const attrs = ['platform'];
+
+    for (const attr of attrs) {
+      const filterString = this.getFilterForAttr(attr);
+      if (filterString.length) {
+        qs += `${attr}=${filterString}&`;
+      }
     }
+    console.log(qs);
+    return qs;
+  }
 
-    console.log(body_data);
-    console.log(body_pub);
-    this.setState({ 
-      diseases: body_data.diseases,
-      platforms: body_data.platforms,
-      libraryLayouts: body_data.libraryLayouts,
-      readLengths: body_data.readLengths,
-      publications: body_pub.publications,
-      samples: body_data.samples,
-     });
-  };
+  getFilterForAttr = (attr) => {
+    const { form } = this.state;
+
+    if (!form[attr]) return '';
+
+    return Object.keys(form[attr])
+      .filter((key) => form[attr][key])
+      // .map((key) => `"${key}"`)
+      .join(',');
+  }
 
   updateFormMultipleValues = (name, value) => () => {
     this.setState({
@@ -162,7 +189,7 @@ class FormElements extends Component {
           [value]: !this.state.form[name][value]
         }
       }
-    });
+    }, () => this.fetchSamples());
   }
 
   updateFormValue = (e) => {
@@ -265,12 +292,15 @@ class FormElements extends Component {
                         </Form.Group>
                       </Table.Col>
                     </Table.Row>
-                    <GetPlatforms platforms={platforms}/>
-                    <GetLibraryLayouts
-                      library_layouts={libraryLayouts}
+                    <GetPlatforms
+                      platforms={platforms}
                       onChange={this.updateFormMultipleValues}
                     />
-                    <GetDiseases diseases={diseases}/>
+                    <GetLibraryLayouts
+                      libraryLayouts={['SINGLE', 'PAIRED']}
+                      onChange={this.updateFormMultipleValues}
+                    />
+                    <GetDiseases diseases={diseases} />
 
                     <Table.Row>
                       <Table.Col>
@@ -300,7 +330,7 @@ class FormElements extends Component {
                         </Grid.Row>
                       </Table.Col>
                     </Table.Row>
-                    
+
 
                     <Table.Row>
                       <Table.Col>
@@ -346,7 +376,7 @@ class FormElements extends Component {
                   cards
                   className="text-nowrap"
                 >
-                  <SamplesTable samples={samples}/>
+                  <SamplesTable samples={samples} />
                 </Table>
               </Card>
             </Grid.Col>
