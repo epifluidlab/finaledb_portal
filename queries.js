@@ -1,6 +1,4 @@
-const db = require('./db');
-
-const sanitizeDiseaseName = (name) => name.replace(/\(.*\)/g, '').trim();
+const { Publication, Sample } = require('./models');
 
 const countOccurrences = (rows, key) => rows.reduce((acc, row) => {
   const prop = row[key];
@@ -10,18 +8,13 @@ const countOccurrences = (rows, key) => rows.reduce((acc, row) => {
 
 const countsToArray = (counts) => Object.keys(counts).map((key) => [key, counts[key]]);
 
-function getDiseases (rows) {
-    // TODO: match with master disease list
-    const cleanedRows = rows.map((row) => ({
-      ...row,
-      disease: sanitizeDiseaseName(row.disease),
-    }));
-
-    return countsToArray(countOccurrences(cleanedRows, 'disease'));
+function getDiseases(rows) {
+  // TODO: match with master disease list
+  return countsToArray(countOccurrences(rows, 'disease'));
 }
 
 
-function getPlatforms (rows) {
+function getPlatforms(rows) {
   // TODO: match with master disease list
   const counts = countOccurrences(rows, 'instrument');
   counts['Illumina HiSeq 2500'] = 0;
@@ -34,85 +27,70 @@ function getPlatforms (rows) {
 }
 
 
-function getLibraryLayouts (rows) {
-    // TODO: match with master disease list
-    const counts = countOccurrences(rows, 'library_format');
-    counts['SINGLE'] = 0;
-
-    return countsToArray(counts);
-}
-
-
-function getReadLengths (rows) {
+function getLibraryLayouts(rows) {
   // TODO: match with master disease list
-  return countsToArray(countOccurrences(rows, 'read_length'));
+  const counts = countOccurrences(rows, 'libraryFormat');
+  counts['SINGLE'] = 0;
+
+  return countsToArray(counts);
 }
 
-function getTissues (rows) {
+
+function getReadLengths(rows) {
+  // TODO: match with master disease list
+  return countsToArray(countOccurrences(rows, 'readLength'));
+}
+
+function getTissues(rows) {
   // TODO: match with master disease list
   return countsToArray(countOccurrences(rows, 'tissue'));
 }
 
-const getData = (request, response) => {
-    db.query('SELECT * FROM metadata', (error, results) => {
-      if (error) {
-        throw error
-      }
+const getData = async (request, response) => {
+  try {
 
-      // get each sample
-      const samplesList = results.rows.map((row) => ({
-        sample_name: row.sample_name,
-        sra_id: row.sra_id,
-        doi: row.doi,
-        link: row.link,
-        age: row.age,
-        sex: row.sex,
-        library_format: row.library_format,
-        platform: row.instrument,
-        read_length: row.read_length,
-        datatype: row.assay_type,
-        disease: sanitizeDiseaseName(row.disease),
-      }));
+    const samples = await Sample.findAll();
 
-      // get metadata stats for all samples
-      const diseaseList = getDiseases (results.rows);
-      const platformList = getPlatforms (results.rows);
-      const libraryLayoutList = getLibraryLayouts (results.rows);
-      const readLengthList = getReadLengths (results.rows);
+    // get each sample
+    const samplesList = samples.map((row) => ({
+      ...row.toJSON()
+    }));
 
-      // send data
-      response.status(200).json({
-        diseases: diseaseList,
-        platforms: platformList,
-        libraryLayouts: libraryLayoutList,
-        readLengths: readLengthList,
+    // get metadata stats for all samples
+    const diseaseList = getDiseases(samplesList);
+    const platformList = getPlatforms(samplesList);
+    const libraryLayoutList = getLibraryLayouts(samplesList);
+    const readLengthList = getReadLengths(samplesList);
 
-        samples: samplesList,
-      });
-    })
-
-  }
-
-
-const getPublications = (request, response) => {
-  db.query('SELECT * FROM publications', (error, results) => {
-    if (error) {
-      throw error
-    }
-
-
-    const publicationsList = results.rows
-
+    // send data
     response.status(200).json({
-      publications: publicationsList,
+      diseases: diseaseList,
+      platforms: platformList,
+      libraryLayouts: libraryLayoutList,
+      readLengths: readLengthList,
+
+      samples: samplesList,
     });
-
-  });
-
+  } catch (e) {
+    response.status(500).json(e);
+  }
 }
 
 
-  module.exports = {
-    getData,
-    getPublications,
+const getPublications = async (request, response) => {
+  try {
+    const publications = await Publication.findAll();
+
+    response.status(200).json({
+      publications,
+    });
+  } catch (e) {
+    response.status(500).json(e);
   }
+}
+
+
+module.exports = {
+  getData,
+  getPublications,
+}

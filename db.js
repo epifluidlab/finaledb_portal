@@ -1,10 +1,18 @@
-const Pool = require('pg').Pool
-const pool = new Pool({
-  user: process.env.CFDNA_DB_USER || 'zhu1lx', //'postgres' || 
-  host: process.env.CFDNA_DB_HOST ||  'cfdna.cbfjin2vxldo.us-east-2.rds.amazonaws.com', // 'localhost', // '216.68.249.18',
-  database: process.env.CFDNA_DB_NAME ||  'cfdna', // 'postgres',
-  password: process.env.CFDNA_DB_PASSWORD || 'Chmc3634',
-  port: 5432,
+const { Sequelize } = require('sequelize');
+
+const dbName = process.env.CFDNA_DB_NAME || 'cfdna';
+const dbUser = process.env.CFDNA_DB_USER || 'zhu1lx';
+const dbPass = process.env.CFDNA_DB_PASSWORD || 'Chmc3634';
+
+const sequelize = new Sequelize(dbName, dbUser, dbPass, {
+  host: process.env.CFDNA_DB_HOST ||  'cfdna.cbfjin2vxldo.us-east-2.rds.amazonaws.com',
+  dialect: 'postgres',
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  }
 });
 
-module.exports = pool;
+module.exports = sequelize;

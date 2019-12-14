@@ -4,9 +4,9 @@ import { connect } from 'react-redux';
 import { addDownload, removeDownload } from '../../redux/downloads/actions';
 
 const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => {
-  const sampleInBasket = downloads.find(download => download.sra_id === sample.sra_id);
+  const sampleInBasket = downloads.find(download => download.sraId === sample.sraId);
   const addToBasket = () => addDownload(sample);
-  const removeFromBasket = () => removeDownload(sample.sra_id);
+  const removeFromBasket = () => removeDownload(sample.sraId);
 
 
 
@@ -16,7 +16,7 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
       <Table.Col>
         <div>{sample.sample_name}</div>
         <Text size="sm" muted>
-          {sample.sra_id}
+          {sample.sraId}
         </Text>
       </Table.Col>
       <Table.Col>
@@ -25,8 +25,8 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
           {sample.sex}{sample.age ? ', '+ sample.age : sample.age}
         </Text>
       </Table.Col>
-      <Table.Col> {sample.library_format} </Table.Col>
-      <Table.Col> {sample.read_length} </Table.Col>
+      <Table.Col> {sample.libraryFormat} </Table.Col>
+      <Table.Col> {sample.readLength} </Table.Col>
       <Table.Col> {sample.datatype} </Table.Col>
       <Table.Col>
         <Button link size="sm" RootComponent="a" href={sample.link} target="_blank">
