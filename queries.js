@@ -30,7 +30,7 @@ function getPlatforms(rows) {
 function getLibraryLayouts(rows) {
   // TODO: match with master disease list
   const counts = countOccurrences(rows, 'libraryFormat');
-  counts['SINGLE'] = 0;
+  counts.SINGLE = 0;
 
   return countsToArray(counts);
 }
@@ -48,12 +48,11 @@ function getTissues(rows) {
 
 const getData = async (request, response) => {
   try {
-
     const samples = await Sample.findAll();
 
     // get each sample
     const samplesList = samples.map((row) => ({
-      ...row.toJSON()
+      ...row.toJSON(),
     }));
 
     // get metadata stats for all samples
@@ -74,7 +73,7 @@ const getData = async (request, response) => {
   } catch (e) {
     response.status(500).json(e);
   }
-}
+};
 
 
 const getPublications = async (request, response) => {
@@ -87,10 +86,10 @@ const getPublications = async (request, response) => {
   } catch (e) {
     response.status(500).json(e);
   }
-}
+};
 
 
 module.exports = {
   getData,
   getPublications,
-}
+};

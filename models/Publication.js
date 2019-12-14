@@ -1,4 +1,4 @@
-const { Sequelize, Model, DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const db = require('../db');
 
 class Publication extends Model { }
@@ -10,7 +10,7 @@ Publication.init({
   pmid: DataTypes.NUMBER,
   doi: {
     type: DataTypes.STRING,
-    primaryKey: true
+    primaryKey: true,
   },
   datastore: DataTypes.STRING,
   title: DataTypes.STRING,

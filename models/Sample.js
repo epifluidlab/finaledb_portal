@@ -1,4 +1,4 @@
-const { Sequelize, Model, DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const db = require('../db');
 
 class Sample extends Model { }
@@ -25,7 +25,7 @@ Sample.init({
   tissue: DataTypes.STRING,
   other: DataTypes.STRING,
   disease: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     get() {
       const disease = this.getDataValue('disease');
       return disease.replace(/\(.*\)/g, '').trim();

@@ -3,5 +3,5 @@ const Sample = require('./Sample');
 
 module.exports = {
   Publication,
-  Sample
+  Sample,
 };
