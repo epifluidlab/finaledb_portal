@@ -24,11 +24,10 @@ function Blog(props) {
     <Table.Header>
       <Table.Row>
         <Table.ColHeader>Publication Name</Table.ColHeader>
-        <Table.ColHeader>PMID</Table.ColHeader>
         <Table.ColHeader>Author</Table.ColHeader>
         <Table.ColHeader>Date</Table.ColHeader>
         <Table.ColHeader>Journal</Table.ColHeader>
-        <Table.ColHeader>Samples</Table.ColHeader>
+        <Table.ColHeader>PMID</Table.ColHeader>
         <Table.ColHeader>DOI</Table.ColHeader>
       </Table.Row>
     </Table.Header>
@@ -36,11 +35,10 @@ function Blog(props) {
   const content = props.pubs.map((pub) =>
     <Table.Row>
       <Table.Col>{pub.title}</Table.Col>
-      <Table.Col>{pub.pmid}</Table.Col>
       <Table.Col>{pub.author}</Table.Col>
       <Table.Col>{pub.date}</Table.Col>
       <Table.Col>{pub.journal}</Table.Col>
-      <Table.Col>60</Table.Col>
+      <Table.Col>{pub.pmid}</Table.Col>
       <Table.Col>{pub.doi}</Table.Col>
     </Table.Row>
   );
@@ -110,39 +108,26 @@ class Home extends Component {
                   <Card.Title>Samples per disease</Card.Title>
                 </Card.Header>
                 <C3Chart
-                  style={{ height: "10rem" }}
                   data={{
                     columns:diseases ,
                     type: "bar",
                   }}
                   axis={{
-                    y: {
-                      padding: {
-                        bottom: 0,
-                      },
-                      show: true,
-                      tick: {
-                        outer: true,
-                      },
-                    },
+
                     x: {
+                      type: 'category',
+                      categories: diseases[1],
                       padding: {
                         left: 0,
                         right: 0,
                       },
-                      show: true,
+                      show: false,
                     },
                   }}
                   legend={{
-                    show: false,
+                    show: true,
                     position: "inset",
                     padding: 0,
-                    inset: {
-                      anchor: "top-left",
-                      x: 20,
-                      y: 8,
-                      step: 10,
-                    },
                   }}
                   tooltip={{
                     format: {
