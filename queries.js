@@ -13,36 +13,29 @@ function getDiseases(rows) {
   return countsToArray(countOccurrences(rows, 'disease'));
 }
 
-
 function getPlatforms(rows) {
   const counts = countOccurrences(rows, 'instrument');
 
   return countsToArray(counts);
 }
 
-
 function getLibraryFormats(rows) {
-  // TODO: match with master disease list
   const counts = countOccurrences(rows, 'libraryFormat');
   counts.SINGLE = 0;
 
   return countsToArray(counts);
 }
 
-
-function getReadLengths(rows) {
-  // TODO: match with master disease list
-  return countsToArray(countOccurrences(rows, 'readLength'));
-}
-
 function getTissues(rows) {
-  // TODO: match with master disease list
   return countsToArray(countOccurrences(rows, 'tissue'));
 }
 
 function getAssayTypes(rows) {
-  // TODO: match with master disease list
   return countsToArray(countOccurrences(rows, 'assayType'));
+}
+
+function getReadLengthRange(rows) {
+  return countsToArray(countOccurrences(rows, 'readLength'));
 }
 
 const getData = async (request, response) => {
@@ -58,13 +51,14 @@ const getData = async (request, response) => {
     const diseaseList = getDiseases(samplesList);
     const platformList = getPlatforms(samplesList);
     const libraryFormatList = getLibraryFormats(samplesList);
-    const readLengthList = getReadLengths(samplesList);
     const tissueList = getTissues(samplesList);
     const assayTypeList = getAssayTypes(samplesList);
 
+    const readLengthRange = getReadLengthRange(samplesList);
 
     console.log(tissueList);
     console.log(assayTypeList);
+    console.log(readLengthRange)
 
 
     // send data
@@ -72,9 +66,10 @@ const getData = async (request, response) => {
       diseases: diseaseList,
       platforms: platformList,
       libraryFormats: libraryFormatList,
-      readLengths: readLengthList,
       tissues: tissueList,
       assayTypes: assayTypeList,
+
+      readLengths: readLengthRange,
 
       samples: samplesList,
     });

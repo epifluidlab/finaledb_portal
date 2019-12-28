@@ -15,29 +15,8 @@ import SamplesTable from '../components/SamplesTable';
 import 'nouislider';
 import 'nouislider/distribute/nouislider.css';
 import request from "../utils/request";
+import { number } from "prop-types";
 
-
-
-
-function GetReadLengths(props) {
-  const content = props.read_lengths.map((read_length) =>
-    <Form.Checkbox
-      isInline
-      name="example-radios"
-      label={read_length[0]}
-      value={read_length[0]}
-    />
-  );
-  return (
-    <Table.Row>
-      <Table.Col>
-        <Form.Group label="Read length">
-          {content}
-        </Form.Group>
-      </Table.Col>
-    </Table.Row>
-  );
-}
 
 function GetPlatforms(props) {
   const content = props.platforms.map(({ platform }) => // [{ platform: 'something', count: 12 }]
@@ -65,7 +44,7 @@ function GetDiseases(props) {
     <Form.Checkbox
       isInline
       name="example-radios"
-      label={disease[0].replace(/\(.*\)/g, '').trim()}
+      label={disease[0]}
       value={disease[0]}
       onChange={props.onChange('disease', disease[0])}
     />
@@ -110,7 +89,7 @@ function GetTissues(props) {
       name="example-radios"
       label={tissue[0]}
       value={tissue[0]}
-      onChange={props.onChange('tissues', tissue[0])}
+      onChange={props.onChange('tissue', tissue[0])}
     />
   );
   return (
@@ -131,7 +110,7 @@ function GetAssayTypes(props) {
       name="example-radios"
       label={assayType[0]}
       value={assayType[0]}
-      onChange={props.onChange('assayTypes', assayType[0])}
+      onChange={props.onChange('assayType', assayType[0])}
     />
   );
   return (
@@ -144,6 +123,8 @@ function GetAssayTypes(props) {
     </Table.Row>
   );
 }
+
+
 
 class FormElements extends Component {
 
@@ -158,10 +139,9 @@ class FormElements extends Component {
       tissue: {},
       assayType: {},
       diseaseStatus: {},
-      minReadLength: 10,
-      maxReadLength: 100,
-      minAge: 10,
-      maxAge: 100,
+      minReadLength: 0,
+      maxReadLength: 1000,
+      age:{},
     }
 
     this.state = {
@@ -204,8 +184,9 @@ class FormElements extends Component {
   }
 
   formToQueryString = () => {
+    const { minReadLength, maxReadLength } = this.state.form;
     let qs = '?';
-    const attrs = ['platform', 'disease'];
+    const attrs = ['platform', 'disease', 'tissue', 'libraryFormat', 'assayType'];
 
     for (const attr of attrs) {
       const filterString = this.getFilterForAttr(attr);
@@ -213,9 +194,15 @@ class FormElements extends Component {
         qs += `${attr}=${filterString}&`;
       }
     }
+
+    qs += 'readLength=' + '0' + ',' + '1000' + '&';
+
     console.log(qs);
     return qs;
   }
+
+  // disease: { flu: true, cancer: true, diabetes: false }
+  // minReadLen: 10, maxReadLen: 100 -> String(minReadLen) + ',' + String(maxReadLen)
 
   getFilterForAttr = (attr) => {
     const { form } = this.state;
@@ -223,7 +210,7 @@ class FormElements extends Component {
     if (!form[attr]) return '';
 
     return Object.keys(form[attr])
-      .filter((key) => form[attr][key])
+      .filter((key) => form[attr][key]) // [flu, cancer]
       // .map((key) => `"${key}"`)
       .join(',');
   }
@@ -252,7 +239,7 @@ class FormElements extends Component {
         ...this.state.form,
         [e.target.name]: e.target.value
       }
-    });
+    },  () => this.fetchSamples() );
   }
 
   resetForm = () => {
@@ -387,9 +374,9 @@ class FormElements extends Component {
                             <Form.Group label="Max Read Length">
                               <Form.Input
                                 name="maxReadLength"
-                                value={form.maxReadLength}
                                 placeholder={100}
                                 type='number'
+                                value={form.maxReadLength}
                                 onChange={this.updateFormValue}
                               />
                             </Form.Group>

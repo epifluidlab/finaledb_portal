@@ -20,7 +20,7 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
         </Text>
       </Table.Col>
       <Table.Col>
-        {sample.disease} ({sample.tissue})
+        {sample.disease}{sample.tissue ? ' (' + sample.tissue + ')' : sample.tissue}
         <Text size="sm" muted>
           {sample.sex}{sample.age ? ', '+ sample.age : sample.age}
         </Text>

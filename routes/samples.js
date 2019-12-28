@@ -6,14 +6,22 @@ const router = Router();
 
 const get = async (req, res, next) => {
   try {
+    // select * from Sample where [...buildWhereClause] and [...buildBetweenClause];
     const samples = await Sample.findAll({
-      where: buildWhereClause(req.query),
+      where: { ...buildWhereClause(req.query), ...buildBetweenClause(req.query) },
     });
     return res.status(200).json(samples);
   } catch (e) {
     return next(e);
   }
 };
+
+/**
+ * const obj3 = {
+ *  ...obj1,
+ *  ...obj2
+ * }
+ */
 
 /* IN:
 //      req: {
@@ -40,12 +48,33 @@ const buildWhereClause = (query) => {
     return {}
   }
 
-  const attrs = ['platform', 'disease'];
+  const attrs = ['platform', 'disease', 'tissue', 'libraryFormat', 'assayType'];
   const result = {}
 
   for (const attr of attrs) {
     if (query[attr] && query[attr].length) {
       result[attr] = { [Op.in]: query[attr].split(',') };
+    }
+  }
+
+  return result;
+}
+
+// [Op.between]: [6, 10],     // BETWEEN 6 AND 10
+
+const buildBetweenClause = (query) => {
+  if (!query) {
+    return {}
+  }
+
+  const attrs = ['readLength'];
+  const result = {}
+
+  for (const attr of attrs) {
+    if (query[attr] && query[attr].length) {
+      console.log(query[attr]);
+      console.log(query[attr].split(',').map((n) => parseInt(n, 10)));
+      result[attr] = { [Op.between]: query[attr].split(',').map((n) => parseInt(n, 10)) };
     }
   }
 
@@ -71,12 +100,17 @@ const getLibraryFormats = getCountHandler('libraryFormat');
 const getTissues = getCountHandler('tissue');
 const getAssayTypes = getCountHandler('assayType');
 
+const getReadLengths = getCountHandler('readLength');
+
+
 router.get('/', get);
 router.get('/diseases', getDiseases);
 router.get('/platforms', getPlatforms);
 router.get('/libraryFormats', getLibraryFormats);
 router.get('/tissues', getTissues);
 router.get('/assayTypes', getAssayTypes);
+router.get('/readLengths', getReadLengths);
+
 
 
 
