@@ -36,13 +36,7 @@ Sample.init({
   mbases: DataTypes.NUMBER,
   tissue: DataTypes.STRING,
   other: DataTypes.STRING,
-  disease: {
-    type: DataTypes.STRING,
-    get() {
-      const disease = this.getDataValue('disease');
-      return disease.replace(/\(.*\)/g, '').trim();
-    },
-  },
+  disease: DataTypes.STRING,
 }, {
   sequelize: db,
   tableName: 'metadata',

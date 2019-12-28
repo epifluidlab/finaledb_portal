@@ -40,7 +40,7 @@ function GetReadLengths(props) {
 }
 
 function GetPlatforms(props) {
-  const content = props.platforms.map(({ platform }) =>
+  const content = props.platforms.map(({ platform }) => // [{ platform: 'something', count: 12 }]
     <Form.Checkbox
       isInline
       name="example-radios"
@@ -65,8 +65,9 @@ function GetDiseases(props) {
     <Form.Checkbox
       isInline
       name="example-radios"
-      label={disease[0]}
+      label={disease[0].replace(/\(.*\)/g, '').trim()}
       value={disease[0]}
+      onChange={props.onChange('disease', disease[0])}
     />
   );
   return (
@@ -149,6 +150,7 @@ class FormElements extends Component {
   constructor(props) {
     super(props);
     this.initialFormState = {
+      disease: {},
       genomeAssembly: {},
       repository: {},
       platform: {},
@@ -203,7 +205,7 @@ class FormElements extends Component {
 
   formToQueryString = () => {
     let qs = '?';
-    const attrs = ['platform'];
+    const attrs = ['platform', 'disease'];
 
     for (const attr of attrs) {
       const filterString = this.getFilterForAttr(attr);
@@ -227,6 +229,7 @@ class FormElements extends Component {
   }
 
   updateFormMultipleValues = (name, value) => () => {
+    console.log(this.state.form);
     this.setState({
       form: {
         ...this.state.form,
@@ -237,6 +240,11 @@ class FormElements extends Component {
       }
     }, () => this.fetchSamples());
   }
+
+  // platform: {
+  //   nextseq: true,
+  //   illumina: false,
+  // }
 
   updateFormValue = (e) => {
     this.setState({
