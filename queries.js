@@ -15,19 +15,13 @@ function getDiseases(rows) {
 
 
 function getPlatforms(rows) {
-  // TODO: match with master disease list
   const counts = countOccurrences(rows, 'instrument');
-  counts['Illumina HiSeq 2500'] = 0;
-  counts['Illumina HiSeq 4000'] = 0;
-  counts['HiSeq X Ten'] = 0;
-  counts['NovaSeq 6000'] = 0;
-  counts['NextSeq 500'] = 0;
 
   return countsToArray(counts);
 }
 
 
-function getLibraryLayouts(rows) {
+function getLibraryFormats(rows) {
   // TODO: match with master disease list
   const counts = countOccurrences(rows, 'libraryFormat');
   counts.SINGLE = 0;
@@ -46,6 +40,11 @@ function getTissues(rows) {
   return countsToArray(countOccurrences(rows, 'tissue'));
 }
 
+function getAssayTypes(rows) {
+  // TODO: match with master disease list
+  return countsToArray(countOccurrences(rows, 'assayType'));
+}
+
 const getData = async (request, response) => {
   try {
     const samples = await Sample.findAll();
@@ -58,15 +57,24 @@ const getData = async (request, response) => {
     // get metadata stats for all samples
     const diseaseList = getDiseases(samplesList);
     const platformList = getPlatforms(samplesList);
-    const libraryLayoutList = getLibraryLayouts(samplesList);
+    const libraryFormatList = getLibraryFormats(samplesList);
     const readLengthList = getReadLengths(samplesList);
+    const tissueList = getTissues(samplesList);
+    const assayTypeList = getAssayTypes(samplesList);
+
+
+    console.log(tissueList);
+    console.log(assayTypeList);
+
 
     // send data
     response.status(200).json({
       diseases: diseaseList,
       platforms: platformList,
-      libraryLayouts: libraryLayoutList,
+      libraryFormats: libraryFormatList,
       readLengths: readLengthList,
+      tissues: tissueList,
+      assayTypes: assayTypeList,
 
       samples: samplesList,
     });

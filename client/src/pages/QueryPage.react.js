@@ -72,7 +72,7 @@ function GetDiseases(props) {
   return (
     <Table.Row>
       <Table.Col>
-        <Form.Group label="Disease status">
+        <Form.Group label="Disease Status">
           {content}
         </Form.Group>
       </Table.Col>
@@ -81,20 +81,62 @@ function GetDiseases(props) {
 }
 
 
-function GetLibraryLayouts(props) {
-  const content = props.libraryLayouts.map((layout) =>
+function GetLibraryFormats(props) {
+  const content = props.libraryFormats.map((layout) =>
     <Form.Checkbox
       isInline
       name="example-radios"
       label={layout}
       value={layout}
-      onChange={props.onChange('libraryLayout', layout)}
+      onChange={props.onChange('libraryFormat', layout)}
     />
   );
   return (
     <Table.Row>
       <Table.Col>
-        <Form.Group label="Library format">
+        <Form.Group label="Library Format">
+          {content}
+        </Form.Group>
+      </Table.Col>
+    </Table.Row>
+  );
+}
+
+function GetTissues(props) {
+  const content = props.tissues.map((tissue) =>
+    <Form.Checkbox
+      isInline
+      name="example-radios"
+      label={tissue[0]}
+      value={tissue[0]}
+      onChange={props.onChange('tissues', tissue[0])}
+    />
+  );
+  return (
+    <Table.Row>
+      <Table.Col>
+        <Form.Group label="Tissue">
+          {content}
+        </Form.Group>
+      </Table.Col>
+    </Table.Row>
+  );
+}
+
+function GetAssayTypes(props) {
+  const content = props.assayTypes.map((assayType) =>
+    <Form.Checkbox
+      isInline
+      name="example-radios"
+      label={assayType[0]}
+      value={assayType[0]}
+      onChange={props.onChange('assayTypes', assayType[0])}
+    />
+  );
+  return (
+    <Table.Row>
+      <Table.Col>
+        <Form.Group label="Assay Types">
           {content}
         </Form.Group>
       </Table.Col>
@@ -110,7 +152,9 @@ class FormElements extends Component {
       genomeAssembly: {},
       repository: {},
       platform: {},
-      libraryLayout: {},
+      libraryFormat: {},
+      tissue: {},
+      assayType: {},
       diseaseStatus: {},
       minReadLength: 10,
       maxReadLength: 100,
@@ -141,7 +185,9 @@ class FormElements extends Component {
     this.setState({
       diseases: data.diseases,
       platforms,
-      libraryLayouts: data.libraryLayouts,
+      tissues: data.tissues,
+      assayTypes: data.assayTypes,
+      libraryFormats: data.libraryFormats,
       readLengths: data.readLengths,
       publications,
       samples,
@@ -212,14 +258,16 @@ class FormElements extends Component {
     const {
       diseases,
       platforms,
-      libraryLayouts,
+      tissues,
+      assayTypes,
+      libraryFormats,
       readLengths,
       publications,
       samples,
       form
     } = this.state;
 
-    if (!diseases || !platforms || !libraryLayouts || !readLengths || !publications || !samples) return null;
+    if (!diseases || !platforms || !tissues  || !assayTypes || !libraryFormats || !readLengths || !publications || !samples) return null;
 
     return (
       <SiteWrapper>
@@ -241,18 +289,18 @@ class FormElements extends Component {
                   <Table.Body>
                     <Table.Row>
                       <Table.Col>
-                        <Form.Group label="Genome assembly">
+                        <Form.Group label="Human Reference Genome">
                           <Form.SelectGroup canSelectMultiple>
                             <Form.SelectGroupItem
                               name="device"
-                              label="hg19"
+                              label="hg19 (GRCh37)"
                               value="hg19"
                               checked={form.genomeAssembly['hg19']}
                               onChange={this.updateFormMultipleValues('genomeAssembly', 'hg19')}
                             />
                             <Form.SelectGroupItem
                               name="device"
-                              label="hg38"
+                              label="hg38 (GRCh38)"
                               value="hg39"
                               checked={form.genomeAssembly['hg38']}
                               onChange={this.updateFormMultipleValues('genomeAssembly', 'hg38')}
@@ -284,10 +332,10 @@ class FormElements extends Component {
                             disabled
                             isInline
                             name="example-radios"
-                            label="ENA"
+                            label="EGA"
                             value="option3"
-                            checked={form.repository['ENA']}
-                            onChange={this.updateFormMultipleValues('repository', 'ENA')}
+                            checked={form.repository['EGA']}
+                            onChange={this.updateFormMultipleValues('repository', 'EGA')}
                           />
                         </Form.Group>
                       </Table.Col>
@@ -296,17 +344,28 @@ class FormElements extends Component {
                       platforms={platforms}
                       onChange={this.updateFormMultipleValues}
                     />
-                    <GetLibraryLayouts
-                      libraryLayouts={['SINGLE', 'PAIRED']}
+                    <GetLibraryFormats
+                      libraryFormats={['SINGLE', 'PAIRED']}
                       onChange={this.updateFormMultipleValues}
                     />
-                    <GetDiseases diseases={diseases} />
+                    <GetDiseases
+                      diseases={diseases}
+                      onChange={this.updateFormMultipleValues}
+                    />
+                    <GetTissues
+                      tissues={tissues} 
+                      onChange={this.updateFormMultipleValues}
+                    />
 
+                    <GetAssayTypes
+                      assayTypes={assayTypes} 
+                      onChange={this.updateFormMultipleValues}
+                    />
                     <Table.Row>
                       <Table.Col>
                         <Grid.Row>
                           <Grid.Col>
-                            <Form.Group label="Minimum read length">
+                            <Form.Group label="Min Read Length">
                               <Form.Input
                                 name="minReadLength"
                                 placeholder={10}
@@ -317,7 +376,7 @@ class FormElements extends Component {
                             </Form.Group>
                           </Grid.Col>
                           <Grid.Col>
-                            <Form.Group label="Maximum read length">
+                            <Form.Group label="Max Read Length">
                               <Form.Input
                                 name="maxReadLength"
                                 value={form.maxReadLength}
@@ -336,7 +395,7 @@ class FormElements extends Component {
                       <Table.Col>
                         <Grid.Row>
                           <Grid.Col>
-                            <Form.Group label="Minimum age">
+                            <Form.Group label="Min Age">
                               <Form.Input
                                 name="minAge"
                                 placeholder={10}
@@ -347,7 +406,7 @@ class FormElements extends Component {
                             </Form.Group>
                           </Grid.Col>
                           <Grid.Col>
-                            <Form.Group label="Maximum age">
+                            <Form.Group label="Max Age">
                               <Form.Input
                                 name="maxAge"
                                 placeholder={100}
@@ -357,9 +416,12 @@ class FormElements extends Component {
                               />
                             </Form.Group>
                           </Grid.Col>
+
                         </Grid.Row>
                       </Table.Col>
                     </Table.Row>
+
+
                   </Table.Body>
                 </Table>
               </Card>

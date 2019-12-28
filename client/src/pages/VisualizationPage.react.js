@@ -57,7 +57,7 @@ function FormElements() {
                     <Table.ColHeader>Age</Table.ColHeader>
                     <Table.ColHeader>Run type</Table.ColHeader>
                     <Table.ColHeader>len.</Table.ColHeader>
-                    <Table.ColHeader>Datatype</Table.ColHeader>
+                    <Table.ColHeader>Assay Type</Table.ColHeader>
                     <Table.ColHeader>PMID</Table.ColHeader>
                     <Table.ColHeader alignContent="center">
                       <i className="icon-settings" />

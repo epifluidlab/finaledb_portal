@@ -20,7 +20,7 @@ Sample.init({
   },
   age: DataTypes.NUMBER,
   sex: DataTypes.STRING,
-  libraryLayout: {
+  libraryFormat: {
     type: DataTypes.STRING,
     field: 'library_format',
   },
@@ -28,12 +28,11 @@ Sample.init({
     type: DataTypes.STRING,
     field: 'instrument',
   },
-  datatype: {
+  assayType: {
     type: DataTypes.STRING,
     field: 'assay_type',
   },
   readLength: DataTypes.NUMBER,
-  assayType: DataTypes.STRING,
   mbases: DataTypes.NUMBER,
   tissue: DataTypes.STRING,
   other: DataTypes.STRING,

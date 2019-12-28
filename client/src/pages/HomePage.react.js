@@ -76,7 +76,7 @@ class Home extends Component {
     this.setState({
       diseases: data.diseases,
       platforms: data.platforms,
-      libraryLayouts: data.libraryLayouts,
+      libraryFormats: data.libraryFormats,
       readLengths: data.readLengths,
       publications,
     });
@@ -84,9 +84,9 @@ class Home extends Component {
 
 
   render() {
-    const { diseases, platforms, libraryLayouts, readLengths, publications } = this.state;
+    const { diseases, platforms, libraryFormats, readLengths, publications } = this.state;
 
-    if (!diseases || !platforms || !libraryLayouts || !readLengths || !publications) return null;
+    if (!diseases || !platforms || !libraryFormats || !readLengths || !publications) return null;
 
     return (
       <SiteWrapper>

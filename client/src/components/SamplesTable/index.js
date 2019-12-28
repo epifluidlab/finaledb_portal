@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Button, Text } from 'tabler-react';
+import { Table, Button, Text, Form, Dropdown } from 'tabler-react';
 import { connect } from 'react-redux';
 import { addDownload, removeDownload } from '../../redux/downloads/actions';
 
@@ -14,37 +14,48 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
   return (
     <Table.Row>
       <Table.Col>
-        <div>{sample.sample_name}</div>
+        <div>{sample.sampleName}</div>
         <Text size="sm" muted>
           {sample.sraId}
         </Text>
       </Table.Col>
       <Table.Col>
-        {sample.disease}
+        {sample.disease} ({sample.tissue})
         <Text size="sm" muted>
           {sample.sex}{sample.age ? ', '+ sample.age : sample.age}
         </Text>
       </Table.Col>
-      <Table.Col> {sample.libraryFormat} </Table.Col>
       <Table.Col> {sample.readLength} </Table.Col>
+      <Table.Col>{sample.libraryFormat}</Table.Col>
       <Table.Col>{sample.platform}</Table.Col>
-      <Table.Col> {sample.datatype} </Table.Col>
-      <Table.Col>
-        <Button link size="sm" RootComponent="a" href={sample.link} target="_blank">
-          {sample.doi}
-        </Button>
-      </Table.Col>
+      <Table.Col> {sample.assayType} </Table.Col>
+
       <Table.Col alignContent="center">
-        <Button.List>
-          <Button icon="download" size="sm" color="secondary"/>
-          <Button
-            size="sm"
-            onClick={sampleInBasket ? removeFromBasket : addToBasket}
-            icon={sampleInBasket ? "x" : "plus"}
-            color={sampleInBasket ? "danger" : "secondary"}
-          />
-          <Button icon="box" size="sm" color="secondary" RootComponent="a" href="/visualization"/>
-        </Button.List>
+        <Form.Group>
+          <Form.InputGroup append>
+            <Button.Dropdown>
+              <Dropdown.Item>
+                Direct download
+              </Dropdown.Item>
+              <Dropdown.Item>
+                Add to download list
+              </Dropdown.Item>
+              <Dropdown.ItemDivider />
+              <Dropdown.Item>
+                <Button link RootComponent="a" href="/visualization">
+                  Visualiation
+                </Button>
+              </Dropdown.Item>
+              <Dropdown.ItemDivider />
+              <Dropdown.Item>
+                <Button link RootComponent="a" href="/visualization">
+                  See Publication
+                </Button>
+              </Dropdown.Item>
+            </Button.Dropdown>
+          </Form.InputGroup>
+        </Form.Group>
+
       </Table.Col>
     </Table.Row>
   )
@@ -64,16 +75,14 @@ const SamplesTable = ({ samples }) => {
   const header = (
     <Table.Header>
       <Table.Row>
-        <Table.ColHeader>Sample Name</Table.ColHeader>
-        <Table.ColHeader>Disease status</Table.ColHeader>
-        <Table.ColHeader>Run type</Table.ColHeader>
+        <Table.ColHeader>Sample Name<br /> Run ID</Table.ColHeader>
+        <Table.ColHeader>Disease status, Tissue <br /> Sex, Age</Table.ColHeader>
         <Table.ColHeader>len.</Table.ColHeader>
+        <Table.ColHeader>Format</Table.ColHeader>
         <Table.ColHeader>Platform</Table.ColHeader>
-        <Table.ColHeader>Datatype</Table.ColHeader>
-        <Table.ColHeader>Publication</Table.ColHeader>
-        <Table.ColHeader alignContent="center">
-          <i className="icon-settings" />
-        </Table.ColHeader>
+        <Table.ColHeader>Assay Type</Table.ColHeader>
+        <Table.ColHeader>Other</Table.ColHeader>
+
       </Table.Row>
     </Table.Header>
   );

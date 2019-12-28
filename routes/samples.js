@@ -36,11 +36,19 @@ const getCountHandler = (attr) => async (req, res, next) => {
 
 const getDiseases = getCountHandler('disease');
 const getPlatforms = getCountHandler('platform');
-const getLibraryLayouts = getCountHandler('libraryLayout');
+const getLibraryFormats = getCountHandler('libraryFormat');
+const getTissues = getCountHandler('tissue');
+const getAssayTypes = getCountHandler('assayType');
+
+
 
 router.get('/', get);
 router.get('/diseases', getDiseases);
 router.get('/platforms', getPlatforms);
-router.get('/libraryLayouts', getLibraryLayouts);
+router.get('/libraryFormats', getLibraryFormats);
+router.get('/tissues', getTissues);
+router.get('/assayTypes', getAssayTypes);
+
+
 
 module.exports = router;
