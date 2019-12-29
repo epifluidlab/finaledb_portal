@@ -72,9 +72,14 @@ const buildBetweenClause = (query) => {
 
   for (const attr of attrs) {
     if (query[attr] && query[attr].length) {
-      console.log(query[attr]);
-      console.log(query[attr].split(',').map((n) => parseInt(n, 10)));
-      result[attr] = { [Op.between]: query[attr].split(',').map((n) => parseInt(n, 10)) };
+      // console.log(query[attr]);
+      // console.log(query[attr].split(',').map((n) => parseInt(n, 10)));
+      const min = parseInt(query[attr].split(',')[0], 10);
+      const max = parseInt(query[attr].split(',')[1], 10);
+      //console.log(min + ' ' + max)
+      if (min && max) {
+        result[attr] = { [Op.between]: query[attr].split(',').map((n) => parseInt(n, 10)) };
+      }
     }
   }
 

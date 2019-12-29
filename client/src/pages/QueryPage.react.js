@@ -195,7 +195,7 @@ class FormElements extends Component {
       }
     }
 
-    qs += 'readLength=' + '0' + ',' + '1000' + '&';
+    qs += 'readLength=' + minReadLength + ',' + maxReadLength + '&';
 
     console.log(qs);
     return qs;
