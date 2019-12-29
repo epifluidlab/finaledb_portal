@@ -38,6 +38,12 @@ const navBarItems = [
     to: "/help",
     LinkComponent: withRouter(NavLink),
   },
+  {
+    value: "v",
+    icon: "circle",
+    to: "/visualization/:sraId",
+    LinkComponent: withRouter(NavLink),
+  },
 ];
 
 

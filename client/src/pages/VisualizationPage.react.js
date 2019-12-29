@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from "react";
+import { Component } from "react";
 
 import {
   Page,
@@ -13,105 +14,171 @@ import {
 } from "tabler-react";
 
 import SiteWrapper from "./SiteWrapper.react";
+import SamplesTable from '../components/SamplesTable';
 
-function FormElements() {
-  return (
-    <SiteWrapper>
-      <Page.Content title="Search samples">
-        <Grid.Row cards={true} justifyContent="flex-end">
+import request from "../utils/request";
 
+class FormElements extends Component {
 
-          <Grid.Col>
-            <Card>
-              <Card.Body>
-                <Form.Group label="Region search">
-                  <Form.InputGroup>
-                    <Form.Input placeholder="Search for chromosome coordinate, rsID, gene name..." />
-                    <Form.InputGroupAppend>
-                      <Button
-                        color="primary"
-                        outline
-                        icon="search"
-                        href="http://www.google.com"
-                      />
-                    </Form.InputGroupAppend>
-                  </Form.InputGroup>
-                </Form.Group>
-              </Card.Body>
-            </Card>
+  constructor(props) {
+    super(props);
 
-            <Card>
-              <Table
-                responsive
-                highlightRowOnHover
-                hasOutline
-                verticalAlign="center"
-                cards
-                className="text-nowrap"
-              >
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColHeader>Sample Name</Table.ColHeader>
-                    <Table.ColHeader>Disease status</Table.ColHeader>
-                    <Table.ColHeader>Sex</Table.ColHeader>
-                    <Table.ColHeader>Age</Table.ColHeader>
-                    <Table.ColHeader>Run type</Table.ColHeader>
-                    <Table.ColHeader>len.</Table.ColHeader>
-                    <Table.ColHeader>Assay Type</Table.ColHeader>
-                    <Table.ColHeader>PMID</Table.ColHeader>
-                    <Table.ColHeader alignContent="center">
-                      <i className="icon-settings" />
-                    </Table.ColHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  <Table.Row>
-                    <Table.Col>
-                      <div>Sample Name</div>
-                      <Text size="sm" muted>
-                        SRA ID
-                      </Text>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Lung cancer</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>Female</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>PAIRED</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>39</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <div>WGS</div>
-                    </Table.Col>
-                    <Table.Col>
-                      <Button link size="sm">
-                        26771485
-                      </Button>
-                    </Table.Col>
-                    <Table.Col alignContent="center">
-                      <Button.List>
-                        <Button icon="download" size="sm" color='secondary'/>
-                        <Button icon="check" size="sm"color='secondary' />
-                      </Button.List>
-                    </Table.Col>
-                  </Table.Row>
+    this.initialFormState = {
+      genomeAssembly: {},
+      sraId: null,
+    }
+
+    this.state = {
+      data: null,
+      form: this.initialFormState,
+    };
+  }
+
+  componentDidMount() {
+    // Call our fetch function below once the component mounts
+    this.callBackendAPI()
+
+    const { handle } = this.props.match.params 
+
+    fetch(`http://localhost:3000/visualization/${handle}`)
+      .then((sraId) => {
+        this.setState(() => ({ sraId }))
+      })
+  }
 
 
-                </Table.Body>
-              </Table>
-            </Card>
-          </Grid.Col>
-        </Grid.Row>
-      </Page.Content>
-    </SiteWrapper>
-  );
+  // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
+  callBackendAPI = async () => {
+    const [samples] = await Promise.all([
+      request('/samples'),
+    ]);
+
+    // this.setState({
+    //   samples,
+    // });
+
+    this.fetchSample()
+  }
+
+
+  fetchSample = async () => {
+    const samples = await request('/samples' + this.formToQueryString());
+    this.setState({
+      samples,
+    });
+  }
+
+  formToQueryString = () => {
+    const { sraId } = this.props.match.params;
+    // console.log(sraId)
+
+    let qs = '?';
+    qs += 'sraId=' + sraId + '&';
+
+    // console.log(qs);
+    return qs;
+  }
+
+  updateFormMultipleValues = (name, value) => () => {
+    console.log(this.state.form);
+
+    this.setState({
+      form: {
+        ...this.state.form,
+        [name]: {
+          ...this.state.form[name],
+          [value]: !this.state.form[name][value]
+        }
+      }
+    }, () => this.fetchSamples());
+  }
+
+
+  render() {
+
+    const {
+      samples,
+      form
+    } = this.state;
+  
+    if (!samples) return null;
+
+    return (
+      <SiteWrapper>
+        <Page.Content>
+          <Grid.Row cards={true}>
+            <Grid.Col>
+              <Card>
+                <Card.Body>
+                  <Form.Group label="Region search">
+                    <Form.InputGroup>
+                      <Form.Input placeholder="Search for chromosome coordinate, rsID, gene name..." />
+                      <Form.InputGroupAppend>
+                        <Button
+                          color="primary"
+                          outline
+                          icon="search"
+                          href="http://www.google.com"
+                        />
+                      </Form.InputGroupAppend>
+                    </Form.InputGroup>
+                  </Form.Group>
+                </Card.Body>
+              </Card>
+            </Grid.Col>
+          </Grid.Row>
+
+          <Grid.Row cards={true}>
+            <Grid.Col>
+              <Card>
+                <Table className="card-table table-vcenter">
+                  <Table.Body>
+                    <Table.Row>
+                      <Table.Col>
+                        <Form.Group label="Human Reference Genome">
+                          <Form.SelectGroup canSelectMultiple>
+                            <Form.SelectGroupItem
+                              name="device"
+                              label="hg19 (GRCh37)"
+                              value="hg19"
+                              checked={form.genomeAssembly['hg19']}
+                              onChange={this.updateFormMultipleValues('genomeAssembly', 'hg19')}
+                            />
+                            <Form.SelectGroupItem
+                              name="device"
+                              label="hg38 (GRCh38)"
+                              value="hg39"
+                              checked={form.genomeAssembly['hg38']}
+                              onChange={this.updateFormMultipleValues('genomeAssembly', 'hg38')}
+                            />
+                          </Form.SelectGroup>
+                        </Form.Group>
+                      </Table.Col>
+                    </Table.Row>
+                  </Table.Body>
+                </Table>
+              </Card>
+            </Grid.Col>
+
+            <Grid.Col>
+              <Card>
+                <Table
+                  responsive
+                  highlightRowOnHover
+                  hasOutline
+                  cards
+                  className="text-nowrap"                    
+                >
+
+                  <SamplesTable samples={samples} />
+                </Table>
+              </Card>
+            </Grid.Col>
+          </Grid.Row>
+        </Page.Content>
+      </SiteWrapper>
+    );
+  }
 }
 
 export default FormElements;

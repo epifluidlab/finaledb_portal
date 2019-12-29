@@ -48,7 +48,7 @@ const buildWhereClause = (query) => {
     return {}
   }
 
-  const attrs = ['platform', 'disease', 'tissue', 'libraryFormat', 'assayType'];
+  const attrs = ['platform', 'disease', 'tissue', 'libraryFormat', 'assayType', 'sraId'];
   const result = {}
 
   for (const attr of attrs) {

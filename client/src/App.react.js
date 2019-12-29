@@ -11,6 +11,7 @@ import store from './store';
 
 import "tabler-react/dist/Tabler.css";
 
+
 function App(props) {
   return (
     <Provider store={store}>
@@ -20,6 +21,7 @@ function App(props) {
             <Route exact path="/" component={HomePage} />
             <Route exact path="/query" component={QueryPage} />
             <Route exact path="/visualization" component={VisualizationPage} />
+            <Route exact path="/visualization/:sraId" component={VisualizationPage}  />
             <Route exact path="/help" component={HelpPage} />
             <Route component={Error404} />
           </Switch>

@@ -3,13 +3,16 @@ import { Table, Button, Text, Form, Dropdown } from 'tabler-react';
 import { connect } from 'react-redux';
 import { addDownload, removeDownload } from '../../redux/downloads/actions';
 
+
+
 const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => {
   const sampleInBasket = downloads.find(download => download.sraId === sample.sraId);
   const addToBasket = () => addDownload(sample);
   const removeFromBasket = () => removeDownload(sample.sraId);
 
-
-
+  const hi = () => {
+    console.log('HIII')
+  }
 
   return (
     <Table.Row>
@@ -38,15 +41,16 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
                 Direct download
               </Dropdown.Item>
               <Dropdown.Item>
-                Add to download list
-              </Dropdown.Item>
-              <Dropdown.ItemDivider />
-              <Dropdown.Item>
-                <Button link RootComponent="a" href="/visualization">
-                  Visualiation
+                <Button link onClick={sampleInBasket ? removeFromBasket : addToBasket}>
+                  Add to download list
                 </Button>
               </Dropdown.Item>
               <Dropdown.ItemDivider />
+              <Dropdown.Item>
+                <Button link RootComponent="a" href={`/visualization/${sample.sraId}`}>
+                  Visualiation
+                </Button>
+              </Dropdown.Item>
               <Dropdown.Item>
                 <Button link RootComponent="a" href="/visualization">
                   See Publication
@@ -56,10 +60,28 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
           </Form.InputGroup>
         </Form.Group>
 
+        <Dropdown
+        type="button"
+        toggle={false}
+        arrow
+        triggerContent="other"
+        itemsObject={[
+          {
+            value: "Visualization",
+            RootComponent:"a",
+            href:"/visualization",
+          },
+          { isDivider: true },
+          { value: "Logout" },
+        ]}
+      />
+
       </Table.Col>
     </Table.Row>
   )
 };
+
+
 
 
 const mapStateToProps = (state) => ({
@@ -76,11 +98,11 @@ const SamplesTable = ({ samples }) => {
     <Table.Header>
       <Table.Row>
         <Table.ColHeader>Sample Name<br /> Run ID</Table.ColHeader>
-        <Table.ColHeader>Disease status, Tissue <br /> Sex, Age</Table.ColHeader>
-        <Table.ColHeader>len.</Table.ColHeader>
+        <Table.ColHeader>Disease status (Tissue) <br /> Sex, Age</Table.ColHeader>
+        <Table.ColHeader>Read <br /> len.</Table.ColHeader>
         <Table.ColHeader>Format</Table.ColHeader>
         <Table.ColHeader>Platform</Table.ColHeader>
-        <Table.ColHeader>Assay Type</Table.ColHeader>
+        <Table.ColHeader>Assay <br /> Type</Table.ColHeader>
         <Table.ColHeader>Other</Table.ColHeader>
 
       </Table.Row>
