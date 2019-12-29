@@ -15,7 +15,7 @@ import {
 
 import C3Chart from "react-c3js";
 
-import SiteWrapper from "./SiteWrapper.react";
+import SiteWrapper from "./SiteWrapper";
 import request from "../utils/request";
 
 

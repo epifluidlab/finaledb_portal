@@ -13,7 +13,7 @@ import {
   Text,
 } from "tabler-react";
 
-import SiteWrapper from "./SiteWrapper.react";
+import SiteWrapper from "./SiteWrapper";
 import SamplesTable from '../components/SamplesTable';
 
 import request from "../utils/request";
@@ -34,49 +34,12 @@ class FormElements extends Component {
     };
   }
 
-  componentDidMount() {
-    // Call our fetch function below once the component mounts
-    this.callBackendAPI()
-
-    const { handle } = this.props.match.params 
-
-    fetch(`http://localhost:3000/visualization/${handle}`)
-      .then((sraId) => {
-        this.setState(() => ({ sraId }))
-      })
-  }
-
-
-  // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
-  callBackendAPI = async () => {
-    const [samples] = await Promise.all([
-      request('/samples'),
-    ]);
-
-    // this.setState({
-    //   samples,
-    // });
-
-    this.fetchSample()
-  }
-
-
-  fetchSample = async () => {
-    const samples = await request('/samples' + this.formToQueryString());
+  async componentDidMount() {
+    const { sraId } = this.props.match.params;
+    const samples = await request(`/samples?sraId=${sraId}&`);
     this.setState({
       samples,
     });
-  }
-
-  formToQueryString = () => {
-    const { sraId } = this.props.match.params;
-    // console.log(sraId)
-
-    let qs = '?';
-    qs += 'sraId=' + sraId + '&';
-
-    // console.log(qs);
-    return qs;
   }
 
   updateFormMultipleValues = (name, value) => () => {
@@ -100,7 +63,7 @@ class FormElements extends Component {
       samples,
       form
     } = this.state;
-  
+
     if (!samples) return null;
 
     return (
@@ -167,7 +130,7 @@ class FormElements extends Component {
                   highlightRowOnHover
                   hasOutline
                   cards
-                  className="text-nowrap"                    
+                  className="text-nowrap"
                 >
 
                   <SamplesTable samples={samples} />

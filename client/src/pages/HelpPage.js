@@ -12,7 +12,7 @@ import {
   Text,
 } from "tabler-react";
 
-import SiteWrapper from "./SiteWrapper.react";
+import SiteWrapper from "./SiteWrapper";
 
 function FormElements() {
   return (

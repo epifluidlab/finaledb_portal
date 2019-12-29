@@ -3,10 +3,10 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Provider } from 'react-redux';
 import { Error404} from "./pages";
 
-import HomePage from "./pages/HomePage.react";
-import HelpPage from "./pages/HelpPage.react";
-import QueryPage from "./pages/QueryPage.react";
-import VisualizationPage from "./pages/VisualizationPage.react";
+import HomePage from "./pages/HomePage";
+import HelpPage from "./pages/HelpPage";
+import QueryPage from "./pages/QueryPage";
+import VisualizationPage from "./pages/VisualizationPage";
 import store from './store';
 
 import "tabler-react/dist/Tabler.css";

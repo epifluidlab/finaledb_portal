@@ -38,12 +38,6 @@ const navBarItems = [
     to: "/help",
     LinkComponent: withRouter(NavLink),
   },
-  {
-    value: "v",
-    icon: "circle",
-    to: "/visualization/:sraId",
-    LinkComponent: withRouter(NavLink),
-  },
 ];
 
 
@@ -54,8 +48,8 @@ class SiteWrapper extends React.Component {
       <Site.Wrapper
         headerProps={{
           href: "/",
-          alt: "Tabler React",
-          imageURL: "./demo/brand/logo.svg",
+          alt: "cfDNA DB",
+          imageURL: "/demo/brand/logo.svg",
           navItems: [<Download />]
         }}
         navProps={{ itemsObjects: navBarItems }}

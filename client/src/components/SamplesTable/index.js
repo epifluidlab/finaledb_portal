@@ -2,6 +2,7 @@ import React from 'react';
 import { Table, Button, Text, Form, Dropdown } from 'tabler-react';
 import { connect } from 'react-redux';
 import { addDownload, removeDownload } from '../../redux/downloads/actions';
+import { Link } from 'react-router-dom';
 
 
 
@@ -9,10 +10,6 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
   const sampleInBasket = downloads.find(download => download.sraId === sample.sraId);
   const addToBasket = () => addDownload(sample);
   const removeFromBasket = () => removeDownload(sample.sraId);
-
-  const hi = () => {
-    console.log('HIII')
-  }
 
   return (
     <Table.Row>
@@ -47,9 +44,11 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
               </Dropdown.Item>
               <Dropdown.ItemDivider />
               <Dropdown.Item>
-                <Button link RootComponent="a" href={`/visualization/${sample.sraId}`}>
-                  Visualiation
-                </Button>
+                <Link to={`/visualization/${sample.sraId}`}>
+                  <Button link>
+                    Visualization
+                  </Button>
+                </Link>
               </Dropdown.Item>
               <Dropdown.Item>
                 <Button link RootComponent="a" href="/visualization">
@@ -59,23 +58,6 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
             </Button.Dropdown>
           </Form.InputGroup>
         </Form.Group>
-
-        <Dropdown
-        type="button"
-        toggle={false}
-        arrow
-        triggerContent="other"
-        itemsObject={[
-          {
-            value: "Visualization",
-            RootComponent:"a",
-            href:"/visualization",
-          },
-          { isDivider: true },
-          { value: "Logout" },
-        ]}
-      />
-
       </Table.Col>
     </Table.Row>
   )

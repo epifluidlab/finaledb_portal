@@ -9,7 +9,7 @@ import {
   Button,
   Text,
 } from "tabler-react";
-import SiteWrapper from "./SiteWrapper.react";
+import SiteWrapper from "./SiteWrapper";
 import SamplesTable from '../components/SamplesTable';
 
 import 'nouislider';
@@ -201,17 +201,13 @@ class FormElements extends Component {
     return qs;
   }
 
-  // disease: { flu: true, cancer: true, diabetes: false }
-  // minReadLen: 10, maxReadLen: 100 -> String(minReadLen) + ',' + String(maxReadLen)
-
   getFilterForAttr = (attr) => {
     const { form } = this.state;
 
     if (!form[attr]) return '';
 
     return Object.keys(form[attr])
-      .filter((key) => form[attr][key]) // [flu, cancer]
-      // .map((key) => `"${key}"`)
+      .filter((key) => form[attr][key])
       .join(',');
   }
 
@@ -227,11 +223,6 @@ class FormElements extends Component {
       }
     }, () => this.fetchSamples());
   }
-
-  // platform: {
-  //   nextseq: true,
-  //   illumina: false,
-  // }
 
   updateFormValue = (e) => {
     this.setState({
