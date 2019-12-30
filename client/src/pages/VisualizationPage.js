@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Component } from "react";
+import { Document, pdfjs } from "react-pdf";
+
 
 import {
   Page,
@@ -18,14 +20,16 @@ import SamplesTable from '../components/SamplesTable';
 
 import request from "../utils/request";
 
+
 class FormElements extends Component {
+
 
   constructor(props) {
     super(props);
 
     this.initialFormState = {
-      genomeAssembly: {},
-      sraId: null,
+      genomeAssembly: 'none',
+      sraId: 'none',
     }
 
     this.state = {
@@ -37,27 +41,34 @@ class FormElements extends Component {
   async componentDidMount() {
     const { sraId } = this.props.match.params;
     const samples = await request(`/samples?sraId=${sraId}&`);
+    this.state.form.sraId = sraId;
+
     this.setState({
       samples,
     });
   }
 
-  updateFormMultipleValues = (name, value) => () => {
-    console.log(this.state.form);
-
+  updateFormValue = (e) => {
     this.setState({
       form: {
         ...this.state.form,
-        [name]: {
-          ...this.state.form[name],
-          [value]: !this.state.form[name][value]
-        }
+        [e.target.name]: e.target.value
       }
-    }, () => this.fetchSamples());
+    },  () => this.logHg() );
   }
 
+  logHg() {
+    const genomeAssembly = this.state.form;
+    console.log(genomeAssembly);
+  }
+
+  onDocumentLoadSuccess () {
+    console.log("success");
+  }
 
   render() {
+
+    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
     const {
       samples,
@@ -101,18 +112,18 @@ class FormElements extends Component {
                         <Form.Group label="Human Reference Genome">
                           <Form.SelectGroup canSelectMultiple>
                             <Form.SelectGroupItem
-                              name="device"
+                              name="genomeAssembly"
                               label="hg19 (GRCh37)"
                               value="hg19"
                               checked={form.genomeAssembly['hg19']}
-                              onChange={this.updateFormMultipleValues('genomeAssembly', 'hg19')}
+                              onChange={this.updateFormValue}
                             />
                             <Form.SelectGroupItem
-                              name="device"
+                              name="genomeAssembly"
                               label="hg38 (GRCh38)"
                               value="hg39"
                               checked={form.genomeAssembly['hg38']}
-                              onChange={this.updateFormMultipleValues('genomeAssembly', 'hg38')}
+                              onChange={this.updateFormValue}
                             />
                           </Form.SelectGroup>
                         </Form.Group>
@@ -138,10 +149,31 @@ class FormElements extends Component {
               </Card>
             </Grid.Col>
           </Grid.Row>
+
+
+          <Grid.Row>
+            <Grid.Col>
+              <Card>
+
+
+              </Card>
+            
+            </Grid.Col>
+          </Grid.Row>
+          <Document
+          file="/demo/brand/BIO325.pdf"
+          onLoadSuccess={this.onDocumentLoadSuccess}
+          >
+            <Page pageNumber={1} />
+                      </Document>
+
         </Page.Content>
+        
       </SiteWrapper>
+
+      
     );
   }
-}
+}              
 
 export default FormElements;
