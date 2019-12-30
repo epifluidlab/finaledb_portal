@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Component } from "react";
-import { Document, pdfjs } from "react-pdf";
+import { Document, Page as PdfPage, pdfjs } from "react-pdf";
 
 
 import {
@@ -20,6 +20,7 @@ import SamplesTable from '../components/SamplesTable';
 
 import request from "../utils/request";
 
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 class FormElements extends Component {
 
@@ -54,7 +55,7 @@ class FormElements extends Component {
         ...this.state.form,
         [e.target.name]: e.target.value
       }
-    },  () => this.logHg() );
+    }, () => this.logHg());
   }
 
   logHg() {
@@ -62,14 +63,12 @@ class FormElements extends Component {
     console.log(genomeAssembly);
   }
 
-  onDocumentLoadSuccess () {
+  onDocumentLoadSuccess(pdf) {
     console.log("success");
+    console.log(pdf);
   }
 
   render() {
-
-    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-
     const {
       samples,
       form
@@ -157,23 +156,24 @@ class FormElements extends Component {
 
 
               </Card>
-            
+
             </Grid.Col>
           </Grid.Row>
           <Document
-          file="/demo/brand/BIO325.pdf"
-          onLoadSuccess={this.onDocumentLoadSuccess}
+            file="/demo/brand/BIO325.pdf"
+            onLoadSuccess={this.onDocumentLoadSuccess}
+            onLoadError={console.error}
           >
-            <Page pageNumber={1} />
-                      </Document>
+            <PdfPage pageNumber={1} loading="loading..." error="error" />
+          </Document>
 
         </Page.Content>
-        
+
       </SiteWrapper>
 
-      
+
     );
   }
-}              
+}
 
 export default FormElements;
