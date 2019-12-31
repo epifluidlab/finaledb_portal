@@ -22,6 +22,40 @@ import request from "../utils/request";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
+function RenderPDF(props) {
+  const pdfFile = props.pdfFile;
+  const onLoadSuccess = props.onLoadSuccess;
+
+  console.log("PDF " + pdfFile);
+  if (pdfFile) {
+    console.log("OK");
+    return (
+      <Grid.Row>
+        <Grid.Col>
+          <Document
+            file={pdfFile}
+            onLoadSuccess={onLoadSuccess}
+            onLoadError={console.error}
+          >
+            <PdfPage pageNumber={1} loading="loading..." error="error" />
+          </Document>
+        </Grid.Col>
+      </Grid.Row>
+    );
+  }
+
+  return (
+    <Grid.Row>
+      <Grid.Col>
+        <Card
+          body={`Please select a sample from the query page and double click on a genome assembly.`}
+        />
+      </Grid.Col>
+    </Grid.Row>
+  )
+}
+
+
 class FormElements extends Component {
 
 
@@ -31,6 +65,7 @@ class FormElements extends Component {
     this.initialFormState = {
       genomeAssembly: 'none',
       sraId: 'none',
+      pdfFile: null,
     }
 
     this.state = {
@@ -59,8 +94,10 @@ class FormElements extends Component {
   }
 
   logHg() {
-    const genomeAssembly = this.state.form;
-    console.log(genomeAssembly);
+    const { sraId, genomeAssembly, pdfFile } = this.state.form;
+    this.state.form.pdfFile = `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.${genomeAssembly}.insert_size_histogram.pdf`;
+    console.log(this.state.form.pdfFile);
+
   }
 
   onDocumentLoadSuccess(pdf) {
@@ -79,27 +116,7 @@ class FormElements extends Component {
     return (
       <SiteWrapper>
         <Page.Content>
-          <Grid.Row cards={true}>
-            <Grid.Col>
-              <Card>
-                <Card.Body>
-                  <Form.Group label="Region search">
-                    <Form.InputGroup>
-                      <Form.Input placeholder="Search for chromosome coordinate, rsID, gene name..." />
-                      <Form.InputGroupAppend>
-                        <Button
-                          color="primary"
-                          outline
-                          icon="search"
-                          href="http://www.google.com"
-                        />
-                      </Form.InputGroupAppend>
-                    </Form.InputGroup>
-                  </Form.Group>
-                </Card.Body>
-              </Card>
-            </Grid.Col>
-          </Grid.Row>
+
 
           <Grid.Row cards={true}>
             <Grid.Col>
@@ -120,7 +137,7 @@ class FormElements extends Component {
                             <Form.SelectGroupItem
                               name="genomeAssembly"
                               label="hg38 (GRCh38)"
-                              value="hg39"
+                              value="hg38"
                               checked={form.genomeAssembly['hg38']}
                               onChange={this.updateFormValue}
                             />
@@ -150,18 +167,10 @@ class FormElements extends Component {
           </Grid.Row>
 
 
-          <Grid.Row>
-            <Grid.Col>
-                <Document
-                  file="https://psc-cfdna.s3.us-east-2.amazonaws.com/SRR2129994/SRR2129994.hg19.insert_size_histogram.pdf"
-                  onLoadSuccess={this.onDocumentLoadSuccess}
-                  onLoadError={console.error}
-                >
-                  <PdfPage pageNumber={1} loading="loading..." error="error" />
-                </Document>
-            </Grid.Col>
-          </Grid.Row>
-
+          <RenderPDF
+            pdfFile={form.pdfFile}
+            onLoadSuccess={this.onDocumentLoadSuccess}
+          />
 
         </Page.Content>
 
