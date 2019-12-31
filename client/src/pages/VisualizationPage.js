@@ -152,20 +152,16 @@ class FormElements extends Component {
 
           <Grid.Row>
             <Grid.Col>
-              <Card>
-
-
-              </Card>
-
+                <Document
+                  file="https://psc-cfdna.s3.us-east-2.amazonaws.com/SRR2129994/SRR2129994.hg19.insert_size_histogram.pdf"
+                  onLoadSuccess={this.onDocumentLoadSuccess}
+                  onLoadError={console.error}
+                >
+                  <PdfPage pageNumber={1} loading="loading..." error="error" />
+                </Document>
             </Grid.Col>
           </Grid.Row>
-          <Document
-            file="/demo/brand/BIO325.pdf"
-            onLoadSuccess={this.onDocumentLoadSuccess}
-            onLoadError={console.error}
-          >
-            <PdfPage pageNumber={1} loading="loading..." error="error" />
-          </Document>
+
 
         </Page.Content>
 
