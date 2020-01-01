@@ -20,15 +20,29 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
         </Text>
       </Table.Col>
       <Table.Col>
-        {sample.disease}{sample.tissue ? ' (' + sample.tissue + ')' : sample.tissue}
+        {sample.disease}{sample.tissue!=-1 ? ' (' + sample.tissue + ')' : ''}
         <Text size="sm" muted>
-          {sample.sex}{sample.age ? ', '+ sample.age : sample.age}
+          {sample.sex}{sample.age!=-1 ? ', '+ sample.age : ''}
         </Text>
       </Table.Col>
-      <Table.Col> {sample.readLength} </Table.Col>
-      <Table.Col>{sample.libraryFormat}</Table.Col>
-      <Table.Col>{sample.platform}</Table.Col>
-      <Table.Col> {sample.assayType} </Table.Col>
+      <Table.Col> 
+        <Text size="sm" muted>
+          {sample.readLength} <br />
+          {sample.mbases}
+        </Text>
+
+      </Table.Col>
+      <Table.Col>
+        <Text size="sm" muted>
+          {sample.libraryFormat} <br />
+          {sample.assayType}
+        </Text>
+      </Table.Col>
+      <Table.Col>
+        <Text size="sm" muted>
+          {sample.platform}
+        </Text>
+      </Table.Col>
       <Table.Col> {sample.doi} </Table.Col>
 
 
@@ -85,10 +99,14 @@ const SamplesTable = ({ samples }) => {
       <Table.Row>
         <Table.ColHeader>Sample Name<br /> Run ID</Table.ColHeader>
         <Table.ColHeader>Disease status (Tissue) <br /> Sex, Age</Table.ColHeader>
-        <Table.ColHeader>Read <br /> len.</Table.ColHeader>
-        <Table.ColHeader>Format</Table.ColHeader>
-        <Table.ColHeader>Platform</Table.ColHeader>
-        <Table.ColHeader>Assay <br /> Type</Table.ColHeader>
+        <Table.ColHeader>Read length <br /> Mbases </Table.ColHeader>
+        <Table.ColHeader>
+          Format <br />
+          Assay Type
+        </Table.ColHeader>
+        <Table.ColHeader>
+          Platform
+        </Table.ColHeader>
         <Table.ColHeader>DOI</Table.ColHeader>
 
         <Table.ColHeader>Other</Table.ColHeader>

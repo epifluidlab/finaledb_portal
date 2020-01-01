@@ -27,32 +27,29 @@ function RenderPDF(props) {
   const onLoadSuccess = props.onLoadSuccess;
 
   console.log("PDF " + pdfFile);
-  if (pdfFile) {
-    console.log("OK");
+
     return (
       <Grid.Row>
         <Grid.Col>
-          <Document
-            file={pdfFile}
-            onLoadSuccess={onLoadSuccess}
-            onLoadError={console.error}
-          >
-            <PdfPage pageNumber={1} loading="loading..." error="error" />
-          </Document>
+          { 
+          pdfFile ? 
+            <Document
+              file={pdfFile}
+              onLoadSuccess={onLoadSuccess}
+              onLoadError={console.error}
+            >
+              <PdfPage pageNumber={1} loading="loading..." error="error" />
+            </Document>
+            :
+            <Card
+              body={`Please select a sample from the query page.
+              Chose a genome assembly here.`}
+            />
+          }
         </Grid.Col>
       </Grid.Row>
+  
     );
-  }
-
-  return (
-    <Grid.Row>
-      <Grid.Col>
-        <Card
-          body={`Please select a sample from the query page and double click on a genome assembly.`}
-        />
-      </Grid.Col>
-    </Grid.Row>
-  )
 }
 
 
@@ -90,14 +87,17 @@ class FormElements extends Component {
         ...this.state.form,
         [e.target.name]: e.target.value
       }
-    }, () => this.logHg());
+    }, () => this.setPdfAddress());
   }
 
-  logHg() {
+  setPdfAddress() {
     const { sraId, genomeAssembly, pdfFile } = this.state.form;
     this.state.form.pdfFile = `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.${genomeAssembly}.insert_size_histogram.pdf`;
     console.log(this.state.form.pdfFile);
 
+    this.setState({
+      pdfFile,
+    });
   }
 
   onDocumentLoadSuccess(pdf) {

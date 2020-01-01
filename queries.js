@@ -42,6 +42,10 @@ function getDois(rows) {
   return countsToArray(countOccurrences(rows, 'doi'));
 }
 
+function getMBases(rows) {
+  return countsToArray(countOccurrences(rows, 'mbases'));
+}
+
 const getData = async (request, response) => {
   try {
     const samples = await Sample.findAll();
@@ -58,6 +62,8 @@ const getData = async (request, response) => {
     const tissueList = getTissues(samplesList);
     const assayTypeList = getAssayTypes(samplesList);
     const doiList = getDois(samplesList);
+    const mbasesList = getMBases(samplesList);
+
 
     const readLengthRange = getReadLengthRange(samplesList);
 
@@ -65,6 +71,8 @@ const getData = async (request, response) => {
     console.log(assayTypeList);
     console.log(readLengthRange)
     console.log("doi list " + doiList)
+    console.log("mbases list " + mbasesList)
+
 
 
     // send data
@@ -75,6 +83,7 @@ const getData = async (request, response) => {
       tissues: tissueList,
       assayTypes: assayTypeList,
       dois: doiList,
+      mbases: mbasesList,
 
       readLengths: readLengthRange,
 

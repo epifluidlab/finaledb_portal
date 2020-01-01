@@ -67,7 +67,7 @@ const buildBetweenClause = (query) => {
     return {}
   }
 
-  const attrs = ['readLength'];
+  const attrs = ['readLength', 'mbases'];
   const result = {}
 
   for (const attr of attrs) {
@@ -105,6 +105,8 @@ const getLibraryFormats = getCountHandler('libraryFormat');
 const getTissues = getCountHandler('tissue');
 const getAssayTypes = getCountHandler('assayType');
 const getDois = getCountHandler('doi');
+const getMBases = getCountHandler('mbases');
+
 
 
 const getReadLengths = getCountHandler('readLength');
@@ -118,6 +120,8 @@ router.get('/tissues', getTissues);
 router.get('/assayTypes', getAssayTypes);
 router.get('/readLengths', getReadLengths);
 router.get('/dois', getDois);
+router.get('/mbases', getMBases);
+
 
 
 

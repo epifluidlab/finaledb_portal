@@ -36,6 +36,7 @@ Sample.init({
     type: DataTypes.STRING,
     field: 'doi',
   },
+  mbases: DataTypes.STRING,
   readLength: DataTypes.NUMBER,
   mbases: DataTypes.NUMBER,
   tissue: DataTypes.STRING,

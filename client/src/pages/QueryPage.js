@@ -138,10 +138,9 @@ class FormElements extends Component {
       tissue: {},
       assayType: {},
       diseaseStatus: {},
-      minReadLength: 0,
-      maxReadLength: 1000,
       age:{},
-      doi:'none',
+      doi:'',
+
     }
 
     this.state = {
@@ -172,6 +171,7 @@ class FormElements extends Component {
       libraryFormats: data.libraryFormats,
       readLengths: data.readLengths,
       dois: data.dois,
+      mbases: data.mbases,
       publications,
       samples,
     });
@@ -185,7 +185,7 @@ class FormElements extends Component {
   }
 
   formToQueryString = () => {
-    const { minReadLength, maxReadLength, doi } = this.state.form;
+    const { minReadLength, maxReadLength, doi, minMBases, maxMBases } = this.state.form;
     let qs = '?';
     const attrs = ['platform', 'disease', 'tissue', 'libraryFormat', 'assayType'];
 
@@ -196,8 +196,8 @@ class FormElements extends Component {
       }
     }
 
-      qs += 'doi=' + doi + '&';
-    
+    qs += 'doi=' + doi + '&';
+    qs += 'mbases=' + minMBases + ',' + maxMBases + '&';
     qs += 'readLength=' + minReadLength + ',' + maxReadLength + '&';
 
     console.log(qs);
@@ -254,14 +254,12 @@ class FormElements extends Component {
       publications,
       samples,
       dois,
+      mbases,
       form
     } = this.state;
 
-    if (!diseases || !platforms || !tissues  || !assayTypes || !libraryFormats || !readLengths || !publications || !samples) return null;
+    if (!diseases || !platforms || !tissues  || !assayTypes || !libraryFormats || !readLengths || !dois || !mbases || !publications || !samples) return null;
 
-
-    console.log("dois " + dois)
-    console.log("tissues " + tissues)
 
     return (
       <SiteWrapper>
@@ -336,6 +334,34 @@ class FormElements extends Component {
                                 placeholder={100}
                                 type='number'
                                 value={form.maxReadLength}
+                                onChange={this.updateFormValue}
+                              />
+                            </Form.Group>
+                          </Grid.Col>
+                        </Grid.Row>
+                      </Table.Col>
+                    </Table.Row>
+                    <Table.Row>
+                      <Table.Col>
+                        <Grid.Row>
+                          <Grid.Col>
+                            <Form.Group label="Min MBases">
+                              <Form.Input
+                                name="minMBases"
+                                placeholder={10}
+                                type='number'
+                                value={form.minMBases}
+                                onChange={this.updateFormValue}
+                              />
+                            </Form.Group>
+                          </Grid.Col>
+                          <Grid.Col>
+                            <Form.Group label="Max MBases">
+                              <Form.Input
+                                name="maxMBases"
+                                placeholder={100}
+                                type='number'
+                                value={form.maxMBases}
                                 onChange={this.updateFormValue}
                               />
                             </Form.Group>
