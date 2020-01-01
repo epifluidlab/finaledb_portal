@@ -17,9 +17,10 @@ import C3Chart from "react-c3js";
 
 import SiteWrapper from "./SiteWrapper";
 import request from "../utils/request";
+import SamplesTable from "../components/SamplesTable";
 
 
-function Blog(props) {
+function PublicationTable(props) {
   const header = (
     <Table.Header>
       <Table.Row>
@@ -34,12 +35,18 @@ function Blog(props) {
   );
   const content = props.pubs.map((pub) =>
     <Table.Row>
-      <Table.Col>{pub.title}</Table.Col>
+      <Table.Col>
+        <a href={pub.link}>
+          {pub.title}
+        </a>
+      </Table.Col>
       <Table.Col>{pub.author}</Table.Col>
       <Table.Col>{pub.date}</Table.Col>
       <Table.Col>{pub.journal}</Table.Col>
       <Table.Col>{pub.pmid}</Table.Col>
-      <Table.Col>{pub.doi}</Table.Col>
+      <Table.Col>
+        {pub.doi}
+      </Table.Col>
     </Table.Row>
   );
   return (
@@ -68,26 +75,40 @@ class Home extends Component {
 
   // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
   callBackendAPI = async () => {
-    const [data, publications] = await Promise.all([
+    const [data, publications, samples] = await Promise.all([
       request('/data'),
       request('/publications'),
+      request('/samples'),
     ]);
 
     this.setState({
       diseases: data.diseases,
       platforms: data.platforms,
       libraryFormats: data.libraryFormats,
+      assayTypes: data.assayTypes,
       readLengths: data.readLengths,
+      tissues: data.tissues,
       publications,
+      samples,
     });
   };
 
 
   render() {
-    const { diseases, platforms, libraryFormats, readLengths, publications } = this.state;
+    const { 
+      diseases, 
+      platforms, 
+      libraryFormats, 
+      assayTypes,
+      readLengths, 
+      tissues,
+      publications,
+      samples 
+    } = this.state;
 
-    if (!diseases || !platforms || !libraryFormats || !readLengths || !publications) return null;
+    if (!diseases || !platforms || !libraryFormats || !assayTypes || !readLengths || !tissues || !publications || !samples) return null;
 
+    console.log(Array.from(diseases))
     return (
       <SiteWrapper>
         <Page.Content>
@@ -95,38 +116,32 @@ class Home extends Component {
             <Grid.Col lg={9}>
               <Card>
                 <Card.Header>
-                  <Card.Title>About</Card.Title>
+                  <Card.Title>About cfDB</Card.Title>
                 </Card.Header>
                 <Card.Body>
-                  There has been a recent surge in cfDNA studies and datasets, making it imperative to build a platform to collect and uniformly process published data. Through a publicly accessible database that makes all datasets from current published and preprint studies reusable and comparable, researchers will be able to further understand the genetics and epigenetics behind cfDNA and its diagnostic implications. Here, we developed a comprehensive cfDNA database dedicated to integrating, analyzing, and visualizing cfDNA data for the benefit of the cfDNA research community. Beginning with a large collection of raw sequence data from available studies and uniformly processing this raw data for effective presentation and interpretation, cfDNA database provides a user-friendly web interface with powerful browse and search capacities, as well as data visualization and downloading functions.
+                  With the recent surge in cfDNA studies and datasets, a platform to collect and uniformly process published data is needed. 
+                  Through a publicly accessible database that makes all datasets from current published and preprint studies reusable and comparable, 
+                  researchers will be able to further understand the genetics and epigenetics behind cfDNA and its diagnostic implications. 
+                  Here, we developed a comprehensive cfDNA database, cfDB, dedicated to integrating, analyzing, and visualizing cfDNA data for the benefit of the cfDNA research community. 
+                  Beginning with a large collection of raw sequence data from available studies and uniformly processing this raw data for effective presentation and interpretation, 
+                  cfDNA database provides a user-friendly web interface with powerful browse and search capacities, as well as data visualization and downloading functions.
                 </Card.Body>
               </Card>
 
 
               <Card>
                 <Card.Header>
-                  <Card.Title>Samples per disease</Card.Title>
+                  <Card.Title>Sample Number per Disease</Card.Title>
                 </Card.Header>
                 <C3Chart
                   data={{
-                    columns:diseases ,
+                    columns: diseases,
                     type: "bar",
                   }}
-                  axis={{
 
-                    x: {
-                      type: 'category',
-                      categories: diseases[1],
-                      padding: {
-                        left: 0,
-                        right: 0,
-                      },
-                      show: false,
-                    },
-                  }}
                   legend={{
                     show: true,
-                    position: "inset",
+                    position: "bottom",
                     padding: 0,
                   }}
                   tooltip={{
@@ -135,6 +150,15 @@ class Home extends Component {
                         return "";
                       },
                     },
+                  }}
+                  axis={{
+                    x: {
+                      show:true
+                    }
+                    ,
+                    y: {
+                      show: true
+                    }
                   }}
                   padding={{
                     bottom: 0,
@@ -147,9 +171,21 @@ class Home extends Component {
                 />
               </Card>
 
-
-
-
+              <Card>
+                <Card.Header>
+                  <Card.Title>Publications</Card.Title>
+                </Card.Header>
+                <Table
+                    responsive
+                    highlightRowOnHover
+                    hasOutline
+                    verticalAlign="center"
+                    cards
+                    className="text-nowrap"
+                >
+                  <PublicationTable pubs={publications} />
+                </Table>
+              </Card>
 
             </Grid.Col>
 
@@ -160,7 +196,7 @@ class Home extends Component {
                   icon="activity"
                   header={
                     <a href="#">
-                      1,284 <small>Samples</small>
+                      {samples.length} <small>Samples</small>
                     </a>
                   }
                 />
@@ -170,7 +206,7 @@ class Home extends Component {
                   icon="book-open"
                   header={
                     <a href="#">
-                      27 <small>Publications</small>
+                      {publications.length} <small>Publications</small>
                     </a>
                   }
                 />
@@ -184,21 +220,7 @@ class Home extends Component {
                       style={{ height: "12rem" }}
                       data={{
                         columns: diseases,
-                        //[
-                        // each columns data
-                        // ["data1", 63],
-                        // ["data2", 37],
-                        //],
                         type: "donut", // default type of chart
-                        //colors: {
-                        //  data1: colors["red-light"],
-                        //  data2: colors["red"],
-                        //},
-                        //names: {
-                        //  // name of each serie
-                        //  data1: "Maximum",
-                        //  data2: "Minimum",
-                        //},
                       }}
                       donut={{
                         label: {
@@ -223,27 +245,38 @@ class Home extends Component {
               <Grid.Row>
                 <Card>
                   <Card.Header>
-                    <Card.Title>Read lengths</Card.Title>
+                    <Card.Title>Assay Types</Card.Title>
                   </Card.Header>
                   <Card.Body>
                     <C3Chart
                       style={{ height: "12rem" }}
                       data={{
-                        columns: readLengths,
+                        columns: assayTypes,
                         type: "donut", // default type of chart
-                        // colors: {
-                        //   data1: colors["yellow-lighter"],
-                        //   data2: colors["yellow-light"],
-                        //   data3: colors["yellow"],
-                        //   data4: colors["yellow-dark"],
-                        // },
-                        // names: {
-                        //   // name of each serie
-                        //   data1: "A",
-                        //   data2: "B",
-                        //   data3: "C",
-                        //   data4: "D",
-                        // },
+                      }}
+                      legend={{
+                        show: false, //hide legend
+                      }}
+                      padding={{
+                        bottom: 0,
+                        top: 0,
+                      }}
+                    />
+                  </Card.Body>
+                </Card>
+              </Grid.Row>
+
+              <Grid.Row>
+                <Card>
+                  <Card.Header>
+                    <Card.Title>Tissues</Card.Title>
+                  </Card.Header>
+                  <Card.Body>
+                    <C3Chart
+                      style={{ height: "12rem" }}
+                      data={{
+                        columns: tissues,
+                        type: "donut", // default type of chart
                       }}
                       legend={{
                         show: false, //hide legend
@@ -259,29 +292,6 @@ class Home extends Component {
 
             </Grid.Col>
           </Grid.Row>
-
-
-          <Grid.Row cards={true}>
-            <Grid.Col width={12}>
-              <Card>
-                <Card.Header>
-                  <Card.Title>Publications</Card.Title>
-                </Card.Header>
-                <Table
-                  responsive
-                  highlightRowOnHover
-                  hasOutline
-                  verticalAlign="center"
-                  cards
-                  className="text-nowrap"
-                >
-
-                  <Blog pubs={publications} />
-                </Table>
-              </Card>
-            </Grid.Col>
-          </Grid.Row>
-
 
         </Page.Content>
       </SiteWrapper>

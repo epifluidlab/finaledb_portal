@@ -29,13 +29,17 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
       <Table.Col>{sample.libraryFormat}</Table.Col>
       <Table.Col>{sample.platform}</Table.Col>
       <Table.Col> {sample.assayType} </Table.Col>
+      <Table.Col> {sample.doi} </Table.Col>
+
 
       <Table.Col alignContent="center">
         <Form.Group>
           <Form.InputGroup append>
             <Button.Dropdown>
               <Dropdown.Item>
-                Direct download
+                <Button link onClick={sampleInBasket ? removeFromBasket : addToBasket}>
+                  Direct Download
+                </Button>
               </Dropdown.Item>
               <Dropdown.Item>
                 <Button link onClick={sampleInBasket ? removeFromBasket : addToBasket}>
@@ -85,6 +89,8 @@ const SamplesTable = ({ samples }) => {
         <Table.ColHeader>Format</Table.ColHeader>
         <Table.ColHeader>Platform</Table.ColHeader>
         <Table.ColHeader>Assay <br /> Type</Table.ColHeader>
+        <Table.ColHeader>DOI</Table.ColHeader>
+
         <Table.ColHeader>Other</Table.ColHeader>
 
       </Table.Row>

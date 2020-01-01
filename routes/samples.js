@@ -48,7 +48,7 @@ const buildWhereClause = (query) => {
     return {}
   }
 
-  const attrs = ['platform', 'disease', 'tissue', 'libraryFormat', 'assayType', 'sraId'];
+  const attrs = ['platform', 'disease', 'tissue', 'doi', 'libraryFormat', 'assayType', 'sraId'];
   const result = {}
 
   for (const attr of attrs) {
@@ -104,6 +104,8 @@ const getPlatforms = getCountHandler('platform');
 const getLibraryFormats = getCountHandler('libraryFormat');
 const getTissues = getCountHandler('tissue');
 const getAssayTypes = getCountHandler('assayType');
+const getDois = getCountHandler('doi');
+
 
 const getReadLengths = getCountHandler('readLength');
 
@@ -115,6 +117,8 @@ router.get('/libraryFormats', getLibraryFormats);
 router.get('/tissues', getTissues);
 router.get('/assayTypes', getAssayTypes);
 router.get('/readLengths', getReadLengths);
+router.get('/dois', getDois);
+
 
 
 

@@ -116,7 +116,7 @@ function GetAssayTypes(props) {
   return (
     <Table.Row>
       <Table.Col>
-        <Form.Group label="Assay Types">
+        <Form.Group label="Assay Type">
           {content}
         </Form.Group>
       </Table.Col>
@@ -133,7 +133,6 @@ class FormElements extends Component {
     this.initialFormState = {
       disease: {},
       genomeAssembly: {},
-      repository: {},
       platform: {},
       libraryFormat: {},
       tissue: {},
@@ -142,6 +141,7 @@ class FormElements extends Component {
       minReadLength: 0,
       maxReadLength: 1000,
       age:{},
+      doi:'none',
     }
 
     this.state = {
@@ -171,6 +171,7 @@ class FormElements extends Component {
       assayTypes: data.assayTypes,
       libraryFormats: data.libraryFormats,
       readLengths: data.readLengths,
+      dois: data.dois,
       publications,
       samples,
     });
@@ -184,7 +185,7 @@ class FormElements extends Component {
   }
 
   formToQueryString = () => {
-    const { minReadLength, maxReadLength } = this.state.form;
+    const { minReadLength, maxReadLength, doi } = this.state.form;
     let qs = '?';
     const attrs = ['platform', 'disease', 'tissue', 'libraryFormat', 'assayType'];
 
@@ -195,6 +196,8 @@ class FormElements extends Component {
       }
     }
 
+      qs += 'doi=' + doi + '&';
+    
     qs += 'readLength=' + minReadLength + ',' + maxReadLength + '&';
 
     console.log(qs);
@@ -250,10 +253,15 @@ class FormElements extends Component {
       readLengths,
       publications,
       samples,
+      dois,
       form
     } = this.state;
 
     if (!diseases || !platforms || !tissues  || !assayTypes || !libraryFormats || !readLengths || !publications || !samples) return null;
+
+
+    console.log("dois " + dois)
+    console.log("tissues " + tissues)
 
     return (
       <SiteWrapper>
@@ -276,7 +284,7 @@ class FormElements extends Component {
                     <Table.Row>
                       <Table.Col>
                         <Form.Group label="Human Reference Genome">
-                          <Form.SelectGroup canSelectMultiple>
+                          <Form.SelectGroup>
                             <Form.SelectGroupItem
                               name="device"
                               label="hg19 (GRCh37)"
@@ -295,37 +303,6 @@ class FormElements extends Component {
                         </Form.Group>
                       </Table.Col>
                     </Table.Row>
-                    <Table.Row>
-                      <Table.Col>
-                        <Form.Group label="Repository">
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="GEO"
-                            value="option1"
-                            checked={form.repository['GEO']}
-                            onChange={this.updateFormMultipleValues('repository', 'GEO')}
-                          />
-                          <Form.Checkbox
-                            isInline
-                            name="example-radios"
-                            label="dbGaP"
-                            value="option2"
-                            checked={form.repository['dbGaP']}
-                            onChange={this.updateFormMultipleValues('repository', 'dbGaP')}
-                          />
-                          <Form.Checkbox
-                            disabled
-                            isInline
-                            name="example-radios"
-                            label="EGA"
-                            value="option3"
-                            checked={form.repository['EGA']}
-                            onChange={this.updateFormMultipleValues('repository', 'EGA')}
-                          />
-                        </Form.Group>
-                      </Table.Col>
-                    </Table.Row>
                     <GetPlatforms
                       platforms={platforms}
                       onChange={this.updateFormMultipleValues}
@@ -334,15 +311,6 @@ class FormElements extends Component {
                       libraryFormats={['SINGLE', 'PAIRED']}
                       onChange={this.updateFormMultipleValues}
                     />
-                    <GetDiseases
-                      diseases={diseases}
-                      onChange={this.updateFormMultipleValues}
-                    />
-                    <GetTissues
-                      tissues={tissues} 
-                      onChange={this.updateFormMultipleValues}
-                    />
-
                     <GetAssayTypes
                       assayTypes={assayTypes} 
                       onChange={this.updateFormMultipleValues}
@@ -375,7 +343,14 @@ class FormElements extends Component {
                         </Grid.Row>
                       </Table.Col>
                     </Table.Row>
-
+                    <GetDiseases
+                      diseases={diseases}
+                      onChange={this.updateFormMultipleValues}
+                    />
+                    <GetTissues
+                      tissues={tissues} 
+                      onChange={this.updateFormMultipleValues}
+                    />
 
                     <Table.Row>
                       <Table.Col>
@@ -407,6 +382,33 @@ class FormElements extends Component {
                       </Table.Col>
                     </Table.Row>
 
+                    <Table.Row>
+                      <Table.Col>
+                        <Grid.Row>
+                          <Grid.Col>
+                            <Form.Group label="DOI">
+                              <Form.Input
+                                name="doi"
+                                placeholder="10.1016/j.cell.2015.11.050"
+                                value={form.doi}
+                                onChange={this.updateFormValue}
+                              />
+                            </Form.Group>
+                          </Grid.Col>
+                        </Grid.Row>
+                        <Grid.Row>
+                          <Grid.Col>
+                            <Form.Group label="PMID">
+                              <Form.Input
+                                name="pmid"
+                                placeholder="26771485"
+                                onChange={this.updateFormValue}
+                              />
+                            </Form.Group>
+                          </Grid.Col>
+                        </Grid.Row>
+                      </Table.Col>
+                    </Table.Row>
 
                   </Table.Body>
                 </Table>

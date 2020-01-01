@@ -126,7 +126,7 @@ class FormElements extends Component {
                     <Table.Row>
                       <Table.Col>
                         <Form.Group label="Human Reference Genome">
-                          <Form.SelectGroup canSelectMultiple>
+                          <Form.SelectGroup>
                             <Form.SelectGroupItem
                               name="genomeAssembly"
                               label="hg19 (GRCh37)"

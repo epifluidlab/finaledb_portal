@@ -38,6 +38,10 @@ function getReadLengthRange(rows) {
   return countsToArray(countOccurrences(rows, 'readLength'));
 }
 
+function getDois(rows) {
+  return countsToArray(countOccurrences(rows, 'doi'));
+}
+
 const getData = async (request, response) => {
   try {
     const samples = await Sample.findAll();
@@ -53,12 +57,14 @@ const getData = async (request, response) => {
     const libraryFormatList = getLibraryFormats(samplesList);
     const tissueList = getTissues(samplesList);
     const assayTypeList = getAssayTypes(samplesList);
+    const doiList = getDois(samplesList);
 
     const readLengthRange = getReadLengthRange(samplesList);
 
     console.log(tissueList);
     console.log(assayTypeList);
     console.log(readLengthRange)
+    console.log("doi list " + doiList)
 
 
     // send data
@@ -68,6 +74,7 @@ const getData = async (request, response) => {
       libraryFormats: libraryFormatList,
       tissues: tissueList,
       assayTypes: assayTypeList,
+      dois: doiList,
 
       readLengths: readLengthRange,
 
