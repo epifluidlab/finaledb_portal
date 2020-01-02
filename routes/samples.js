@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { Sequelize, Op } = require('sequelize');
-const { Sample } = require('../models');
+const { Sample, Publication } = require('../models');
 
 const router = Router();
 
@@ -9,6 +9,7 @@ const get = async (req, res, next) => {
     // select * from Sample where [...buildWhereClause] and [...buildBetweenClause];
     const samples = await Sample.findAll({
       where: { ...buildWhereClause(req.query), ...buildBetweenClause(req.query) },
+      include: [{ model: Publication, as: 'publication' }]
     });
     return res.status(200).json(samples);
   } catch (e) {

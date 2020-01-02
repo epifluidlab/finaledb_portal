@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const db = require('../db');
+const Sample = require('./Sample');
 
 class Publication extends Model { }
 
@@ -21,5 +22,8 @@ Publication.init({
   underscored: true,
   timestamps: false,
 });
+
+Publication.hasMany(Sample, { foreignKey: 'doi' });
+Sample.belongsTo(Publication, { foreignKey: 'doi', as: 'publication' });
 
 module.exports = Publication;

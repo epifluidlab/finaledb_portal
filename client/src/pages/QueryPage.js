@@ -25,6 +25,7 @@ function GetPlatforms(props) {
       name="example-radios"
       label={platform}
       value={platform}
+      checked={props.checked[platform] || false}
       onChange={props.onChange('platform', platform)}
     />
   );
@@ -46,6 +47,7 @@ function GetDiseases(props) {
       name="example-radios"
       label={disease[0]}
       value={disease[0]}
+      checked={props.checked[disease[0]] || false}
       onChange={props.onChange('disease', disease[0])}
     />
   );
@@ -68,6 +70,7 @@ function GetLibraryFormats(props) {
       name="example-radios"
       label={layout}
       value={layout}
+      checked={props.checked[layout] || false}
       onChange={props.onChange('libraryFormat', layout)}
     />
   );
@@ -89,6 +92,7 @@ function GetTissues(props) {
       name="example-radios"
       label={tissue[0]}
       value={tissue[0]}
+      checked={props.checked[tissue[0]] || false}
       onChange={props.onChange('tissue', tissue[0])}
     />
   );
@@ -110,6 +114,7 @@ function GetAssayTypes(props) {
       name="example-radios"
       label={assayType[0]}
       value={assayType[0]}
+      checked={props.checked[assayType[0]] || false}
       onChange={props.onChange('assayType', assayType[0])}
     />
   );
@@ -138,6 +143,7 @@ class FormElements extends Component {
       tissue: {},
       assayType: {},
       diseaseStatus: {},
+      maxReadLength:-1,
       age:{},
       doi:'',
 
@@ -258,6 +264,8 @@ class FormElements extends Component {
       form
     } = this.state;
 
+    console.log('render');
+
     if (!diseases || !platforms || !tissues  || !assayTypes || !libraryFormats || !readLengths || !dois || !mbases || !publications || !samples) return null;
 
 
@@ -303,14 +311,17 @@ class FormElements extends Component {
                     </Table.Row>
                     <GetPlatforms
                       platforms={platforms}
+                      checked={form.platform}
                       onChange={this.updateFormMultipleValues}
                     />
                     <GetLibraryFormats
                       libraryFormats={['SINGLE', 'PAIRED']}
+                      checked={form.libraryFormat}
                       onChange={this.updateFormMultipleValues}
                     />
                     <GetAssayTypes
                       assayTypes={assayTypes} 
+                      checked={form.assayType}
                       onChange={this.updateFormMultipleValues}
                     />
                     <Table.Row>
@@ -371,10 +382,12 @@ class FormElements extends Component {
                     </Table.Row>
                     <GetDiseases
                       diseases={diseases}
+                      checked={form.disease}
                       onChange={this.updateFormMultipleValues}
                     />
                     <GetTissues
-                      tissues={tissues} 
+                      tissues={tissues}
+                      checked={form.tissue}
                       onChange={this.updateFormMultipleValues}
                     />
 

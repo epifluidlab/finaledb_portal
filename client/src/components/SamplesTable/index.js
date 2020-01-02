@@ -11,6 +11,10 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
   const addToBasket = () => addDownload(sample);
   const removeFromBasket = () => removeDownload(sample.sraId);
 
+  const truncatedDisease = sample.disease.length > 15
+    ? sample.disease.substring(0, 15) + '...'
+    : sample.disease;
+
   return (
     <Table.Row>
       <Table.Col>
@@ -20,10 +24,13 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
         </Text>
       </Table.Col>
       <Table.Col>
-        {sample.disease}{sample.tissue!=-1 ? ' (' + sample.tissue + ')' : ''}
+        <div title={sample.disease}>{truncatedDisease}</div>
         <Text size="sm" muted>
           {sample.sex}{sample.age!=-1 ? ', '+ sample.age : ''}
         </Text>
+      </Table.Col>
+      <Table.Col>
+        {sample.tissue}
       </Table.Col>
       <Table.Col> 
         <Text size="sm" muted>
@@ -43,7 +50,6 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
           {sample.platform}
         </Text>
       </Table.Col>
-      <Table.Col> {sample.doi} </Table.Col>
 
 
       <Table.Col alignContent="center">
@@ -69,7 +75,7 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
                 </Link>
               </Dropdown.Item>
               <Dropdown.Item>
-                <Button link RootComponent="a" href="/visualization">
+                <Button link RootComponent="a" href={sample.publication.link}>
                   See Publication
                 </Button>
               </Dropdown.Item>
@@ -98,7 +104,8 @@ const SamplesTable = ({ samples }) => {
     <Table.Header>
       <Table.Row>
         <Table.ColHeader>Sample Name<br /> Run ID</Table.ColHeader>
-        <Table.ColHeader>Disease status (Tissue) <br /> Sex, Age</Table.ColHeader>
+        <Table.ColHeader>Disease status <br /> Sex, Age</Table.ColHeader>
+        <Table.ColHeader>Tissue</Table.ColHeader>
         <Table.ColHeader>Read length <br /> Mbases </Table.ColHeader>
         <Table.ColHeader>
           Format <br />
@@ -107,7 +114,6 @@ const SamplesTable = ({ samples }) => {
         <Table.ColHeader>
           Platform
         </Table.ColHeader>
-        <Table.ColHeader>DOI</Table.ColHeader>
 
         <Table.ColHeader>Other</Table.ColHeader>
 
