@@ -143,10 +143,12 @@ class FormElements extends Component {
       tissue: {},
       assayType: {},
       diseaseStatus: {},
-      maxReadLength:-1,
+      minReadLength:10,
+      maxReadLength:100,
+      minMBases:10,
+      maxMBases:100000,
       age:{},
       doi:'',
-
     }
 
     this.state = {
@@ -271,7 +273,7 @@ class FormElements extends Component {
 
     return (
       <SiteWrapper>
-        <Page.Content title="Search samples">
+        <Page.Content title="Search Samples">
           <Grid.Row cards={true} justifyContent="flex-end">
             <Grid.Col>
               <Button.List>
@@ -395,52 +397,11 @@ class FormElements extends Component {
                       <Table.Col>
                         <Grid.Row>
                           <Grid.Col>
-                            <Form.Group label="Min Age">
-                              <Form.Input
-                                name="minAge"
-                                placeholder={10}
-                                type='number'
-                                value={form.minAge}
-                                onChange={this.updateFormValue}
-                              />
-                            </Form.Group>
-                          </Grid.Col>
-                          <Grid.Col>
-                            <Form.Group label="Max Age">
-                              <Form.Input
-                                name="maxAge"
-                                placeholder={100}
-                                type='number'
-                                value={form.maxAge}
-                                onChange={this.updateFormValue}
-                              />
-                            </Form.Group>
-                          </Grid.Col>
-
-                        </Grid.Row>
-                      </Table.Col>
-                    </Table.Row>
-
-                    <Table.Row>
-                      <Table.Col>
-                        <Grid.Row>
-                          <Grid.Col>
                             <Form.Group label="DOI">
                               <Form.Input
                                 name="doi"
                                 placeholder="10.1016/j.cell.2015.11.050"
                                 value={form.doi}
-                                onChange={this.updateFormValue}
-                              />
-                            </Form.Group>
-                          </Grid.Col>
-                        </Grid.Row>
-                        <Grid.Row>
-                          <Grid.Col>
-                            <Form.Group label="PMID">
-                              <Form.Input
-                                name="pmid"
-                                placeholder="26771485"
                                 onChange={this.updateFormValue}
                               />
                             </Form.Group>

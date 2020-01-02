@@ -11,8 +11,8 @@ const SamplesTableRow = ({ downloads, sample, addDownload, removeDownload }) => 
   const addToBasket = () => addDownload(sample);
   const removeFromBasket = () => removeDownload(sample.sraId);
 
-  const truncatedDisease = sample.disease.length > 15
-    ? sample.disease.substring(0, 15) + '...'
+  const truncatedDisease = sample.disease.length > 20
+    ? sample.disease.substring(0, 20) + '...'
     : sample.disease;
 
   return (
