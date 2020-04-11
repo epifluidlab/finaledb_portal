@@ -17,6 +17,7 @@ import {
 
 import SiteWrapper from "./SiteWrapper";
 import SamplesTable from '../components/SamplesTable';
+import Browser from '../components/Browser';
 
 import request from "../utils/request";
 
@@ -161,6 +162,8 @@ class FormElements extends Component {
                 >
 
                   <SamplesTable samples={samples} />
+                  <Browser />
+
                 </Table>
               </Card>
             </Grid.Col>
@@ -171,6 +174,11 @@ class FormElements extends Component {
             pdfFile={form.pdfFile}
             onLoadSuccess={this.onDocumentLoadSuccess}
           />
+
+          <script src="https://unpkg.com/epgg@latest/umd/epgg.js"></script>
+          <script>
+            renderBrowserInElement(contents, container);
+          </script>
 
         </Page.Content>
 
