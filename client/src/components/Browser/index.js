@@ -5,63 +5,72 @@ class Browser extends React.Component {
     super(props);
 
     this.state = {
-      data: 0
+      data: 0,
     }
     this.browserRef = React.createRef();
     this.setNewNumber = this.setNewNumber.bind(this)
   };
   setNewNumber() {
-    this.setState({ data: this.state.data + 1 })
+    this.setState({ 
+      data: this.state.data + 1,
+    })
   }
 
-  componentDidMount() {
+  renderBrowser = () => {
     const container = this.browserRef.current;
+    console.log(this.props.sraId);
+    console.log("ga " + this.props.genomeAssembly);
+
     const contents = {
-      genomeName: 'mm10',
-      displayRegion: 'chr5:51997494-52853744',
+      genomeName: this.props.genomeAssembly,
+      displayRegion: 'chr7:27053397-27373765',
       trackLegendWidth: 120,
       isShowingNavigator: true,
       tracks: [
         {
           type: 'geneannotation',
-          name: 'refGene',
-          genome: 'mm10'
+          name: 'refGene' + this.props.genomeAssembly,
+          genome: 'hg38', // this.props.genomeAssembly,
         },
-        {
-          type: 'geneannotation',
-          name: 'gencodeM19Basic',
-          genome: 'mm10'
-        },
+        // {
+        //   type: 'geneannotation',
+        //   name: 'gencodeM19Basic',
+        //   genome: 'hg38'
+        // },
         {
           type: 'ruler',
           name: 'Ruler'
         },
         {
-          type: 'bigWig',
-          name: 'ChipSeq of Heart',
-          url: 'https://www.encodeproject.org/files/ENCFF641FBI/@@download/ENCFF641FBI.bigWig',
+          type: 'bam',
+          name:  this.props.sraId, //'psc file',
+          url: this.props.bamFile,
           options: { color: 'red' },
           metadata: { Sample: 'Heart' }
         },
-        {
-          type: 'bigWig',
-          name: 'ChipSeq of Liver',
-          url: 'https://www.encodeproject.org/files/ENCFF555LBI/@@download/ENCFF555LBI.bigWig',
-          options: { color: 'blue' },
-          metadata: { Sample: 'Liver' }
-        }
       ],
       metadataTerms: ['Sample'],
       regionSets: [],
       regionSetViewIndex: -1
     };
     window.renderBrowserInElement(contents, container);
+  }
 
+  componentDidMount() {
+    this.renderBrowser();
+
+    // just call this.renderBrowser()
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.genomeAssembly !== prevProps.genomeAssembly) {
+      this.renderBrowser();
+    }
   }
 
   render() {
     return (
-      <div id="embed" ref={this.browserRef} style={{ width: '1000px' }}></div>
+      <div id="embed" ref={this.browserRef} ></div>
     );
   }
 }
