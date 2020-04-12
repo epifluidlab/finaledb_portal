@@ -27,8 +27,6 @@ function RenderPDF(props) {
   const pdfFile = props.pdfFile;
   const onLoadSuccess = props.onLoadSuccess;
 
-  console.log("PDF " + pdfFile);
-
     return (
       <Grid.Row>
         <Grid.Col>
@@ -41,6 +39,7 @@ function RenderPDF(props) {
             >
               <PdfPage pageNumber={1} loading="loading..." error="error" />
             </Document>
+
             :
             <Card
               body={`Please select a sample from the query page.
@@ -60,10 +59,13 @@ class FormElements extends Component {
   constructor(props) {
     super(props);
 
+    const { sraId } = props.match.params;
+
     this.initialFormState = {
-      genomeAssembly: 'none',
-      sraId: 'none',
-      pdfFile: null,
+      genomeAssembly: 'hg38',
+      sraId,
+      pdfFile: `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.hg38.insert_size_histogram.pdf`,
+      bamFile: `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.hg38.mdups.bam`,
     }
 
     this.state = {
@@ -75,9 +77,12 @@ class FormElements extends Component {
   async componentDidMount() {
     const { sraId } = this.props.match.params;
     const samples = await request(`/samples?sraId=${sraId}&`);
-    this.state.form.sraId = sraId;
 
     this.setState({
+      form: {
+        ...this.state.form,
+        sraId,
+      },
       samples,
     });
   }
@@ -92,13 +97,19 @@ class FormElements extends Component {
   }
 
   setPdfAddress() {
-    const { sraId, genomeAssembly, pdfFile } = this.state.form;
-    this.state.form.pdfFile = `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.${genomeAssembly}.insert_size_histogram.pdf`;
-    console.log(this.state.form.pdfFile);
+    const { sraId, genomeAssembly } = this.state.form;
+    const pdfFile = `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.${genomeAssembly}.insert_size_histogram.pdf`;
+    const bamFile = `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.${genomeAssembly}.mdups.bam`;
+
 
     this.setState({
-      pdfFile,
+      form: {
+        ...this.state.form,
+        pdfFile,
+        bamFile,
+      },
     });
+
   }
 
   onDocumentLoadSuccess(pdf) {
@@ -109,8 +120,10 @@ class FormElements extends Component {
   render() {
     const {
       samples,
-      form
+      form,
     } = this.state;
+
+    const { sraId } = this.props.match.params;
 
     if (!samples) return null;
 
@@ -126,7 +139,7 @@ class FormElements extends Component {
                   <Table.Body>
                     <Table.Row>
                       <Table.Col>
-                        <Form.Group label="Human Reference Genome">
+                        <Form.Group label="Human Reference Genome (choose one)">
                           <Form.SelectGroup>
                             <Form.SelectGroupItem
                               name="genomeAssembly"
@@ -162,23 +175,39 @@ class FormElements extends Component {
                 >
 
                   <SamplesTable samples={samples} />
-                  <Browser />
+
 
                 </Table>
               </Card>
             </Grid.Col>
           </Grid.Row>
 
+          <Grid.Row>
+            <Grid.Col>
+              <Card>
+                <RenderPDF
+                  pdfFile={form.pdfFile}
+                  onLoadSuccess={this.onDocumentLoadSuccess}
+                />
+              </Card>
+            </Grid.Col>
+          </Grid.Row>
 
-          <RenderPDF
-            pdfFile={form.pdfFile}
-            onLoadSuccess={this.onDocumentLoadSuccess}
-          />
+          <Grid.Row>
+            <Grid.Col>
+              <Card>
+                <Browser
+                  sraId={sraId}
+                  genomeAssembly={form.genomeAssembly}
+                  bamFile={form.bamFile}
+                />
+              </Card>
+            </Grid.Col>
+          </Grid.Row>
 
-          <script src="https://unpkg.com/epgg@latest/umd/epgg.js"></script>
-          <script>
-            renderBrowserInElement(contents, container);
-          </script>
+
+
+
 
         </Page.Content>
 
