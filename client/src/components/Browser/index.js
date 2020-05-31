@@ -29,14 +29,9 @@ class Browser extends React.Component {
       tracks: [
         {
           type: 'geneannotation',
-          name: 'refGene' + this.props.genomeAssembly,
-          genome: 'hg38', // this.props.genomeAssembly,
+          name: 'refGene', // + this.props.genomeAssembly,
+          genome: this.props.genomeAssembly,
         },
-        // {
-        //   type: 'geneannotation',
-        //   name: 'gencodeM19Basic',
-        //   genome: 'hg38'
-        // },
         {
           type: 'ruler',
           name: 'Ruler'
