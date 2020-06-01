@@ -21,29 +21,32 @@ class Browser extends React.Component {
     console.log(this.props.sraId);
     console.log("ga " + this.props.genomeAssembly);
 
-    const contents = {
-      genomeName: this.props.genomeAssembly,
-      displayRegion: 'chr7:27053397-27373765',
-      trackLegendWidth: 120,
-      isShowingNavigator: true,
-      tracks: [
-        {
-          type: 'geneannotation',
-          name: 'refGene', // + this.props.genomeAssembly,
-          genome: this.props.genomeAssembly,
-        },
+    const tracks = [
         {
           type: 'ruler',
           name: 'Ruler'
         },
         {
-          type: 'bam',
-          name:  this.props.sraId, //'psc file',
-          url: this.props.bamFile,
-          options: { color: 'red' },
-          metadata: { Sample: 'Heart' }
-        },
-      ],
+          type: 'geneannotation',
+          name: 'refGene', // + this.props.genomeAssembly,
+          genome: this.props.genomeAssembly,
+        }
+    ];
+
+    for (const track of this.props.tracks || []) {
+      tracks.push({
+        type: track['type'],
+        name: track['name'],
+        url: track['url']
+      })
+    }
+
+    const contents = {
+      genomeName: this.props.genomeAssembly,
+      displayRegion: 'chr7:27170438-27190461',
+      trackLegendWidth: 120,
+      isShowingNavigator: true,
+      tracks: tracks,
       metadataTerms: ['Sample'],
       regionSets: [],
       regionSetViewIndex: -1
