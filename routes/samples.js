@@ -4,14 +4,30 @@ const { Sample, Publication } = require('../models');
 
 const router = Router();
 
+const guessSampleId = (idText) => {
+  // The sample ID can be either of the two forms: 86009 or EE86009
+  // This function always return the trailing digits
+  const pattern = /^(EE)?([0-9]+)$/;
+  const match = pattern.exec(idText);
+  return match ? match[2] : null;
+}
+
 const get = async (req, res, next) => {
   try {
     // select * from Sample where [...buildWhereClause] and [...buildBetweenClause];
+    const whereClause = req.params['sampleId'] ? {"id": guessSampleId(req.params['sampleId'])} : buildWhereClause(req.query);
     const samples = await Sample.findAll({
-      where: { ...buildWhereClause(req.query), ...buildBetweenClause(req.query) },
-      include: [{ model: Publication, as: 'publication' }]
+      // where: { ...buildWhereClause(req.query), ...buildBetweenClause(req.query) },
+      // where: Sequelize.and(Sequelize.where(Sequelize.literal('alt_id->>\'original\''), "EGAR00002028223")),
+      where: whereClause,
+      include: [{ model: Publication, as: 'publication'}]
     });
-    return res.status(200).json(samples);
+    const payload = samples.map(s => {
+      const data = s.toJSON();
+      delete data['publicationId'];
+      return data;
+    })
+    return res.status(200).json(payload);
   } catch (e) {
     return next(e);
   }
@@ -49,16 +65,45 @@ const buildWhereClause = (query) => {
     return {}
   }
 
-  const attrs = ['platform', 'disease', 'tissue', 'doi', 'libraryFormat', 'assayType', 'sraId'];
-  const result = {}
-
-  for (const attr of attrs) {
-    if (query[attr] && query[attr].length) {
-      result[attr] = { [Op.in]: query[attr].split(',') };
-    }
+  clauses = [];
+  // const attrs = ['platform', 'disease', 'tissue', 'doi', 'libraryFormat', 'assayType', 'sraId'];
+  
+  // Process original ID and SRA IDs
+  let idClause = [];
+  for (const originalID of (query['originalId'] || '').split(',')) {
+    if (originalID)
+      idClause.push(Sequelize.where(Sequelize.literal(`alt_id->>'original'`), originalID));
   }
+  if (idClause.length > 0)
+    clauses.push(Sequelize.or(...idClause));
+  
+  idClause = [];
+  for (const sraID of (query['sraId'] || '').split(',')) {
+    if (sraID)
+      idClause.push(Sequelize.where(Sequelize.literal(`alt_id->>'SRA'`), sraID));
+  }
+  if (idClause.length > 0)
+    clauses.push(Sequelize.or(...idClause));
 
-  return result;
+  idClause = [];
+  for (const entryID of (query['ID'] || '').split(',').map(guessSampleId)) {    
+    if (entryID)
+      idClause.push({"id": entryID});
+  }
+  if (idClause.length > 0)
+    clauses.push(Sequelize.or(...idClause));
+
+  return clauses;
+  
+  // const result = {}
+
+  // for (const attr of attrs) {
+  //   if (query[attr] && query[attr].length) {
+  //     result[attr] = { [Op.in]: query[attr].split(',') };
+  //   }
+  // }
+
+  // return result;
 }
 
 // [Op.between]: [6, 10],     // BETWEEN 6 AND 10
@@ -114,6 +159,7 @@ const getReadLengths = getCountHandler('readLength');
 
 
 router.get('/', get);
+router.get('/:sampleId', get);
 router.get('/diseases', getDiseases);
 router.get('/platforms', getPlatforms);
 router.get('/libraryFormats', getLibraryFormats);

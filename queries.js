@@ -95,20 +95,20 @@ const getData = async (request, response) => {
 };
 
 
-const getPublications = async (request, response) => {
-  try {
-    const publications = await Publication.findAll();
+// const getPublications = async (request, response) => {
+//   try {
+//     const publications = await Publication.findAll({limit: 2});
 
-    response.status(200).json({
-      publications,
-    });
-  } catch (e) {
-    response.status(500).json(e);
-  }
-};
+//     response.status(200).json({
+//       publications,
+//     });
+//   } catch (e) {
+//     response.status(500).json(e);
+//   }
+// };
 
 
 module.exports = {
   getData,
-  getPublications,
+  // getPublications,
 };

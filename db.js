@@ -1,6 +1,6 @@
 const { Sequelize } = require('sequelize');
 
-const dbName = process.env.CFDNA_DB_NAME || 'cfdna';
+const dbName = process.env.CFDNA_DB_NAME || 'cfdnadb';
 const dbUser = process.env.CFDNA_DB_USER || 'zhu1lx';
 const dbPass = process.env.CFDNA_DB_PASSWORD || 'Chmc3634';
 

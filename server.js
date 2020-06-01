@@ -17,7 +17,7 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'client/build')));
 
-app.get('/data', db.getData);
+// app.get('/data', db.getData);
 app.use('/samples', samples);
 app.use('/publications', publications); // http://localhost:3000/visualization/c91952a9b48f32a8f26a.worker.js
 

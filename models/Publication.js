@@ -5,25 +5,34 @@ const Sample = require('./Sample');
 class Publication extends Model { }
 
 Publication.init({
-  author: DataTypes.STRING,
-  journal: DataTypes.STRING,
-  date: DataTypes.STRING,
-  pmid: DataTypes.NUMBER,
-  doi: {
-    type: DataTypes.STRING,
-    primaryKey: true,
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true
   },
-  datastore: DataTypes.STRING,
-  title: DataTypes.STRING,
-  link: DataTypes.STRING,
+  author: DataTypes.JSON,
+  journal: DataTypes.TEXT,
+  date: DataTypes.DATE,
+  identifiers: DataTypes.JSON,
+  // pmid: DataTypes.NUMBER,
+  // doi: {
+  //   type: DataTypes.STRING,
+  //   primaryKey: true,
+  // },
+  // datastore: DataTypes.STRING,
+  title: DataTypes.TEXT,
+  link: DataTypes.TEXT,
 }, {
   sequelize: db,
-  tableName: 'publications',
+  schema: 'dev',
+  tableName: 'publication',
   underscored: true,
   timestamps: false,
 });
 
-Publication.hasMany(Sample, { foreignKey: 'doi' });
-Sample.belongsTo(Publication, { foreignKey: 'doi', as: 'publication' });
+// Publication.hasMany(Sample, { foreignKey: 'publication', as: 'publication_id'});
+// Sample.belongsTo(Publication, { foreignKey: 'publication', as: 'publication_id'});
+
+Publication.hasMany(Sample, {foreignKey: 'publicationId', as: 'publication'});
+Sample.belongsTo(Publication, { foreignKey: 'publicationId', as: 'publication'});
 
 module.exports = Publication;
