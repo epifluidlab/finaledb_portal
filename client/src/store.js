@@ -12,11 +12,12 @@ const rootReducer = combineReducers({
   downloads: downloadsReducer,
 });
 
-export const createStoreWithInitialState = state => createStore(
-  rootReducer,
-  state,
-  composeWithDevTools(applyMiddleware(...middleware))
-);
+export const createStoreWithInitialState = (state) =>
+  createStore(
+    rootReducer,
+    state,
+    composeWithDevTools(applyMiddleware(...middleware))
+  );
 
 const store = createStoreWithInitialState(initialState);
 
