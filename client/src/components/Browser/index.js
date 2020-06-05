@@ -34,11 +34,11 @@ class Browser extends React.Component {
     ];
 
     for (const track of this.props.tracks || []) {
-      tracks.push({
-        type: track['type'],
-        name: track['name'],
-        url: track['url']
-      })
+      const trackOptions = {};
+      if (track.type == 'bigWig') {
+        trackOptions.height = 64;
+      }
+      tracks.push({ name: track.name, type: track.type, url: track.url, options: trackOptions });
     }
 
     const contents = {
@@ -51,6 +51,7 @@ class Browser extends React.Component {
       regionSets: [],
       regionSetViewIndex: -1
     };
+    console.log(contents);
     window.renderBrowserInElement(contents, container);
   }
 
