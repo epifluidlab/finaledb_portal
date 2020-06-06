@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import log from 'loglevel';
 
 import { changeGenomeAssembly } from '../redux/actions/epiBrowserActions';
+import { s3Bucket, showBAM } from '../settings';
 
 // A React container component wraps the WashU Epigenome Browser
 
@@ -11,12 +12,13 @@ log.enableAll();
 
 class EpiBrowser extends React.Component {
   // process track data and generate WashU browser-ready track objects
-  static processTracks(assembly, tracks) {
+  static processTracks(assembly, entries) {
+    log.info(entries);
     // Colors that are used to display numeric tracks (such as bigWig)
     const trackColors = [
       '#058DC7',
       '#50B432',
-      '#ED561B',
+      // '#ED561B',
       '#DDDF00',
       '#24CBE5',
       '#64E572',
@@ -25,29 +27,58 @@ class EpiBrowser extends React.Component {
       '#6AF9C4',
     ];
 
-    // filter tracks matching the assembly
-    const filteredTracks = tracks.filter((val) => val.assembly === assembly);
+    // Merge tracks from entries and only keep those matching the assembly
+    const tracks = Object.values(entries || {}).reduce((arr, entry) => {
+      const filteredAnalysis = (entry.analysis || []).filter((val) => {
+        if (val.assembly !== assembly) return false;
 
-    // Determine colors of the tracks
-    // Each track will be assigned a color from trackColors, based on natural order
-    const uniqEntryIdx = filteredTracks
-      .map((val) => val.entryId)
-      .filter((ele, idx, data) => data.indexOf(ele) === idx);
-    const colorMap = uniqEntryIdx.reduce((m, entryId, idx) => {
-      const newMap = { ...m };
-      newMap[entryId] = trackColors[idx % trackColors.length];
-      return newMap;
-    }, {});
+        switch (val.type) {
+          case 'BAM':
+            return showBAM;
+          case 'bigWig':
+            return true;
+          default:
+            return false;
+        }
+      });
+      // Sample name: original altId or the universal entryId
+      const sampleName = (entry.altId || {}).original || `EE${entry.id}`;
+      const tracksForEntry = filteredAnalysis.map((analysis) => {
+        const url = `${s3Bucket}/${analysis.key}`;
+        const name = (() => {
+          switch (analysis.desc) {
+            case 'BAM':
+              return `BAM: ${sampleName}`;
+            case 'coverage':
+              return `Coverage: ${sampleName}`;
+            case 'fragment profile':
+              return `Fragments: ${sampleName}`;
+            default:
+              return '';
+          }
+        })();
+        const { type } = analysis;
+        // Each entry will be assigned a color from trackColors, by the natural order.
+        const color =
+          trackColors[
+            Object.keys(entries).indexOf(entry.id) % trackColors.length
+          ];
 
-    return filteredTracks.map((val) => {
-      const { type, name, url, entryId } = val;
-      const track = { type, name, url };
-      track.options = {
-        color: colorMap[entryId],
-        height: 96,
-      };
-      return track;
-    });
+        return {
+          type,
+          name,
+          url,
+          options: { color, height: 96 },
+        };
+      });
+
+      return arr.concat(tracksForEntry);
+    }, []);
+
+    log.info('Successfully building up the tracks!');
+    log.info(tracks);
+
+    return tracks;
   }
 
   constructor(props) {
@@ -57,19 +88,16 @@ class EpiBrowser extends React.Component {
   }
 
   componentDidMount() {
-    this.renderBrowser(this.props);
     log.info('EpiBrowser: componentDidMount');
+    this.renderBrowser(this.props);
     log.info(this.props);
   }
 
   shouldComponentUpdate(nextProps) {
     // Always manually handle rendering and updating
-    const { assembly, revision, displayRegion } = this.props;
-    if (
-      assembly !== nextProps.assembly ||
-      revision !== nextProps.revision ||
-      displayRegion !== nextProps.displayRegion
-    ) {
+    log.info('EpiBrowser: shouldComponentUpdate');
+    const { revision } = this.props;
+    if (revision !== nextProps.revision) {
       this.renderBrowser(nextProps);
     }
     return false;
@@ -79,27 +107,26 @@ class EpiBrowser extends React.Component {
     // EpiBrowser relies on manual DOM manipulation. If the component is
     // unmounted because of React's render/update process, it may stop
     // functioning.
-    log.info('Message one');
-    log.warn('Message two');
+    log.warn('Browser is going to be unmounted!');
   }
 
   renderBrowser(props) {
     const { assembly, displayRegion, refTracks, tracks } = props;
     log.info(`Render browser: ${assembly} : ${displayRegion}`);
 
-    if (!tracks || tracks.length === 0) {
-      log.info('Empty tracks, skip rendering the browser.');
-      return;
-    }
+    // const dataTracks = EpiBrowser.processTracks(assembly, entries);
 
-    const dataTracks = EpiBrowser.processTracks(assembly, tracks);
+    // if (!dataTracks || dataTracks.length === 0) {
+    //   log.info('Empty tracks, skip rendering the browser.');
+    //   return;
+    // }
 
     const contents = {
       genomeName: assembly,
       displayRegion,
       trackLegendWidth: 120,
       isShowingNavigator: true,
-      tracks: refTracks.concat(dataTracks),
+      tracks: refTracks.concat(tracks),
       metadataTerms: ['Sample'],
       regionSets: [],
       regionSetViewIndex: -1,

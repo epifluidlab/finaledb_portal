@@ -24,7 +24,8 @@ const get = async (req, res, next) => {
     });
     const payload = samples.map(s => {
       const data = s.toJSON();
-      delete data['publicationId'];
+      data.id = `${s.id}`;
+      // delete data['publicationId'];
       return data;
     })
     return res.status(200).json(payload);
