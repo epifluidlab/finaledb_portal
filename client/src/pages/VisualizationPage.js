@@ -1,26 +1,18 @@
 // @flow
 
-import * as React from "react";
-import { Component } from "react";
+import * as React from 'react';
+import { Component } from 'react';
 // import { Document, Page as PdfPage, pdfjs } from "react-pdf";
 
+import { Page, Card, Grid, Table, Form, Button, Text } from 'tabler-react';
 
-import {
-  Page,
-  Card,
-  Grid,
-  Table,
-  Form,
-  Button,
-  Text,
-} from "tabler-react";
-
-import SiteWrapper from "./SiteWrapper";
+import SiteWrapper from './SiteWrapper';
 import SamplesTable from '../components/SamplesTable';
-import Browser from '../components/Browser';
+// import Browser from '../components/Browser';
+import EpiBrowser from '../containers/EpiBrowser';
 import Charts from '../components/Charts';
 
-import request from "../utils/request";
+import request from '../utils/request';
 
 // pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -31,8 +23,8 @@ import request from "../utils/request";
 //     return (
 //       <Grid.Row>
 //         <Grid.Col>
-//           { 
-//           pdfFile ? 
+//           {
+//           pdfFile ?
 //             <Document
 //               file={pdfFile}
 //               onLoadSuccess={onLoadSuccess}
@@ -49,35 +41,33 @@ import request from "../utils/request";
 //           }
 //         </Grid.Col>
 //       </Grid.Row>
-  
+
 //     );
 // }
 
-
 class FormElements extends Component {
-
-
   constructor(props) {
     super(props);
 
     const { id } = props.match.params;
     // The page can display tracks of multiple samples by having an additional query term
-    const extraIds = ((new URLSearchParams(props.location.search)).get('id') || '').split(',');
+    const extraIds = (
+      new URLSearchParams(props.location.search).get('id') || ''
+    ).split(',');
     const idList = [];
-    if (id)
-      idList.push(id);
+    if (id) idList.push(id);
     for (const id of extraIds) {
-      if (id)
-        idList.push(id);
+      if (id) idList.push(id);
     }
 
-    const assembly = (new URLSearchParams(props.location.search)).get('assembly') || 'hg38';
+    const assembly =
+      new URLSearchParams(props.location.search).get('assembly') || 'hg38';
     this.initialFormState = {
       genomeAssembly: assembly,
-      ids: idList
+      ids: idList,
       // pdfFile: `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.hg38.insert_size_histogram.pdf`,
       // bamFile: `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.hg38.mdups.bam`,
-    }
+    };
 
     this.state = {
       data: null,
@@ -92,49 +82,54 @@ class FormElements extends Component {
 
     for (const sample of samples) {
       const analysis = sample['analysis'] || [];
-      const filteredAnalysis = analysis.filter(item => item['assembly'] == assembly && ['BAM', 'bigWig'].includes(item['type']));
+      const filteredAnalysis = analysis.filter(
+        (item) =>
+          item['assembly'] == assembly &&
+          ['BAM', 'bigWig'].includes(item['type'])
+      );
       // Try locate the following tracks: BAM, coverage, fragment
-      
-      const s3Prefix = 'https://s3.us-east-2.amazonaws.com/cfdnadb.epifluidlab.cchmc.org';
+
+      const s3Prefix =
+        'https://s3.us-east-2.amazonaws.com/cfdnadb.epifluidlab.cchmc.org';
       const nameMap = {
-        'BAM': 'BAM file',
-        'coverage': 'Reads coverage',
-        'fragment profile': 'Fragment size profile'
+        BAM: 'BAM file',
+        coverage: 'Reads coverage',
+        'fragment profile': 'Fragment size profile',
       };
       for (const desc of ['BAM', 'coverage', 'fragment profile']) {
-        const filteredItem = filteredAnalysis.filter(item => item['desc'] == desc);
+        const filteredItem = filteredAnalysis.filter(
+          (item) => item['desc'] == desc
+        );
         if (filteredItem && filteredItem.length > 0) {
           // Rule for sample ID: SRA > original > ID
           let sampleId = `EE${sample['id']}`;
           const sraId = (sample['altId'] || {})['SRA'];
           const originalId = (sample['altId'] || {})['original'];
-          if (sraId)
-            sampleId = sraId;
-          else if (originalId)
-            sampleId = originalId;
+          if (sraId) sampleId = sraId;
+          else if (originalId) sampleId = originalId;
 
           tracks.push({
             name: `${nameMap[desc]} ${sampleId}`,
-            type: filteredItem[0]['type'],  // bam, bigWig, etc.
-            url: `${s3Prefix}/${filteredItem[0]['key']}`
-          })
+            type: filteredItem[0]['type'], // bam, bigWig, etc.
+            url: `${s3Prefix}/${filteredItem[0]['key']}`,
+          });
         }
       }
     }
-    
-    return tracks; 
+
+    return tracks;
   }
 
   async componentDidMount() {
     const { id } = this.props.match.params;
     // The page can display tracks of multiple samples by having an additional query term
-    const extraIds = ((new URLSearchParams(this.props.location.search)).get('id') || '').split(',');
+    const extraIds = (
+      new URLSearchParams(this.props.location.search).get('id') || ''
+    ).split(',');
     const idList = [];
-    if (id)
-      idList.push(id);
+    if (id) idList.push(id);
     for (const id of extraIds) {
-      if (id)
-        idList.push(id);
+      if (id) idList.push(id);
     }
 
     // const { sraId } = this.props.match.params;
@@ -147,37 +142,42 @@ class FormElements extends Component {
       sample.disease = [];
     }
 
-    const tracks = this.getGenomeTracks(samples, this.state.form.genomeAssembly);
+    const tracks = this.getGenomeTracks(
+      samples,
+      this.state.form.genomeAssembly
+    );
     console.log(tracks);
 
     this.setState({
       form: {
         ...this.state.form,
-        tracks: tracks
+        tracks: tracks,
       },
       samples,
     });
   }
 
   updateFormValue = (e) => {
-    const tracks = this.getGenomeTracks(this.state.samples, this.state.form.genomeAssembly);
+    const tracks = this.getGenomeTracks(
+      this.state.samples,
+      this.state.form.genomeAssembly
+    );
 
     this.setState({
       form: {
         ...this.state.form,
         [e.target.name]: e.target.value,
-        tracks: tracks
-      }
-    });//, () => this.setPdfAddress());
+        tracks: tracks,
+      },
+    }); //, () => this.setPdfAddress());
 
     this.forceUpdate();
-  }
+  };
 
   // setPdfAddress() {
   //   const { sraId, genomeAssembly } = this.state.form;
   //   const pdfFile = `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.${genomeAssembly}.insert_size_histogram.pdf`;
   //   const bamFile = `https://psc-cfdna.s3.us-east-2.amazonaws.com/${sraId}/${sraId}.${genomeAssembly}.mdups.bam`;
-
 
   //   this.setState({
   //     form: {
@@ -190,15 +190,12 @@ class FormElements extends Component {
   // }
 
   onDocumentLoadSuccess(pdf) {
-    console.log("success");
+    console.log('success');
     console.log(pdf);
   }
 
   render() {
-    const {
-      samples,
-      form,
-    } = this.state;
+    const { samples, form } = this.state;
 
     // Generate props for Charts
     // fragmentSize: [
@@ -210,19 +207,20 @@ class FormElements extends Component {
     // ],
     const fragmentSize = [];
     const assembly = form.genomeAssembly;
-    for (const sample of (samples || [])) {
+    for (const sample of samples || []) {
       // Rule for sample ID: SRA > original > ID
       let sampleId = `EE${sample['id']}`;
       const sraId = (sample['altId'] || {})['SRA'];
       const originalId = (sample['altId'] || {})['original'];
-      if (sraId)
-        sampleId = sraId;
-      else if (originalId)
-        sampleId = originalId;
+      if (sraId) sampleId = sraId;
+      else if (originalId) sampleId = originalId;
 
       const dataUrls = (sample.analysis || [])
-        .filter(v => v.desc == 'fragment size' && v.assembly == assembly )
-        .map(v => `https://s3.us-east-2.amazonaws.com/cfdnadb.epifluidlab.cchmc.org/${v.key}`);
+        .filter((v) => v.desc == 'fragment size' && v.assembly == assembly)
+        .map(
+          (v) =>
+            `https://s3.us-east-2.amazonaws.com/cfdnadb.epifluidlab.cchmc.org/${v.key}`
+        );
       for (const dataUrl of dataUrls) {
         fragmentSize.push({ name: sampleId, dataUrl });
       }
@@ -235,8 +233,6 @@ class FormElements extends Component {
     return (
       <SiteWrapper>
         <Page.Content>
-
-
           <Grid.Row cards={true}>
             <Grid.Col>
               <Card>
@@ -278,15 +274,12 @@ class FormElements extends Component {
                   cards
                   className="text-nowrap"
                 >
-
                   <SamplesTable samples={samples} />
-
-
                 </Table>
               </Card>
             </Grid.Col>
           </Grid.Row>
-{/* 
+          {/* 
           <Grid.Row>
             <Grid.Col>
               <Card>
@@ -309,25 +302,18 @@ class FormElements extends Component {
           <Grid.Row>
             <Grid.Col>
               <Card>
-                <Browser
+                {/* <Browser
                   sraId={idList[0]}
                   tracks={form.tracks}
                   genomeAssembly={form.genomeAssembly}
                   // bamFile={form.bamFile}
-                />
+                /> */}
+                <EpiBrowser />
               </Card>
             </Grid.Col>
           </Grid.Row>
-
-
-
-
-
         </Page.Content>
-
       </SiteWrapper>
-
-
     );
   }
 }
