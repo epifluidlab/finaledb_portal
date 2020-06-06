@@ -6,10 +6,12 @@ import { Component } from 'react';
 
 import { connect } from 'react-redux';
 import log from 'loglevel';
+import PropTypes from 'prop-types';
 
 import {
   changeGenomeAssembly,
   resetBrowserEntries,
+  setDisplayRegion,
 } from '../redux/actions/epiBrowserActions';
 
 import { Page, Card, Grid, Table, Form, Button, Text } from 'tabler-react';
@@ -22,16 +24,25 @@ import Charts from '../components/Charts';
 
 class FormElements extends Component {
   async componentDidMount() {
+    // eslint-disable-next-line react/destructuring-assignment
     const { id } = this.props.match.params;
     // The page can display tracks of multiple samples by having an additional query term
-    const extraIds = (
-      new URLSearchParams(this.props.location.search).get('id') || ''
-    ).split(',');
+    const searchParams =
+      // eslint-disable-next-line react/destructuring-assignment
+      new URLSearchParams(this.props.location.search);
+    const extraIds = (searchParams.get('id') || '').split(',');
     const idList = [];
     if (id) idList.push(id);
-    extraIds.forEach((id) => {
-      if (id) idList.push(id);
-    });
+    else {
+      extraIds.forEach((val) => {
+        if (val) idList.push(val);
+      });
+    }
+    const displayRegion = searchParams.get('region');
+    if (displayRegion) {
+      const { dispatchSetDisplayRegion } = this.props;
+      dispatchSetDisplayRegion(displayRegion);
+    }
 
     const { dispatchResetBrowserEntries, assembly } = this.props;
     dispatchResetBrowserEntries(assembly, idList);
@@ -123,7 +134,33 @@ class FormElements extends Component {
   }
 }
 
+FormElements.propTypes = {
+  fragSizeSeries: PropTypes.arrayOf(
+    PropTypes.shape({
+      dataPts: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+      dataUrl: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+    })
+  ),
+  assembly: PropTypes.string.isRequired,
+  dispatchResetBrowserEntries: PropTypes.func.isRequired,
+  dispatchSetDisplayRegion: PropTypes.func.isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string,
+    }),
+  }).isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
+FormElements.defaultProps = {
+  fragSizeSeries: [],
+};
+
 const mapDispatchToProps = (dispatch) => ({
+  dispatchSetDisplayRegion: (region) => dispatch(setDisplayRegion(region)),
   dispatchChangeAssembly: (assembly) =>
     dispatch(changeGenomeAssembly(assembly)),
   dispatchResetBrowserEntries: (assembly, entries) =>
@@ -133,5 +170,3 @@ const mapDispatchToProps = (dispatch) => ({
 const mapStateToProps = (state) => ({ ...state.browser });
 
 export default connect(mapStateToProps, mapDispatchToProps)(FormElements);
-
-// export default FormElements;

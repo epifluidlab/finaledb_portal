@@ -162,7 +162,7 @@ const mapDispatchToProps = (dispatch) => ({
 
 EpiBrowser.propTypes = {
   revision: PropTypes.number.isRequired,
-  assembly: PropTypes.string.isRequired,
+  // assembly: PropTypes.string.isRequired,
   displayRegion: PropTypes.string.isRequired,
 };
 

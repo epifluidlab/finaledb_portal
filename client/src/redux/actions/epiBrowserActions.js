@@ -8,9 +8,9 @@ export const changeGenomeAssembly = (assembly) => ({
 //   payload: tracks,
 // });
 
-export const resetBrowserEntriesSync = (assembly, entries) => ({
-  type: 'RESET_BROWSER_ENTRIES',
-  payload: { assembly, entries },
+export const setDisplayRegion = (region) => ({
+  type: 'SET_DISPLAY_REGION',
+  payload: region,
 });
 
 export function setFragmentSizeSeries(seriesOptions) {

@@ -29,7 +29,7 @@ const initialState = {
   ],
   tracks: [],
   fragSizeSeries: [],
-  // initial display region
+  // // initial display region
   displayRegion: 'chr2:29028122-29057276',
 };
 
@@ -185,6 +185,13 @@ export default (state = initialState, action) => {
     }
     case 'SET_FRAGMENT_SIZE_SERIES': {
       newState.fragSizeSeries = action.payload;
+      break;
+    }
+    case 'SET_DISPLAY_REGION': {
+      if (state.displayRegion !== action.payload) {
+        newState.displayRegion = action.payload;
+        newState.revision += 1;
+      }
       break;
     }
     default:
