@@ -1,10 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import log from 'loglevel';
 
 import { changeGenomeAssembly } from '../redux/actions/epiBrowserActions';
 
 // A React container component wraps the WashU Epigenome Browser
+
+log.enableAll();
 
 class EpiBrowser extends React.Component {
   // process track data and generate WashU browser-ready track objects
@@ -55,6 +58,8 @@ class EpiBrowser extends React.Component {
 
   componentDidMount() {
     this.renderBrowser(this.props);
+    log.info('EpiBrowser: componentDidMount');
+    log.info(this.props);
   }
 
   shouldComponentUpdate(nextProps) {
@@ -70,9 +75,22 @@ class EpiBrowser extends React.Component {
     return false;
   }
 
+  componentWillUnmount() {
+    // EpiBrowser relies on manual DOM manipulation. If the component is
+    // unmounted because of React's render/update process, it may stop
+    // functioning.
+    log.info('Message one');
+    log.warn('Message two');
+  }
+
   renderBrowser(props) {
     const { assembly, displayRegion, refTracks, tracks } = props;
-    console.log(`Render browser: ${assembly} : ${displayRegion}`);
+    log.info(`Render browser: ${assembly} : ${displayRegion}`);
+
+    if (!tracks || tracks.length === 0) {
+      log.info('Empty tracks, skip rendering the browser.');
+      return;
+    }
 
     const dataTracks = EpiBrowser.processTracks(assembly, tracks);
 

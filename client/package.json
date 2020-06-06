@@ -6,6 +6,7 @@
   "dependencies": {
     "highcharts": "^8.1.0",
     "highcharts-react-official": "^3.0.0",
+    "loglevel": "^1.6.8",
     "nouislider": "^14.1.1",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
