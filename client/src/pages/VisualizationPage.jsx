@@ -20,7 +20,7 @@ import SiteWrapper from './SiteWrapper';
 import SamplesTable from '../components/SamplesTable';
 // import Browser from '../components/Browser';
 import EpiBrowser from '../containers/EpiBrowser';
-import Charts from '../components/Charts';
+import Charts from '../components/FragmentSizesChart';
 
 class FormElements extends Component {
   async componentDidMount() {
@@ -50,13 +50,25 @@ class FormElements extends Component {
     // this.setState({ form: { ...this.state.form, samples, } });
   }
 
-  updateFormValue(e) {
+  updateFormValue = (event) => {
+    const assembly = event.target.value;
+    log.info(`Change to assembly: ${assembly}`);
+
+    const { dispatchChangeAssembly } = this.props;
+    dispatchChangeAssembly(assembly);
     this.forceUpdate();
-  }
+  };
 
   render() {
     log.info('Render the form');
     const samples = [];
+    const { entries, displayedEntryIds, assembly } = this.props;
+    const displayedEntries = Object.keys(entries)
+      .filter((entryId) => displayedEntryIds.includes(entryId))
+      .reduce((acc, entryId) => {
+        acc[entryId] = entries[entryId];
+        return acc;
+      }, {});
 
     // eslint-disable-next-line react/destructuring-assignment
     const fragSizeSeries = Object.values(this.props.fragSizeSeries || {});
@@ -79,6 +91,7 @@ class FormElements extends Component {
                               name="genomeAssembly"
                               label="hg19 (GRCh37)"
                               value="hg19"
+                              checked={assembly === 'hg19'}
                               // checked={form.genomeAssembly['hg19']}
                               onChange={this.updateFormValue}
                             />
@@ -86,6 +99,7 @@ class FormElements extends Component {
                               name="genomeAssembly"
                               label="hg38 (GRCh38)"
                               value="hg38"
+                              checked={assembly === 'hg38'}
                               // checked={form.genomeAssembly['hg38']}
                               onChange={this.updateFormValue}
                             />
@@ -107,7 +121,7 @@ class FormElements extends Component {
                   cards
                   className="text-nowrap"
                 >
-                  <SamplesTable samples={samples} />
+                  <SamplesTable entries={displayedEntries} />
                 </Table>
               </Card>
             </Grid.Col>
@@ -143,6 +157,8 @@ FormElements.propTypes = {
     })
   ),
   assembly: PropTypes.string.isRequired,
+  entries: PropTypes.shape(PropTypes.shape()),
+  displayedEntryIds: PropTypes.arrayOf(PropTypes.string),
   dispatchResetBrowserEntries: PropTypes.func.isRequired,
   dispatchSetDisplayRegion: PropTypes.func.isRequired,
   match: PropTypes.shape({
@@ -157,6 +173,8 @@ FormElements.propTypes = {
 
 FormElements.defaultProps = {
   fragSizeSeries: [],
+  displayedEntryIds: [],
+  entries: {},
 };
 
 const mapDispatchToProps = (dispatch) => ({

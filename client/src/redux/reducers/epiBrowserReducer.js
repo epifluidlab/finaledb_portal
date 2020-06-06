@@ -92,8 +92,7 @@ function getTracks(assembly, entries) {
           return false;
       }
     });
-    // Sample name: original altId or the universal entryId
-    const sampleName = (entry.altId || {}).original || `EE${entry.id}`;
+    const { sampleName } = entry;
     const colorMap = getColorMap(getDisplayedEntryIds(assembly, entries));
     const tracksForEntry = filteredAnalysis.map((analysis) => {
       const url = `${s3Bucket}/${analysis.key}`;
@@ -137,8 +136,7 @@ function getFragmentSizeSeries(assembly, entries) {
       (val) => val.assembly === assembly && val.desc === 'fragment size'
     );
 
-    // Sample name: original altId or the universal entryId
-    const sampleName = (entry.altId || {}).original || `EE${entry.id}`;
+    const { sampleName } = entry;
     const colorMap = getColorMap(getDisplayedEntryIds(assembly, entries));
 
     const series = filteredAnalysis.map((analysis) => ({
@@ -156,6 +154,17 @@ function getFragmentSizeSeries(assembly, entries) {
   return tracks;
 }
 
+function processEntries(entries) {
+  return Object.keys(entries).reduce((acc, entryId) => {
+    const entry = entries[entryId];
+    const newEntry = { ...entry };
+    // Sample name: original altId or the universal entryId
+    newEntry.sampleName = (entry.altId || {}).original || `EE${entry.id}`;
+    acc[entryId] = newEntry;
+    return acc;
+  }, {});
+}
+
 export default (state = initialState, action) => {
   const newState = {
     ...state,
@@ -163,23 +172,39 @@ export default (state = initialState, action) => {
 
   switch (action.type) {
     case 'CHANGE_GENOME_ASSEMBLY': {
-      if (state.assembly !== action.payload) {
-        newState.assembly = action.payload;
+      const assembly = action.payload;
+      if (state.assembly !== assembly) {
+        newState.assembly = assembly;
         const newAssemblyTrack = {
           ...state.refTracks[1],
           genome: action.payload,
         };
         newState.refTracks = [state.refTracks[0], newAssemblyTrack];
+        newState.displayedEntryIds = getDisplayedEntryIds(
+          assembly,
+          newState.entries
+        );
+        newState.tracks = getTracks(assembly, newState.entries);
+        newState.fragSizeSeries = getFragmentSizeSeries(
+          assembly,
+          newState.entries
+        );
         newState.revision += 1;
       }
       break;
     }
     case 'RESET_BROWSER_ENTRIES': {
       const { assembly, entries } = action.payload;
-      newState.entries = entries;
-      newState.displayedEntryIds = getDisplayedEntryIds(assembly, entries);
-      newState.tracks = getTracks(assembly, entries);
-      newState.fragSizeSeries = getFragmentSizeSeries(assembly, entries);
+      newState.entries = processEntries(entries);
+      newState.displayedEntryIds = getDisplayedEntryIds(
+        assembly,
+        newState.entries
+      );
+      newState.tracks = getTracks(assembly, newState.entries);
+      newState.fragSizeSeries = getFragmentSizeSeries(
+        assembly,
+        newState.entries
+      );
       newState.revision += 1;
       break;
     }
