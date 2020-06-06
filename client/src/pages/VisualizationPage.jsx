@@ -44,7 +44,12 @@ class FormElements extends Component {
       dispatchSetDisplayRegion(displayRegion);
     }
 
-    const { dispatchResetBrowserEntries, assembly } = this.props;
+    const prevAssembly = this.props.assembly;
+    const { dispatchChangeAssembly } = this.props;
+    const assembly = searchParams.get('assembly') || prevAssembly;
+    if (prevAssembly !== assembly) dispatchChangeAssembly(assembly);
+
+    const { dispatchResetBrowserEntries } = this.props;
     dispatchResetBrowserEntries(assembly, idList);
 
     // this.setState({ form: { ...this.state.form, samples, } });
