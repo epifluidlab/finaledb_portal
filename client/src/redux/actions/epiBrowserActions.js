@@ -49,7 +49,8 @@ export function resetBrowserEntries(assembly, entryIds) {
   return (dispatch, getState) => {
     return fetch(`/samples?ID=${entryIds.join(',')}`)
       .then((response) => response.json())
-      .then((samples) => {
+      .then((results) => {
+        const { results: samples } = results;
         const entries = samples.reduce((acc, entry) => {
           acc[entry.id] = entry;
           return acc;

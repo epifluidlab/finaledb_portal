@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Component } from 'react';
+import { Page, Card, Grid, Table, Form, Button, Text } from 'tabler-react';
 // import { Document, Page as PdfPage, pdfjs } from "react-pdf";
 
 import { connect } from 'react-redux';
@@ -13,8 +14,6 @@ import {
   resetBrowserEntries,
   setDisplayRegion,
 } from '../redux/actions/epiBrowserActions';
-
-import { Page, Card, Grid, Table, Form, Button, Text } from 'tabler-react';
 
 import SiteWrapper from './SiteWrapper';
 import SamplesTable from '../components/SamplesTable';
@@ -67,7 +66,7 @@ class FormElements extends Component {
   render() {
     log.info('Render the form');
     const samples = [];
-    const { entries, displayedEntryIds, assembly } = this.props;
+    const { entries, displayedEntryIds, assembly, sampleInfoMap } = this.props;
     const displayedEntries = Object.keys(entries)
       .filter((entryId) => displayedEntryIds.includes(entryId))
       .reduce((acc, entryId) => {
@@ -126,7 +125,10 @@ class FormElements extends Component {
                   cards
                   className="text-nowrap"
                 >
-                  <SamplesTable entries={displayedEntries} />
+                  <SamplesTable
+                    entries={displayedEntries}
+                    sampleInfoMap={sampleInfoMap}
+                  />
                 </Table>
               </Card>
             </Grid.Col>
@@ -190,6 +192,25 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(resetBrowserEntries(assembly, entries)),
 });
 
-const mapStateToProps = (state) => ({ ...state.browser });
+const mapStateToProps = (state) => {
+  const { entries } = state.browser;
+  const sampleInfoMap = {};
+  // Entries may contain the same sample
+  Object.keys(entries).forEach((entryId) => {
+    const { sampleName, sample } = entries[entryId];
+    const sampleInfo = { sampleName };
+    if (sample.age) sampleInfo.age = sample.age;
+    if (sample.gender) sampleInfo.gender = sample.gender;
+    if (sample.pathological && sample.pathological.length > 0)
+      sampleInfo.pathological = sample.pathological;
+
+    sampleInfoMap[sampleName] = sampleInfo;
+  });
+
+  log.debug('sampleInfoMap');
+  log.debug(sampleInfoMap);
+
+  return { ...state.browser, sampleInfoMap };
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(FormElements);

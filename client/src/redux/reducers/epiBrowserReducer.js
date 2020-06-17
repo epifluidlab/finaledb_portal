@@ -59,15 +59,36 @@ function getDisplayedEntryIds(assembly, entries) {
 // Colors that are used to display numeric tracks (such as bigWig)
 function getColorMap(entryIds) {
   const trackColors = [
-    '#058DC7',
-    '#FF9655',
-    '#24CBE5',
-    '#DDDF00',
-    '#FFF263',
-    '#6AF9C4',
-    '#50B432',
-    '#ED561B',
-    '#64E572',
+    '#4b7bec',
+    '#fc5c65',
+    '#0fb9b1',
+    '#fa8231',
+    '#2d98da',
+    '#eb3b5a',
+    '#f7b731',
+    '#a55eea',
+    '#20bf6b',
+    '#778ca3',
+
+    // '#e41a1c',
+    // '#377eb8',
+    // '#4daf4a',
+    // '#984ea3',
+    // '#ff7f00',
+    // '#ffff33',
+    // '#a65628',
+    // '#f781bf',
+    // '#999999',
+
+    // '#058DC7',
+    // '#FF9655',
+    // '#24CBE5',
+    // '#DDDF00',
+    // '#FFF263',
+    // '#6AF9C4',
+    // '#50B432',
+    // '#ED561B',
+    // '#64E572',
   ];
   return entryIds.reduce((acc, ele, idx) => {
     acc[ele] = trackColors[idx % trackColors.length];
@@ -92,18 +113,23 @@ function getTracks(assembly, entries) {
           return false;
       }
     });
-    const { sampleName } = entry;
+    const { sampleName, seqrunName } = entry;
     const colorMap = getColorMap(getDisplayedEntryIds(assembly, entries));
     const tracksForEntry = filteredAnalysis.map((analysis) => {
       const url = `${s3Bucket}/${analysis.key}`;
+      // Rule for trackBaseName: seqRunId + sampleName
+      const trackBaseName =
+        sampleName !== null ? `${seqrunName}/${sampleName}` : seqrunName;
       const name = (() => {
         switch (analysis.desc) {
           case 'BAM':
-            return `BAM: ${sampleName}`;
+            return `BAM: ${trackBaseName}`;
           case 'coverage':
-            return `Coverage: ${sampleName}`;
+            return `Coverage: ${trackBaseName}`;
           case 'fragment profile':
-            return `Fragments: ${sampleName}`;
+            return `Fragments: ${trackBaseName}`;
+          case 'WPS':
+            return `WPS: ${trackBaseName}`;
           default:
             return '';
         }
@@ -112,12 +138,22 @@ function getTracks(assembly, entries) {
       // Each entry will be assigned a color from trackColors, by the natural order.
       const color = colorMap[entry.id];
 
-      return {
-        type,
-        name,
-        url,
-        options: { color, height: 96 },
-      };
+      switch (analysis.desc) {
+        case 'WPS':
+          return {
+            type,
+            name,
+            url,
+            options: { color: 'gray', color2: color, height: 96 },
+          };
+        default:
+          return {
+            type,
+            name,
+            url,
+            options: { color, color2: color, height: 96 },
+          };
+      }
     });
 
     return arr.concat(tracksForEntry);
@@ -159,7 +195,10 @@ function processEntries(entries) {
     const entry = entries[entryId];
     const newEntry = { ...entry };
     // Sample name: original altId or the universal entryId
-    newEntry.sampleName = (entry.altId || {}).original || `EE${entry.id}`;
+    // newEntry.sampleName = entry.originalId || entry.sraId || `EE${entry.id}`;
+    newEntry.sampleName = entry.sample.name;
+    newEntry.seqrunName = entry.sraId || `EE${entry.id}`;
+    // newEntry.sampleName = (entry.altId || {}).original || `EE${entry.id}`;
     acc[entryId] = newEntry;
     return acc;
   }, {});

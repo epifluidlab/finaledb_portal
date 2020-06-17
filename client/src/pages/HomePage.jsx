@@ -1,24 +1,19 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 // @flow
 
-import * as React from "react";
-import { Component } from "react";
+import * as React from 'react';
+import { Component } from 'react';
+import { connect } from 'react-redux';
 
-import {
-  Page,
-  Avatar,
-  Icon,
-  Grid,
-  Card,
-  Table,
-  StampCard,
-} from "tabler-react";
+import { Page, Avatar, Icon, Grid, Card, Table, StampCard } from 'tabler-react';
 
-import C3Chart from "react-c3js";
+import C3Chart from 'react-c3js';
 
-import SiteWrapper from "./SiteWrapper";
-import request from "../utils/request";
-import SamplesTable from "../components/SamplesTable";
+import SiteWrapper from './SiteWrapper';
+import request from '../utils/request';
+import SamplesTable from '../components/SamplesTable';
 
+import getDbSummary from '../redux/actions/dbSummaryActions';
 
 function PublicationTable(props) {
   const header = (
@@ -33,101 +28,82 @@ function PublicationTable(props) {
       </Table.Row>
     </Table.Header>
   );
-  const content = props.pubs.map((pub) =>
+  const content = props.pubs.map((pub) => (
     <Table.Row>
       <Table.Col>
-        <a href={pub.link}>
-          {pub.title}
-        </a>
+        <a href={pub.link}>{pub.title}</a>
       </Table.Col>
       <Table.Col>{pub.author}</Table.Col>
       <Table.Col>{pub.date}</Table.Col>
       <Table.Col>{pub.journal}</Table.Col>
-      <Table.Col>{pub.pmid}</Table.Col>
-      <Table.Col>
-        {pub.doi}
-      </Table.Col>
+      <Table.Col>{(pub.identifiers || {}).pmid}</Table.Col>
+      <Table.Col>{(pub.identifiers || {}).doi}</Table.Col>
     </Table.Row>
-  );
+  ));
   return (
     <div>
       {header}
-      <Table.Body>
-        {content}
-      </Table.Body>
+      <Table.Body>{content}</Table.Body>
     </div>
   );
 }
 
-
-
-
 class Home extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { data: null };
-  }
-
   componentDidMount() {
     // Call our fetch function below once the component mounts
-    this.callBackendAPI()
+    this.props.dispatchGetDbSummary();
   }
 
-  // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
-  callBackendAPI = async () => {
-    const [data, publications, samples] = await Promise.all([
-      request('/data'),
-      request('/publications'),
-      request('/samples'),
-    ]);
-
-    this.setState({
-      diseases: data.diseases,
-      platforms: data.platforms,
-      libraryFormats: data.libraryFormats,
-      assayTypes: data.assayTypes,
-      readLengths: data.readLengths,
-      tissues: data.tissues,
-      publications,
-      samples,
-    });
-  };
-
-
   render() {
-    const { 
-      diseases, 
-      platforms, 
-      libraryFormats, 
-      assayTypes,
-      readLengths, 
-      tissues,
-      publications,
-      samples 
-    } = this.state;
+    const {
+      seqRunCnt,
+      sampleCnt,
+      disease,
+      publication,
+      tissue,
+      assay,
+    } = this.props.summary;
 
-    if (!diseases || !platforms || !libraryFormats || !assayTypes || !readLengths || !tissues || !publications || !samples) return null;
+    if (
+      !seqRunCnt ||
+      !sampleCnt ||
+      !disease ||
+      !publication ||
+      !tissue ||
+      !assay
+    )
+      return null;
 
-    console.log(Array.from(diseases))
+    const diseaseArray = Object.entries(disease).sort(
+      (first, second) => second[1] - first[1]
+    );
     return (
       <SiteWrapper>
         <Page.Content>
-          <Grid.Row cards={true} gutters={"lg"}>
+          <Grid.Row cards={true} gutters={'lg'}>
             <Grid.Col lg={9}>
               <Card>
                 <Card.Header>
                   <Card.Title>About cfDB</Card.Title>
                 </Card.Header>
                 <Card.Body>
-                  With the recent surge in cfDNA studies and datasets, a platform to collect and uniformly process published data is needed. 
-                  Through a publicly accessible database that makes all datasets from current published and preprint studies reusable and comparable, 
-                  researchers will be able to further understand the genetics and epigenetics behind cfDNA and its diagnostic implications. 
-                  Here, we developed a comprehensive cfDNA database, cfDB, dedicated to integrating, analyzing, and visualizing cfDNA data for the benefit of the cfDNA research community. 
-                  Beginning with a large collection of raw sequence data from available studies and uniformly processing this raw data for effective presentation and interpretation, 
-                  cfDNA database provides a user-friendly web interface with powerful browse and search capacities, as well as data visualization and downloading functions.
+                  With the recent surge in cfDNA studies and datasets, a
+                  platform to collect and uniformly process published data is
+                  needed. Through a publicly accessible database that makes all
+                  datasets from current published and preprint studies reusable
+                  and comparable, researchers will be able to further understand
+                  the genetics and epigenetics behind cfDNA and its diagnostic
+                  implications. Here, we developed a comprehensive cfDNA
+                  database, cfDB, dedicated to integrating, analyzing, and
+                  visualizing cfDNA data for the benefit of the cfDNA research
+                  community. Beginning with a large collection of raw sequence
+                  data from available studies and uniformly processing this raw
+                  data for effective presentation and interpretation, cfDNA
+                  database provides a user-friendly web interface with powerful
+                  browse and search capacities, as well as data visualization
+                  and downloading functions.
                 </Card.Body>
               </Card>
-
 
               <Card>
                 <Card.Header>
@@ -135,30 +111,26 @@ class Home extends Component {
                 </Card.Header>
                 <C3Chart
                   data={{
-                    columns: diseases,
-                    type: "bar",
+                    columns: diseaseArray,
+                    type: 'bar',
                   }}
-
                   legend={{
                     show: true,
-                    position: "bottom",
+                    position: 'bottom',
                     padding: 0,
                   }}
                   tooltip={{
                     format: {
-                      title: function (x) {
-                        return "";
-                      },
+                      title: () => '',
                     },
                   }}
                   axis={{
                     x: {
-                      show:true
-                    }
-                    ,
+                      show: true,
+                    },
                     y: {
-                      show: true
-                    }
+                      show: true,
+                    },
                   }}
                   padding={{
                     bottom: 0,
@@ -176,17 +148,16 @@ class Home extends Component {
                   <Card.Title>Publications</Card.Title>
                 </Card.Header>
                 <Table
-                    responsive
-                    highlightRowOnHover
-                    hasOutline
-                    verticalAlign="center"
-                    cards
-                    className="text-nowrap"
+                  responsive
+                  highlightRowOnHover
+                  hasOutline
+                  verticalAlign="center"
+                  cards
+                  className="text-nowrap"
                 >
-                  <PublicationTable pubs={publications} />
+                  <PublicationTable pubs={publication} />
                 </Table>
               </Card>
-
             </Grid.Col>
 
             <Grid.Col sm={3}>
@@ -196,7 +167,17 @@ class Home extends Component {
                   icon="activity"
                   header={
                     <a href="#">
-                      {samples.length} <small>Samples</small>
+                      {sampleCnt} <small>Samples</small>
+                    </a>
+                  }
+                />
+
+                <StampCard
+                  color="red-light"
+                  icon="activity"
+                  header={
+                    <a href="#">
+                      {seqRunCnt} <small>Seqencing runs</small>
                     </a>
                   }
                 />
@@ -206,7 +187,7 @@ class Home extends Component {
                   icon="book-open"
                   header={
                     <a href="#">
-                      {publications.length} <small>Publications</small>
+                      {publication.length} <small>Publications</small>
                     </a>
                   }
                 />
@@ -217,17 +198,15 @@ class Home extends Component {
                   </Card.Header>
                   <Card.Body>
                     <C3Chart
-                      style={{ height: "12rem" }}
+                      style={{ height: '12rem' }}
                       data={{
-                        columns: diseases,
-                        type: "donut", // default type of chart
+                        columns: diseaseArray,
+                        type: 'donut', // default type of chart
                       }}
                       donut={{
                         label: {
-                          format: function (value, ratio, id) {
-                            return value;
-                          }
-                        }
+                          format: (value) => value,
+                        },
                       }}
                       legend={{
                         show: false, //hide legend
@@ -241,7 +220,6 @@ class Home extends Component {
                 </Card>
               </Grid.Row>
 
-
               <Grid.Row>
                 <Card>
                   <Card.Header>
@@ -249,10 +227,10 @@ class Home extends Component {
                   </Card.Header>
                   <Card.Body>
                     <C3Chart
-                      style={{ height: "12rem" }}
+                      style={{ height: '12rem' }}
                       data={{
-                        columns: assayTypes,
-                        type: "donut", // default type of chart
+                        columns: Object.entries(assay),
+                        type: 'donut', // default type of chart
                       }}
                       legend={{
                         show: false, //hide legend
@@ -273,10 +251,10 @@ class Home extends Component {
                   </Card.Header>
                   <Card.Body>
                     <C3Chart
-                      style={{ height: "12rem" }}
+                      style={{ height: '12rem' }}
                       data={{
-                        columns: tissues,
-                        type: "donut", // default type of chart
+                        columns: Object.entries(tissue),
+                        type: 'donut', // default type of chart
                       }}
                       legend={{
                         show: false, //hide legend
@@ -289,14 +267,23 @@ class Home extends Component {
                   </Card.Body>
                 </Card>
               </Grid.Row>
-
             </Grid.Col>
           </Grid.Row>
-
         </Page.Content>
       </SiteWrapper>
     );
   }
 }
 
-export default Home;
+const mapDispatchToProps = (dispatch) => ({
+  // TODO remove this later
+  dispatchGetDbSummary: () => dispatch(getDbSummary()),
+});
+
+const mapStateToProps = (state) => {
+  return { summary: state.summary };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
+
+// export default Home;

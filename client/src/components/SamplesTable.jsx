@@ -7,55 +7,63 @@ import { Link } from 'react-router-dom';
 
 const SamplesTableRow = ({
   downloads,
-  sample,
+  // sample,
+  entry,
   addDownload,
   removeDownload,
 }) => {
+  const { sample } = entry;
   const sampleInBasket = downloads.find(
     (download) => download.sraId === sample.sraId
   );
   const addToBasket = () => addDownload(sample);
   const removeFromBasket = () => removeDownload(sample.sraId);
 
-  const disease = sample.disease || '';
+  // const disease = sample.disease || '';
+  const disease = (entry.sample || {}).disease || '';
+  // (sample.pathological || []).join(', ');
   const truncatedDisease =
     disease.length > 20 ? `${disease.substring(0, 20)}  ...` : disease;
 
   return (
     <Table.Row>
       <Table.Col>
-        <div>{sample.sampleName}</div>
+        <div>{sample.name}</div>
         <Text size="sm" muted>
-          {sample.sraId}
+          {entry.originalId || entry.sraId}
         </Text>
       </Table.Col>
       <Table.Col>
-        <div title={sample.disease}>{truncatedDisease}</div>
+        <div title={disease}>{truncatedDisease}</div>
         <Text size="sm" muted>
-          {sample.sex}
-          {sample.age !== -1 ? `, ${sample.age}` : ''}
+          {sample.gender || ''}
+          {sample.age || ''}
         </Text>
       </Table.Col>
-      <Table.Col>{sample.tissue}</Table.Col>
+      <Table.Col>{sample.tissue || ''}</Table.Col>
       <Table.Col>
         <Text size="sm" muted>
-          {sample.readLength} <br />
-          {sample.mbases}
-        </Text>
-      </Table.Col>
-      <Table.Col>
-        <Text size="sm" muted>
-          {sample.libraryFormat} <br />
-          {sample.assayType}
+          {(entry.seqConfig || {}).readlen || ''} <br />
+          {entry.mbases || ''}
         </Text>
       </Table.Col>
       <Table.Col>
+        <Text size="sm" muted>
+          PAIRED
+        </Text>
+      </Table.Col>
+      <Table.Col>
+        <Text size="sm" muted>
+          {entry.assay}
+        </Text>
+      </Table.Col>
+      {/* <Table.Col>
         <Text size="sm" muted>
           {sample.platform}
         </Text>
-      </Table.Col>
+      </Table.Col> */}
 
-      <Table.Col alignContent="center">
+      {/* <Table.Col alignContent="center">
         <Form.Group>
           <Form.InputGroup append>
             <Button.Dropdown>
@@ -89,7 +97,7 @@ const SamplesTableRow = ({
             </Button.Dropdown>
           </Form.InputGroup>
         </Form.Group>
-      </Table.Col>
+      </Table.Col> */}
     </Table.Row>
   );
 };
@@ -118,20 +126,24 @@ const SamplesTable = ({ entries }) => {
         <Table.ColHeader>
           Read length <br /> Mbases{' '}
         </Table.ColHeader>
-        <Table.ColHeader>
-          Format <br />
-          Assay Type
-        </Table.ColHeader>
-        <Table.ColHeader>Platform</Table.ColHeader>
+        <Table.ColHeader>Library Layout</Table.ColHeader>
+        <Table.ColHeader>Assay</Table.ColHeader>
+        {/* <Table.ColHeader>Platform</Table.ColHeader> */}
 
-        <Table.ColHeader>Other</Table.ColHeader>
+        {/* <Table.ColHeader>Other</Table.ColHeader> */}
       </Table.Row>
     </Table.Header>
   );
 
-  const content = Object.values(entries).map((sample) => (
-    <SamplesTableRowConnected key={sample.id} sample={sample} />
-  ));
+  const content = Object.values(entries).map((entry) => {
+    return (
+      <SamplesTableRowConnected
+        key={entry.id}
+        entry={entry}
+        sample={entry.sample}
+      />
+    );
+  });
 
   return (
     <div>
@@ -143,6 +155,7 @@ const SamplesTable = ({ entries }) => {
 
 SamplesTable.propTypes = {
   entries: PropTypes.shape(),
+  sampleInfoMap: PropTypes.shape(),
 };
 
 SamplesTable.defaultProps = {

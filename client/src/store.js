@@ -5,6 +5,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 import downloadsReducer from './redux/downloads/reducer';
 import epiBrowserReducer from './redux/reducers/epiBrowserReducer';
+import dbSummaryReducer from './redux/reducers/dbSummaryReducer';
 
 const initialState = {};
 
@@ -13,6 +14,7 @@ const middleware = [logger, thunk];
 const rootReducer = combineReducers({
   downloads: downloadsReducer,
   browser: epiBrowserReducer,
+  summary: dbSummaryReducer,
 });
 
 export const createStoreWithInitialState = (state) =>

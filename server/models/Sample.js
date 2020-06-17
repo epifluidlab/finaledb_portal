@@ -14,7 +14,8 @@ Sample.init(
     age: DataTypes.INTEGER,
     gender: DataTypes.TEXT,
     tissue: DataTypes.TEXT,
-    pathological: DataTypes.JSON,
+    disease: DataTypes.TEXT,
+    // pathological: DataTypes.JSON,
   },
   {
     sequelize: db,
