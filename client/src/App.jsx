@@ -12,7 +12,7 @@ import store from './store';
 import "tabler-react/dist/Tabler.css";
 
 
-function App(props) {
+export default function App(props) {
   return (
     <Provider store={store}>
       <React.StrictMode>
@@ -30,5 +30,3 @@ function App(props) {
     </Provider>
   );
 }
-
-export default App;

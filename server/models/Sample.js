@@ -10,6 +10,7 @@ Sample.init(
       type: DataTypes.INTEGER,
       primaryKey: true,
     },
+    altId: DataTypes.JSON,
     name: DataTypes.TEXT,
     age: DataTypes.INTEGER,
     gender: DataTypes.TEXT,

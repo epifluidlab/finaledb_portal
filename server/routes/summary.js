@@ -27,6 +27,16 @@ const summarize = async (req, res, next) => {
     summary.sampleCnt = parseInt(results[0].count, 10);
 
     results = await sequelize.query(
+      "SELECT COUNT(id) count, seq_config->>'instrument' instrument FROM dev.seqrun \n" +
+        "WHERE hidden != true GROUP BY seq_config->>'instrument'",
+      { type: QueryTypes.SELECT }
+    );
+    summary.instrument = results.reduce((acc, ele) => {
+      if (ele.instrument) acc[ele.instrument] = parseInt(ele.count, 10);
+      return acc;
+    }, {});
+
+    results = await sequelize.query(
       'SELECT count(dev.seqrun.id) count, disease FROM dev.seqrun \n' +
         'LEFT OUTER JOIN dev.sample ON (dev.seqrun.sample_id = dev.sample.id) \n' +
         'WHERE dev.seqrun.hidden != TRUE GROUP BY disease',

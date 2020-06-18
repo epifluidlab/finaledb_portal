@@ -18,7 +18,6 @@ SeqRun.init(
     altId: DataTypes.JSON,
     assay: DataTypes.TEXT,
     mbases: DataTypes.INTEGER,
-    numReads: DataTypes.INTEGER,
     analysis: DataTypes.JSON,
     seqConfig: DataTypes.JSON,
 

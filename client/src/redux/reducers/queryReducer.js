@@ -1,18 +1,28 @@
-const initialState = {};
+const initialState = {
+  seqrunQueryTerms: {
+    assay: ['WGS'],
+    minReadlen: 10,
+    maxReadlen: 160,
+    minMbases: 1,
+    maxMbases: 3000,
+    tissue: ['urine'],
+    disease: ['Colorectal cancer', 'Pancreatic cancer'],
+  },
+  seqrunQueryResults: [],
+};
 
-export default (state = initialState, action) => {
-  let newState = {
-    ...state,
-  };
-
+export default function queryReducer(state = initialState, action) {
   switch (action.type) {
-    case 'QUERY_SEQRUN': {
-      newState = { ...newState, ...action.payload };
-      break;
+    case 'SET_SEQRUN_QUERY_TERMS': {
+      const newState = { ...state, seqrunQueryTerms: action.payload };
+      return newState;
+    }
+    case 'SET_SEQRUN_QUERY_RESULTS': {
+      const newState = { ...state, seqrunQueryResults: action.payload };
+      return newState;
     }
     default:
       break;
   }
-
-  return newState;
-};
+  return state;
+}

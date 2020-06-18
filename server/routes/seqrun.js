@@ -39,109 +39,100 @@ const guessSampleId = (idText) => {
 
 */
 
-// Build the query clause based on sraId, originalId, or canonical Id
-// Example: ?sraId=SRR2129993,SRR2129994
-function buildIdQueryClause(query) {
-  if (!query) return [];
+// Filters such as assay, disease, etc
+function buildFacetFilterClause(query) {
+  if (!query) return {};
 
-  // Process original ID and SRA IDs
-  const idClause = [];
-  (query.originalId || '').split(',').forEach((originalId) => {
-    if (originalId)
-      idClause.push(
-        Sequelize.where(Sequelize.literal(`alt_id->>'original'`), originalId)
-      );
+  const plainCLauseMap = {};
+  const complexClauseList = [];
+
+  const fieldsMap = {
+    id: 'id',
+    sraId: Sequelize.literal(`"SeqRun".alt_id->>'SRA'`),
+    originalId: Sequelize.literal(`SeqRun.alt_id->>'original'`),
+    assay: 'assay',
+    sample_name: Sequelize.literal('sample.name'),
+    disease: Sequelize.literal('sample.disease'),
+    tissue: Sequelize.literal('sample.tissue'),
+    instrument: Sequelize.literal(`seq_config->>'instrument'`),
+    publication: 'publication_id',
+  };
+
+  Object.keys(fieldsMap).forEach((filterName) => {
+    if (query[filterName] && query[filterName].length > 0) {
+      const filterValues = query[filterName].split(',');
+
+      if (
+        [
+          'instrument',
+          'tissue',
+          'disease',
+          'sample_name',
+          'sraId',
+          'originalId',
+        ].includes(filterName)
+      ) {
+        complexClauseList.push(
+          Sequelize.where(fieldsMap[filterName], {
+            [Op.in]: filterValues,
+          })
+        );
+      } else if (filterName === 'id') {
+        // Special handling: remove the leading 'EE'
+        const entryIdList = filterValues.map((v) =>
+          parseInt(v.substring(2), 10)
+        );
+        plainCLauseMap.id = { [Op.in]: entryIdList };
+      } else {
+        plainCLauseMap[fieldsMap[filterName]] = { [Op.in]: filterValues };
+      }
+    }
   });
 
-  (query.sraId || '').split(',').forEach((sraId) => {
-    if (sraId)
-      idClause.push(
-        Sequelize.where(Sequelize.literal(`alt_id->>'SRA'`), sraId)
-      );
-  });
-
-  (query.ID || '')
-    .split(',')
-    .map(guessSampleId)
-    .forEach((entryId) => {
-      if (entryId) idClause.push({ id: entryId });
-    });
-
-  if (idClause.length > 0) return [Sequelize.or(...idClause)];
-  return [];
-
-  // if (idClause.length > 0) clauses.push(Sequelize.or(...idClause));
-
-  // // for (const originalID of (query['originalId'] || '').split(',')) {
-  // //   if (originalID)
-  // //     idClause.push(
-  // //       Sequelize.where(Sequelize.literal(`alt_id->>'original'`), originalID)
-  // //     );
-  // // }
-  // // if (idClause.length > 0) clauses.push(Sequelize.or(...idClause));
-
-  // idClause = [];
-
-  // if (idClause.length > 0) clauses.push(Sequelize.or(...idClause));
-
-  // // for (const sraID of (query['sraId'] || '').split(',')) {
-  // //   if (sraID)
-  // //     idClause.push(
-  // //       Sequelize.where(Sequelize.literal(`alt_id->>'SRA'`), sraID)
-  // //     );
-  // // }
-  // // if (idClause.length > 0) clauses.push(Sequelize.or(...idClause));
-
-  // idClause = [];
-  // (query.ID || '')
-  //   .split(',')
-  //   .map(guessSampleId)
-  //   .forEach((entryId) => {
-  //     if (entryId) idClause.push({ id: entryId });
-  //   });
-  // // for (const entryID of (query['ID'] || '').split(',').map(guessSampleId)) {
-  // //   if (entryID) idClause.push({ id: entryID });
-  // // }
-  // if (idClause.length > 0) clauses.push(Sequelize.or(...idClause));
+  const clauses = { ...plainCLauseMap };
+  if (complexClauseList.length > 0) {
+    clauses[Op.and] = complexClauseList;
+  }
+  console.log('clauseList');
+  console.log(clauses);
+  return clauses;
 }
 
-function buildBetweenClause(query) {
-  const clauses = [];
+function buildRangeClause(query) {
+  const plainCLauseMap = {};
+  const complexClauseList = [];
 
-  if (!query) return clauses;
+  if (!query) return {};
 
   const attrs = ['readlen', 'mbases'];
 
   attrs.forEach((attr) => {
-    if (query[attr] && query[attr].length) {
-      // console.log(query[attr]);
-      // console.log(query[attr].split(',').map((n) => parseInt(n, 10)));
+    if (query[attr] && query[attr].length > 0) {
       const min = parseInt(query[attr].split(',')[0], 10);
       const max = parseInt(query[attr].split(',')[1], 10);
-      // console.log(min + ' ' + max)
-      if (min && max) {
-        switch (attr) {
-          case 'readlen':
-            clauses.push(
-              Sequelize.where(
-                Sequelize.literal(`(seq_config->>'readlen')::int`),
-                { [Op.between]: [min, max] }
-              )
-            );
-            break;
-          case 'mbases':
-            clauses.push({
-              mbases: {
-                [Op.between]: [min, max],
-              },
-            });
-            break;
-          default:
-            break;
-        }
+
+      switch (attr) {
+        case 'readlen':
+          complexClauseList.push(
+            Sequelize.where(
+              Sequelize.literal(`(seq_config->>'readlen')::int`),
+              { [Op.between]: [min, max] }
+            )
+          );
+          break;
+        case 'mbases':
+          plainCLauseMap.mbases = { [Op.between]: [min, max] };
+          break;
+        default:
+          break;
       }
     }
   });
+
+  const clauses = { ...plainCLauseMap };
+  if (complexClauseList.length > 0) {
+    clauses[Op.and] = complexClauseList;
+  }
 
   return clauses;
 }
@@ -151,15 +142,24 @@ const buildWhereClause = (query) => {
     return {};
   }
 
-  const queryIdClauses = buildIdQueryClause(query);
-  console.log(queryIdClauses);
-  const betweenClauses = buildBetweenClause(query);
+  // const queryIdClauses = buildIdQueryClause(query);
+  // console.log(queryIdClauses);
+  // const betweenClauses = buildBetweenClause(query);
+  const rangeClauses = buildRangeClause(query);
+  const facetClauses = buildFacetFilterClause(query);
 
-  const clauses = Sequelize.and(
-    [queryIdClauses, betweenClauses].reduce((acc, ele) => acc.concat(ele), [])
-  );
-
+  // const clauses = { [Op.and]: [queryIdClauses, rangeClauses, facetClauses] };
+  const clauses = { [Op.and]: [rangeClauses, facetClauses] };
   console.log(clauses);
+
+  // const multiValClauses = buildMultiValueCheckClause(query);
+
+  // const clauses = Sequelize.and(
+  //   queryIdClauses.concat(betweenClauses).concat(multiValClauses)
+  //   // [queryIdClauses, betweenClauses].reduce((acc, ele) => acc.concat(ele), [])
+  // );
+
+  // console.log(clauses);
   // const attrs = ['platform', 'disease', 'tissue', 'doi', 'libraryFormat', 'assayType', 'sraId'];
 
   return clauses;
@@ -179,14 +179,14 @@ const buildWhereClause = (query) => {
 
 const get = async (req, res, next) => {
   // Default limit of query results: 50
-  const limit = (req.query || {}).limit || 50;
-  const offset = (req.query || {}).offset || 0;
+  const limit = parseInt((req.query || {}).limit || 50, 10);
+  const offset = parseInt((req.query || {}).offset || 0, 10);
   try {
     // select * from Sample where [...buildWhereClause] and [...buildBetweenClause];
     const whereClause = req.params.sampleId
       ? { id: guessSampleId(req.params.sampleId) }
       : buildWhereClause(req.query);
-    const samples = await SeqRun.findAll({
+    const results = await SeqRun.findAndCountAll({
       // where: { ...buildWhereClause(req.query), ...buildBetweenClause(req.query) },
       // where: Sequelize.and(Sequelize.where(Sequelize.literal('alt_id->>\'original\''), "EGAR00002028223")),
       where: whereClause,
@@ -194,25 +194,30 @@ const get = async (req, res, next) => {
         { model: Publication, as: 'publication' },
         { model: Sample, as: 'sample' },
       ],
-      // TODO
       limit,
       offset,
     });
+    const { count: totalCnt, rows: samples } = results;
     const payload = samples.map((s) => {
       const data = s.toJSON();
-      data.id = `${s.id}`;
-
-      // Additional mapping:
-      // altId->>original => originalId, altId->>SRA => sraId
-      data.originalId = (data.altId || {}).original || '';
-      data.sraId = (data.altId || {}).SRA || '';
-      delete data.altId;
 
       delete data.sampleId;
       delete data.publicationId;
+
+      // divide "analysis" into two groups: "hg19" and "hg38"
+      data.analysis = {
+        hg19: (data.analysis || []).filter((item) => item.assembly === 'hg19'),
+        hg38: (data.analysis || []).filter((item) => item.assembly === 'hg38'),
+      };
+
       return data;
     });
-    return res.status(200).json({ count: payload.length, results: payload });
+    return res.status(200).json({
+      count: payload.length,
+      offset,
+      total: totalCnt,
+      results: payload,
+    });
   } catch (e) {
     return next(e);
   }
