@@ -8,7 +8,11 @@ const get = async (req, res, next) => {
   const limit = (req.query || {}).limit || 50;
   const offset = (req.query || {}).offset || 0;
   try {
-    const publications = await Publication.findAll({ limit, offset });
+    const publications = await Publication.findAll({
+      limit,
+      offset,
+      order: ['id'],
+    });
     return res
       .status(200)
       .json({ count: publications.length, results: publications });

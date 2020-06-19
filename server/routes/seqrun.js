@@ -137,6 +137,27 @@ function buildRangeClause(query) {
   return clauses;
 }
 
+const buildSearchClause = (query) => {
+  const { search } = query;
+  if (!search || search.length === 0) return {};
+
+  const clauseList = [];
+
+  const entryIdMatch = search.match(/EE([0-9]+)/);
+  if (entryIdMatch) {
+    const entryId = parseInt(entryIdMatch[1], 10);
+    clauseList.push({ id: entryId });
+  }
+  if (search.startsWith('SRR')) {
+    clauseList.push(
+      Sequelize.where(Sequelize.literal(`"SeqRun".alt_id->>'SRA'`), search)
+    );
+  }
+  clauseList.push(Sequelize.where(Sequelize.literal(`"sample".name`), search));
+
+  return { [Op.or]: clauseList };
+};
+
 const buildWhereClause = (query) => {
   if (!query) {
     return {};
@@ -145,11 +166,15 @@ const buildWhereClause = (query) => {
   // const queryIdClauses = buildIdQueryClause(query);
   // console.log(queryIdClauses);
   // const betweenClauses = buildBetweenClause(query);
+  const searchClauses = buildSearchClause(query);
   const rangeClauses = buildRangeClause(query);
   const facetClauses = buildFacetFilterClause(query);
 
   // const clauses = { [Op.and]: [queryIdClauses, rangeClauses, facetClauses] };
-  const clauses = { [Op.and]: [rangeClauses, facetClauses] };
+  const clauses = {
+    [Op.and]: [searchClauses, rangeClauses, facetClauses],
+    hidden: { [Op.ne]: true },
+  };
   console.log(clauses);
 
   // const multiValClauses = buildMultiValueCheckClause(query);
@@ -196,6 +221,7 @@ const get = async (req, res, next) => {
       ],
       limit,
       offset,
+      order: ['id'],
     });
     const { count: totalCnt, rows: samples } = results;
     const payload = samples.map((s) => {
@@ -203,6 +229,10 @@ const get = async (req, res, next) => {
 
       delete data.sampleId;
       delete data.publicationId;
+
+      if (!data.sample) delete data.sample;
+      if (!data.mbases) delete data.mbases;
+      if (!data.altId) delete data.altId;
 
       // divide "analysis" into two groups: "hg19" and "hg38"
       data.analysis = {

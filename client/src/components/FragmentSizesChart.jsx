@@ -24,11 +24,13 @@ const Charts = (props) => {
         },
       },
     },
-    series: series.map((val) => ({
-      name: val.name,
-      color: val.color,
-      data: val.dataPts,
-    })),
+    series: series
+      .filter((item) => item.dataPts && item.dataPts.length > 0)
+      .map((val) => ({
+        name: val.name,
+        color: val.color,
+        data: val.dataPts,
+      })),
   };
 
   if ((chartOptions.series || []).length > 0) {

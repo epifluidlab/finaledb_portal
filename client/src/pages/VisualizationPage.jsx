@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Component } from 'react';
-import { Page, Card, Grid, Table, Form, Button, Text } from 'tabler-react';
+import { Page, Card, Grid, Table, Form } from 'tabler-react';
 // import { Document, Page as PdfPage, pdfjs } from "react-pdf";
 
 import { connect } from 'react-redux';
@@ -10,8 +10,9 @@ import log from 'loglevel';
 import PropTypes from 'prop-types';
 
 import {
-  changeGenomeAssembly,
   resetBrowserEntries,
+  fetchFragmentSizeSeries,
+  // setFragmentSizeSeries,
   setDisplayRegion,
 } from '../redux/actions/epiBrowserActions';
 
@@ -22,60 +23,90 @@ import EpiBrowser from '../containers/EpiBrowser';
 import Charts from '../components/FragmentSizesChart';
 
 class FormElements extends Component {
-  async componentDidMount() {
-    // eslint-disable-next-line react/destructuring-assignment
-    const { id } = this.props.match.params;
-    // The page can display tracks of multiple samples by having an additional query term
-    const searchParams =
-      // eslint-disable-next-line react/destructuring-assignment
-      new URLSearchParams(this.props.location.search);
-    const extraIds = (searchParams.get('id') || '').split(',');
-    const idList = [];
-    if (id) idList.push(id);
-    else {
-      extraIds.forEach((val) => {
-        if (val) idList.push(val);
-      });
-    }
-    const displayRegion = searchParams.get('region');
-    if (displayRegion) {
-      const { dispatchSetDisplayRegion } = this.props;
-      dispatchSetDisplayRegion(displayRegion);
-    }
-
-    const prevAssembly = this.props.assembly;
-    const { dispatchChangeAssembly } = this.props;
-    const assembly = searchParams.get('assembly') || prevAssembly;
-    if (prevAssembly !== assembly) dispatchChangeAssembly(assembly);
-
+  componentDidMount() {
     const { dispatchResetBrowserEntries } = this.props;
-    dispatchResetBrowserEntries(assembly, idList);
 
-    // this.setState({ form: { ...this.state.form, samples, } });
+    const {
+      query: { selected: selectedEntries },
+    } = this.props;
+
+    const selNum = (selectedEntries || []).length;
+    if (selNum > 3) {
+      console.log(`Too many selected entries: ${selNum}`);
+    }
+
+    const defaultAssembly = 'hg38';
+    // Update the fragment series right after reset the browser
+    const { dispatchFetchFragmentSizeSeries } = this.props;
+    const callback = (browserState) => {
+      const { fragSizeSeries = [] } = browserState;
+      dispatchFetchFragmentSizeSeries(fragSizeSeries);
+    };
+    dispatchResetBrowserEntries(
+      defaultAssembly,
+      selectedEntries.slice(0, 3),
+      callback
+    );
   }
 
   updateFormValue = (event) => {
     const assembly = event.target.value;
     log.info(`Change to assembly: ${assembly}`);
 
-    const { dispatchChangeAssembly } = this.props;
-    dispatchChangeAssembly(assembly);
-    this.forceUpdate();
+    // const { dispatchChangeAssembly } = this.props;
+    // dispatchChangeAssembly(assembly);
+    const { dispatchResetBrowserEntries, entries } = this.props;
+    // Update the fragment series right after reset the browser
+    const { dispatchFetchFragmentSizeSeries } = this.props;
+    const callback = (browserState) => {
+      const { fragSizeSeries = [] } = browserState;
+      dispatchFetchFragmentSizeSeries(fragSizeSeries);
+    };
+    dispatchResetBrowserEntries(assembly, entries, callback);
+  };
+
+  shouldComponentUpdate = (nextProps) => {
+    const { assembly, entries, fragSizeSeries } = this.props;
+    const {
+      assembly: nextAssembly,
+      entries: nextEntries,
+      fragSizeSeries: nextFragSizeSeries,
+    } = nextProps;
+
+    const shouldUpdate =
+      assembly !== nextAssembly ||
+      JSON.stringify(entries.map((entry) => entry.id).sort()) !==
+        JSON.stringify(nextEntries.map((entry) => entry.id).sort()) ||
+      JSON.stringify(
+        fragSizeSeries
+          .filter((item) => item.dataPts)
+          .map((item) => item.key)
+          .sort()
+      ) !==
+        JSON.stringify(
+          nextFragSizeSeries
+            .filter((item) => item.dataPts)
+            .map((item) => item.key)
+            .sort()
+        );
+    return shouldUpdate;
   };
 
   render() {
-    log.info('Render the form');
-    const samples = [];
-    const { entries, displayedEntryIds, assembly, sampleInfoMap } = this.props;
-    const displayedEntries = Object.keys(entries)
-      .filter((entryId) => displayedEntryIds.includes(entryId))
-      .reduce((acc, entryId) => {
-        acc[entryId] = entries[entryId];
-        return acc;
-      }, {});
+    console.log('VisualizationPage render');
 
-    // eslint-disable-next-line react/destructuring-assignment
-    const fragSizeSeries = Object.values(this.props.fragSizeSeries || {});
+    const { fragSizeSeries = [] } = this.props;
+
+    const samples = [];
+    const {
+      entries,
+      displayedEntryIds,
+      assembly,
+      // dispatchSetFragSize,
+    } = this.props;
+    const displayedEntries = (entries || []).filter(({ id: entryId }) =>
+      displayedEntryIds.includes(entryId)
+    );
 
     if (!samples) return null;
 
@@ -127,7 +158,7 @@ class FormElements extends Component {
                 >
                   <SamplesTable
                     entries={displayedEntries}
-                    sampleInfoMap={sampleInfoMap}
+                    assembly={assembly}
                   />
                 </Table>
               </Card>
@@ -164,10 +195,16 @@ FormElements.propTypes = {
     })
   ),
   assembly: PropTypes.string.isRequired,
-  entries: PropTypes.shape(PropTypes.shape()),
+  entries: PropTypes.arrayOf(PropTypes.shape()),
+
+  query: PropTypes.shape({
+    selected: PropTypes.arrayOf(PropTypes.shape({ id: PropTypes.number })),
+  }).isRequired,
+
   displayedEntryIds: PropTypes.arrayOf(PropTypes.string),
   dispatchResetBrowserEntries: PropTypes.func.isRequired,
-  dispatchSetDisplayRegion: PropTypes.func.isRequired,
+  dispatchFetchFragmentSizeSeries: PropTypes.func.isRequired,
+  // dispatchSetDisplayRegion: PropTypes.func.isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
       id: PropTypes.string,
@@ -181,36 +218,25 @@ FormElements.propTypes = {
 FormElements.defaultProps = {
   fragSizeSeries: [],
   displayedEntryIds: [],
-  entries: {},
+  entries: [],
 };
 
 const mapDispatchToProps = (dispatch) => ({
   dispatchSetDisplayRegion: (region) => dispatch(setDisplayRegion(region)),
-  dispatchChangeAssembly: (assembly) =>
-    dispatch(changeGenomeAssembly(assembly)),
-  dispatchResetBrowserEntries: (assembly, entries) =>
-    dispatch(resetBrowserEntries(assembly, entries)),
+  dispatchResetBrowserEntries: (assembly, entries, callback) =>
+    dispatch(resetBrowserEntries(assembly, entries, callback)),
+  dispatchFetchFragmentSizeSeries: (fragSizeSeries) =>
+    dispatch(fetchFragmentSizeSeries(fragSizeSeries)),
 });
 
 const mapStateToProps = (state) => {
-  const { entries } = state.browser;
-  const sampleInfoMap = {};
-  // Entries may contain the same sample
-  Object.keys(entries).forEach((entryId) => {
-    const { sampleName, sample } = entries[entryId];
-    const sampleInfo = { sampleName };
-    if (sample.age) sampleInfo.age = sample.age;
-    if (sample.gender) sampleInfo.gender = sample.gender;
-    if (sample.pathological && sample.pathological.length > 0)
-      sampleInfo.pathological = sample.pathological;
-
-    sampleInfoMap[sampleName] = sampleInfo;
-  });
-
-  log.debug('sampleInfoMap');
-  log.debug(sampleInfoMap);
-
-  return { ...state.browser, sampleInfoMap };
+  // const { entries } = state.browser;
+  return {
+    ...state.browser,
+    query: {
+      selected: state.query.selectedSeqruns,
+    },
+  };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FormElements);

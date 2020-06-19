@@ -14,6 +14,7 @@ Publication.init(
     journal: DataTypes.TEXT,
     date: DataTypes.DATE,
     identifiers: DataTypes.JSON,
+    citeShort: DataTypes.TEXT,
     // pmid: DataTypes.NUMBER,
     // doi: {
     //   type: DataTypes.STRING,

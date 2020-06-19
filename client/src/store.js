@@ -1,4 +1,4 @@
-import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import logger from 'redux-logger';
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
@@ -10,7 +10,8 @@ import queryReducer from './redux/reducers/queryReducer';
 
 const initialState = {};
 
-const middleware = [logger, thunk];
+// const middleware = [logger, thunk];
+const middleware = [thunk];
 
 const rootReducer = combineReducers({
   downloads: downloadsReducer,
@@ -19,13 +20,20 @@ const rootReducer = combineReducers({
   query: queryReducer,
 });
 
-export const createStoreWithInitialState = (state) =>
-  createStore(
-    rootReducer,
-    state,
-    composeWithDevTools(applyMiddleware(...middleware))
-  );
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const store = createStore(
+  rootReducer,
+  initialState,
+  composeEnhancers(applyMiddleware(...middleware))
+);
 
-const store = createStoreWithInitialState(initialState);
+// const createStoreWithInitialState = (state) =>
+//   createStore(
+//     rootReducer,
+//     state,
+//     composeWithDevTools(applyMiddleware(...middleware))
+//   );
+
+// const store = createStoreWithInitialState(initialState);
 
 export default store;

@@ -89,6 +89,10 @@ class EpiBrowser extends React.Component {
 
   componentDidMount() {
     log.info('EpiBrowser: componentDidMount');
+    // This is a weired behavior. When the EpiBrowser is unmounted and mounted again, unless you call
+    // renderBrowser twice, thus epgg-root has two children nodes, the browser won't display properly.
+    // Here, we force it to have at least two children nodes.
+    this.renderBrowser(this.props);
     this.renderBrowser(this.props);
     log.info(this.props);
   }
@@ -98,6 +102,9 @@ class EpiBrowser extends React.Component {
     log.info('EpiBrowser: shouldComponentUpdate');
     const { revision } = this.props;
     if (revision !== nextProps.revision) {
+      log.info(
+        `Revision updated, renderBrowser: ${revision} => ${nextProps.revision}`
+      );
       this.renderBrowser(nextProps);
     }
     return false;
@@ -155,10 +162,10 @@ const mapStateToProps = (state) => ({
   ...state.browser,
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  dispatchChangeAssembly: (assembly) =>
-    dispatch(changeGenomeAssembly(assembly)),
-});
+// const mapDispatchToProps = (dispatch) => ({
+//   dispatchChangeAssembly: (assembly) =>
+//     dispatch(changeGenomeAssembly(assembly)),
+// });
 
 EpiBrowser.propTypes = {
   revision: PropTypes.number.isRequired,
@@ -166,4 +173,4 @@ EpiBrowser.propTypes = {
   displayRegion: PropTypes.string.isRequired,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(EpiBrowser);
+export default connect(mapStateToProps)(EpiBrowser);

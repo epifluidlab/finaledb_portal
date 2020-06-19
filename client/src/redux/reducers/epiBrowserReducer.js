@@ -1,4 +1,3 @@
-// import statesExample from './epiBrowserStatesExample';
 import log from 'loglevel';
 
 import { showBAM, s3Bucket } from '../../settings';
@@ -13,7 +12,7 @@ const initialState = {
 
   // Metadata of all entries, no matter whether displayed or not
   // Key is the entryId
-  entries: {},
+  entries: [],
 
   // Tracks for the reference genome
   refTracks: [
@@ -29,35 +28,39 @@ const initialState = {
   ],
   tracks: [],
   fragSizeSeries: [],
+  dataCache: {},
   // // initial display region
   displayRegion: 'chr2:29028122-29057276',
 };
 
-function getDisplayedEntryIds(assembly, entries) {
-  const ids = [];
-  Object.values(entries || {}).forEach((entry) => {
-    (entry.analysis || []).forEach((item) => {
-      if (item.assembly !== assembly) return;
+// Each entry may have multiple analysis entities, or tracks, however,
+// it's possible that none of them will be displayed, according to some
+// criteria. "displayedEntryIds" is a list containing all entryIds that
+// are displayed in the page
+// Criteria: only display bigWig or fragment size distribution files
+const getDisplayedEntryIds = (assembly, entries) => {
+  return entries.reduce((acc, entry) => {
+    // For each entry, look at its analysis field to find bigWig or fragment size
+    const {
+      analysis: { [assembly]: analysisForAssembly },
+    } = entry;
+    const shouldDisplay = (analysisForAssembly || []).reduce(
+      (flag, item) =>
+        flag || item.type === 'bigWig' || item.desc === 'fragment size',
+      false
+    );
+    if (shouldDisplay) acc.push(entry.id);
+    return acc;
+  }, []);
+};
 
-      switch (item.type) {
-        case 'BAM':
-          if (showBAM) ids.push(entry.id);
-          break;
-        case 'bigWig':
-          ids.push(entry.id);
-          break;
-        default:
-      }
-
-      if (item.desc === 'fragment size') ids.push(entry.id);
-    });
-  });
-
-  return ids.filter((val, idx, self) => self.indexOf(val) === idx);
-}
+// entries
+//   .filter((item) => item.typpe === 'bigWig' || item.desc === 'fragment size')
+//   .map((item) => item.id)
+//   .filter((item, index, self) => self.indexOf(item) === index);
 
 // Colors that are used to display numeric tracks (such as bigWig)
-function getColorMap(entryIds) {
+const getColorMap = (entryIds) => {
   const trackColors = [
     '#4b7bec',
     '#fc5c65',
@@ -90,119 +93,222 @@ function getColorMap(entryIds) {
     // '#ED561B',
     // '#64E572',
   ];
-  return entryIds.reduce((acc, ele, idx) => {
-    acc[ele] = trackColors[idx % trackColors.length];
-    return acc;
-  }, {});
-}
+  return entryIds.reduce(
+    (colorMap, entryId, index) => ({
+      ...colorMap,
+      ...{ [entryId]: trackColors[index % trackColors.length] },
+    }),
+    {}
+  );
+};
 
-function getTracks(assembly, entries) {
+// Extract tracks from entries (right now only bigWig tracks)
+// Return an ordered tracks array for WashU browser
+const getTracks = (assembly, entries) => {
   log.info(entries);
 
-  // Merge tracks from entries and only keep those matching the assembly
-  const tracks = Object.values(entries || {}).reduce((arr, entry) => {
-    const filteredAnalysis = (entry.analysis || []).filter((val) => {
-      if (val.assembly !== assembly) return false;
+  const colorMap = getColorMap(getDisplayedEntryIds(assembly, entries));
 
-      switch (val.type) {
-        case 'BAM':
-          return showBAM;
-        case 'bigWig':
-          return true;
-        default:
-          return false;
-      }
-    });
-    const { sampleName, seqrunName } = entry;
-    const colorMap = getColorMap(getDisplayedEntryIds(assembly, entries));
-    const tracksForEntry = filteredAnalysis.map((analysis) => {
-      const url = `${s3Bucket}/${analysis.key}`;
-      // Rule for trackBaseName: seqRunId + sampleName
-      const trackBaseName =
-        sampleName !== null ? `${seqrunName}/${sampleName}` : seqrunName;
-      const name = (() => {
-        switch (analysis.desc) {
-          case 'BAM':
-            return `BAM: ${trackBaseName}`;
-          case 'coverage':
-            return `Coverage: ${trackBaseName}`;
-          case 'fragment profile':
-            return `Fragments: ${trackBaseName}`;
-          case 'WPS':
-            return `WPS: ${trackBaseName}`;
-          default:
-            return '';
-        }
-      })();
-      const { type } = analysis;
-      // Each entry will be assigned a color from trackColors, by the natural order.
-      const color = colorMap[entry.id];
+  return entries.reduce((tracks, entry) => {
+    const {
+      analysis: { [assembly]: analysisForAssembly },
+      id: entryId,
+      altId: { SRA: sraId, original: originalId },
+      sample: { name: sampleName },
+    } = entry;
 
-      switch (analysis.desc) {
-        case 'WPS':
+    const canonicalEntryId = sraId || `EE${entryId}`;
+    const canonicalSampleName = sampleName; // || geoId;
+    const color = colorMap[entryId];
+
+    // track order: coverage, fragment profile, and WPS
+    ['coverage', 'fragment profile'].forEach((desc) => {
+      const builtTracks = (analysisForAssembly || [])
+        .filter((item) => item.type === 'bigWig' && item.desc === desc)
+        .map((track) => {
+          // Build the track object for WashU browser
+          let trackNamePrefix = '';
+          if (desc === 'fragment profile') trackNamePrefix = 'Fragment';
+          if (desc === 'coverage') trackNamePrefix = 'Coverage';
+          const trackName = `${trackNamePrefix}: ${
+            canonicalSampleName
+              ? `${canonicalEntryId}/${canonicalSampleName}`
+              : canonicalSampleName
+          }`;
+          const trackUrl = `${s3Bucket}/${track.key}`;
           return {
-            type,
-            name,
-            url,
-            options: { color: 'gray', color2: color, height: 96 },
+            type: track.type,
+            name: trackName,
+            url: trackUrl,
+            options: { color, height: 96 },
           };
-        default:
-          return {
-            type,
-            name,
-            url,
-            options: { color, color2: color, height: 96 },
-          };
-      }
+        });
+      if (builtTracks.length > 0) tracks.push(builtTracks[0]);
     });
 
-    return arr.concat(tracksForEntry);
+    const wpsTracks = (analysisForAssembly || [])
+      .filter((item) => item.type === 'bigWig' && item.desc === 'WPS')
+      .map((track) => {
+        // Build the track object for WashU browser
+        const trackName = `WPS: ${
+          canonicalSampleName
+            ? `${canonicalEntryId}/${canonicalSampleName}`
+            : canonicalSampleName
+        }`;
+        const trackUrl = `${s3Bucket}/${track.key}`;
+        return {
+          type: track.type,
+          name: trackName,
+          url: trackUrl,
+          options: { color: 'gray', color2: color, height: 96 },
+        };
+      });
+    if (wpsTracks.length > 0) tracks.push(wpsTracks[0]);
+
+    return tracks;
   }, []);
+};
 
-  log.info('Successfully building up the tracks!');
-  log.info(tracks);
-
-  return tracks;
-}
-
-function getFragmentSizeSeries(assembly, entries) {
+const buildFragmentSizeSeries = (assembly, entries, dataCache) => {
   // Merge tracks from entries and only keep those matching the assembly
-  const tracks = Object.values(entries || {}).reduce((arr, entry) => {
-    const filteredAnalysis = (entry.analysis || []).filter(
-      (val) => val.assembly === assembly && val.desc === 'fragment size'
+  // dataPts may be null
+  const fragSizeSeries = (entries || []).reduce((acc, entry) => {
+    const analysis = (entry.analysis[assembly] || []).find(
+      (item) => item.desc === 'fragment size'
     );
+    if (!analysis) return acc;
 
-    const { sampleName } = entry;
+    const {
+      id: entryId,
+      altId: { SRA: sraId },
+      sample: { name: sampleName },
+    } = entry;
+
+    const canonicalEntryId = sraId || `EE${entryId}`;
+    const canonicalSampleName = sampleName; // || geoId;
+
     const colorMap = getColorMap(getDisplayedEntryIds(assembly, entries));
-
-    const series = filteredAnalysis.map((analysis) => ({
-      name: sampleName,
+    const key = `fragsize.${entryId}.${assembly}`;
+    const fragSizeData = {
+      entryId,
+      assembly,
+      key,
+      name: canonicalSampleName
+        ? `${canonicalEntryId}/${canonicalSampleName}`
+        : canonicalSampleName,
       dataUrl: `${s3Bucket}/${analysis.key}`,
       color: colorMap[entry.id],
-    }));
+    };
 
-    return arr.concat(series);
+    // Look at the cache
+    const { dataPts: cachedDataPts } = (dataCache || {})[key] || {};
+    if (cachedDataPts) {
+      console.log(
+        `Cache hit for ${key}! First element: ${cachedDataPts[0][0]}: ${cachedDataPts[0][1]}`
+      );
+      fragSizeData.dataPts = [...cachedDataPts];
+    }
+    return [...acc, fragSizeData];
   }, []);
 
-  log.info('Successfully building up the tracks!');
-  log.info(tracks);
+  log.info('Successfully building up the frag size series!');
+  log.info(fragSizeSeries);
 
-  return tracks;
-}
+  return fragSizeSeries;
+};
 
-function processEntries(entries) {
-  return Object.keys(entries).reduce((acc, entryId) => {
-    const entry = entries[entryId];
-    const newEntry = { ...entry };
-    // Sample name: original altId or the universal entryId
-    // newEntry.sampleName = entry.originalId || entry.sraId || `EE${entry.id}`;
-    newEntry.sampleName = entry.sample.name;
-    newEntry.seqrunName = entry.sraId || `EE${entry.id}`;
-    // newEntry.sampleName = (entry.altId || {}).original || `EE${entry.id}`;
-    acc[entryId] = newEntry;
-    return acc;
-  }, {});
-}
+const reduceSetFragSizeSeries = (state, payload) => {
+  if (!payload || payload.length === 0) return state;
+  // payload: fragSizeSeries
+  const { fragSizeSeries: prevFragSizeSeries, dataCache } = state;
+
+  // Try update the cache
+  payload.forEach((item) => {
+    console.log(
+      `Update cache at key: ${item.key}. 1st element: ${item.dataPts[0][0]}: ${item.dataPts[0][1]}`
+    );
+    const dataPtsCopy = item.dataPts.map((pair) => [...pair]);
+    const itemCopy = { ...item, dataPts: dataPtsCopy };
+    dataCache[item.key] = itemCopy;
+  });
+
+  // Only update dataPts where the key matches and for prevFragSizeSeries, dataPts is missing
+  let updated = false;
+
+  const newSeries = prevFragSizeSeries.map((item) => {
+    // If not complete, try to find the updated version within payload
+    if (!item.dataPts) {
+      const peer = payload.find((item2) => item2.key === item.key);
+      if (peer && peer.dataPts) {
+        updated = true;
+        return peer;
+      }
+    }
+    return item;
+  });
+
+  if (updated) return { ...state, fragSizeSeries: newSeries, dataCache };
+  return { ...state, dataCache };
+};
+
+// In a nutshell, the reducer sets the assembly, entries, tracks, and cached frag sizes
+const reduceResetBrowserEntries = (state, payload) => {
+  const {
+    assembly: prevAssembly,
+    entries: prevEntries,
+    revision: prevRevision,
+  } = state;
+  const { assembly, entries } = payload;
+
+  const prevEntryIds = (prevEntries || []).map((entry) => entry.id).sort();
+  const entryIds = (entries || []).map((entry) => entry.id).sort();
+
+  if (
+    assembly === prevAssembly &&
+    JSON.stringify(entryIds) === JSON.stringify(prevEntryIds)
+  ) {
+    // Exactly the same, no need to update
+    console.log('Exactly the same');
+    return state;
+  }
+  console.log('Not the same');
+  console.log(state);
+  console.log(payload);
+
+  const refTracks = [
+    {
+      type: 'ruler',
+      name: 'Ruler',
+    },
+    {
+      type: 'geneAnnotation',
+      name: 'refGene',
+      genome: assembly,
+    },
+  ];
+  const tracks = getTracks(assembly, entries);
+
+  // Calculate the fragment size distribution series based on caching
+  const { dataCache } = state;
+  const fragSizeSeries = buildFragmentSizeSeries(assembly, entries, dataCache);
+
+  const displayedEntryIds = getDisplayedEntryIds(assembly, entries);
+
+  const newState = {
+    ...state,
+    assembly,
+    entries,
+    displayedEntryIds,
+    refTracks,
+    tracks,
+    fragSizeSeries,
+    revision: prevRevision + 1,
+  };
+
+  const { callback } = payload;
+  if (callback) callback(newState);
+  return newState;
+};
 
 export default (state = initialState, action) => {
   const newState = {
@@ -210,46 +316,34 @@ export default (state = initialState, action) => {
   };
 
   switch (action.type) {
-    case 'CHANGE_GENOME_ASSEMBLY': {
-      const assembly = action.payload;
-      if (state.assembly !== assembly) {
-        newState.assembly = assembly;
-        const newAssemblyTrack = {
-          ...state.refTracks[1],
-          genome: action.payload,
-        };
-        newState.refTracks = [state.refTracks[0], newAssemblyTrack];
-        newState.displayedEntryIds = getDisplayedEntryIds(
-          assembly,
-          newState.entries
-        );
-        newState.tracks = getTracks(assembly, newState.entries);
-        newState.fragSizeSeries = getFragmentSizeSeries(
-          assembly,
-          newState.entries
-        );
-        newState.revision += 1;
-      }
-      break;
-    }
-    case 'RESET_BROWSER_ENTRIES': {
-      const { assembly, entries } = action.payload;
-      newState.entries = processEntries(entries);
-      newState.displayedEntryIds = getDisplayedEntryIds(
-        assembly,
-        newState.entries
-      );
-      newState.tracks = getTracks(assembly, newState.entries);
-      newState.fragSizeSeries = getFragmentSizeSeries(
-        assembly,
-        newState.entries
-      );
-      newState.revision += 1;
-      break;
-    }
+    // case 'CHANGE_GENOME_ASSEMBLY': {
+    //   const assembly = action.payload;
+    //   if (state.assembly !== assembly) {
+    //     newState.assembly = assembly;
+    //     // The new refGene track
+    //     const newAssemblyTrack = {
+    //       ...state.refTracks[1],
+    //       genome: assembly,
+    //     };
+    //     // [ruler, refGene]
+    //     newState.refTracks = [state.refTracks[0], newAssemblyTrack];
+    //     newState.displayedEntryIds = getDisplayedEntryIds(
+    //       assembly,
+    //       newState.entries
+    //     );
+    //     newState.tracks = getTracks(assembly, newState.entries);
+    //     newState.fragSizeSeries = buildFragmentSizeSeries(
+    //       assembly,
+    //       newState.entries
+    //     );
+    //     newState.revision += 1;
+    //   }
+    //   break;
+    // }
+    case 'RESET_BROWSER_ENTRIES':
+      return reduceResetBrowserEntries(state, action.payload);
     case 'SET_FRAGMENT_SIZE_SERIES': {
-      newState.fragSizeSeries = action.payload;
-      break;
+      return reduceSetFragSizeSeries(state, action.payload);
     }
     case 'SET_DISPLAY_REGION': {
       if (state.displayRegion !== action.payload) {

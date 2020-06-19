@@ -70,6 +70,22 @@ const summarize = async (req, res, next) => {
       else acc.Others = parseInt(ele.count, 10);
       return acc;
     }, {});
+
+    // results = await sequelize.query(
+    //   'SELECT count(dev.seqrun.id) count, cite_short, publication_id FROM dev.seqrun \n' +
+    //     'LEFT OUTER JOIN dev.publication ON (dev.seqrun.publication_id = dev.publication.id) \n' +
+    //     'WHERE dev.seqrun.hidden != TRUE GROUP BY cite_short, publication_id \n' +
+    //     'ORDER BY publication_id',
+    //   { type: QueryTypes.SELECT }
+    // );
+    // summary.publication = results.reduce((acc, ele) => {
+    //   if (ele.cite_short)
+    //     acc[parseInt(ele.publication_id, 10)] = {
+    //       cite: ele.cite_short,
+    //       count: parseInt(ele.count, 10),
+    //     };
+    //   return acc;
+    // }, {});
   } catch (e) {
     return next(e);
   }

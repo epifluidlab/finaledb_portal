@@ -1,14 +1,22 @@
 const initialState = {
   seqrunQueryTerms: {
-    assay: ['WGS'],
+    search: '',
+    assay: [],
+    enableReadlen: false,
     minReadlen: 10,
     maxReadlen: 160,
-    minMbases: 1,
-    maxMbases: 3000,
-    tissue: ['urine'],
-    disease: ['Colorectal cancer', 'Pancreatic cancer'],
+    enableMbases: false,
+    minMbases: 100,
+    maxMbases: 10000,
+    tissue: [],
+    disease: [],
+    instrument: [],
+    publication: [],
+    offset: 0,
   },
-  seqrunQueryResults: [],
+  seqrunQueryResults: { total: 0, entries: [], offset: 0 },
+  // seqrun entries selected for visualization
+  selectedSeqruns: [],
 };
 
 export default function queryReducer(state = initialState, action) {
@@ -21,6 +29,45 @@ export default function queryReducer(state = initialState, action) {
       const newState = { ...state, seqrunQueryResults: action.payload };
       return newState;
     }
+    // case 'SET_READLEN_INPUT':
+    // case 'SET_MBASES_INPUT': {
+    //   const { value, isMin } = action.payload;
+    //   const { seqrunQueryTerms: queryTerms } = state;
+    //   const numValue = parseInt(value, 10);
+    //   const updateKey = action.type == 'SET_READLEN_INPUT' ? (isMin ? 'minReadlenInput' : 'maxReadlenInput') : (isMin ? 'minMbasesInput' : 'maxReadlenInput')
+    //   return {
+    //     ...state,
+    //     seqrunQueryTerms: { ...queryTerms, [updateKey]: numValue },
+    //   };
+    // }
+    case 'TOGGLE_SELECTED_SEQRUNS':
+      {
+        const { entry, isSelected } = action.payload;
+        const { selectedSeqruns: prevSelected } = state;
+
+        // Add to the list
+        if (
+          isSelected &&
+          !prevSelected.map((item) => item.id).includes(entry.id)
+        ) {
+          const newSelected = [...prevSelected, entry].sort(
+            (entry1, entry2) => entry1.id - entry2.id
+          );
+          return { ...state, selectedSeqruns: newSelected };
+        }
+
+        // Remove from the list
+        if (
+          !isSelected &&
+          prevSelected.map((item) => item.id).includes(entry.id)
+        ) {
+          const newSelected = prevSelected
+            .filter((item) => item.id !== entry.id)
+            .sort((entry1, entry2) => entry1.id - entry2.id);
+          return { ...state, selectedSeqruns: newSelected };
+        }
+      }
+      break;
     default:
       break;
   }
