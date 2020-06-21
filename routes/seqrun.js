@@ -93,9 +93,24 @@ function buildFacetFilterClause(query) {
   if (complexClauseList.length > 0) {
     clauses[Op.and] = complexClauseList;
   }
-  console.log('clauseList');
-  console.log(clauses);
   return clauses;
+}
+
+function buildFragNumClauses(query) {
+  const { frag_num: fragNum = '' } = query || {};
+
+  const min = parseInt(fragNum.split(',')[0], 10);
+  const max = parseInt(fragNum.split(',')[1], 10);
+
+  if (Number.isNaN(min) || Number.isNaN(max)) return {};
+
+  // select id, frag_num from dev.seqrun where (frag_num->>'hg19')::int > 0 order by id;
+  const clauses = ['hg19', 'hg38'].map((assembly) =>
+    Sequelize.where(Sequelize.literal(`(frag_num->>'${assembly}')::int`), {
+      [Op.between]: [min, max],
+    })
+  );
+  return { [Op.or]: clauses };
 }
 
 function buildRangeClause(query) {
@@ -169,10 +184,11 @@ const buildWhereClause = (query) => {
   const searchClauses = buildSearchClause(query);
   const rangeClauses = buildRangeClause(query);
   const facetClauses = buildFacetFilterClause(query);
+  const fragNumClauses = buildFragNumClauses(query);
 
   // const clauses = { [Op.and]: [queryIdClauses, rangeClauses, facetClauses] };
   const clauses = {
-    [Op.and]: [searchClauses, rangeClauses, facetClauses],
+    [Op.and]: [searchClauses, rangeClauses, facetClauses, fragNumClauses],
     hidden: { [Op.ne]: true },
   };
   console.log(clauses);

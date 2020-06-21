@@ -6,6 +6,7 @@ import { Error404 } from './pages';
 import HomePage from './pages/HomePage';
 import HelpPage from './pages/HelpPage';
 import QueryPage from './pages/QueryPage';
+import DownloadListPage from './pages/DownloadListPage';
 import VisualizationPage from './pages/VisualizationPage';
 import store from './store';
 
@@ -19,7 +20,11 @@ export default function App(props) {
           <Switch>
             <Route exact path="/" component={HomePage} />
             <Route exact path="/query" component={QueryPage} />
-
+            <Route
+              exact
+              path="/downloads"
+              render={({ history }) => <DownloadListPage history={history} />}
+            />
             <Route
               exact
               path="/visualization"

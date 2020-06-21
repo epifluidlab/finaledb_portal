@@ -3,14 +3,12 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { Component } from 'react';
-import { Link, useHistory, withRouter } from 'react-router-dom';
-import { Page, Card, Grid, Table, Form, Button, Text } from 'tabler-react';
+import { Page, Card, Grid, Table, Form, Button } from 'tabler-react';
 import SiteWrapper from './SiteWrapper';
 import SamplesTable from '../components/SamplesTable';
 
 import 'nouislider';
 import 'nouislider/distribute/nouislider.css';
-import request from '../utils/request';
 
 import getDbSummary from '../redux/actions/dbSummaryActions';
 import {
@@ -23,26 +21,9 @@ import {
   resetBrowserEntries,
   fetchFragmentSizeSeries,
 } from '../redux/actions/epiBrowserActions';
+import { addDownloadItems } from '../redux/actions/downloadListActions';
 
-// function GetLibraryFormats(props) {
-//   const content = props.libraryFormats.map((layout) => (
-//     <Form.Checkbox
-//       isInline
-//       name="example-radios"
-//       label={layout}
-//       value={layout}
-//       checked={props.checked[layout] || false}
-//       onChange={props.onChange('libraryFormat', layout)}
-//     />
-//   ));
-//   return (
-//     <Table.Row>
-//       <Table.Col>
-//         <Form.Group label="Library Format">{content}</Form.Group>
-//       </Table.Col>
-//     </Table.Row>
-//   );
-// }
+import { defaultSeqrunQueryTerms } from '../settings';
 
 function GetPlatforms(props) {
   const { instrumentSummary, checkedInstruments, onChange } = props;
@@ -70,6 +51,7 @@ function GetPlatforms(props) {
     </Table.Row>
   );
 }
+
 GetPlatforms.propTypes = {
   instrumentSummary: PropTypes.shape().isRequired,
   checkedInstruments: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -102,6 +84,7 @@ function GetDiseases(props) {
     </Table.Row>
   );
 }
+
 GetDiseases.propTypes = {
   diseaseSummary: PropTypes.shape().isRequired,
   checkedDisease: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -136,6 +119,7 @@ function GetTissues(props) {
     </Table.Row>
   );
 }
+
 GetTissues.propTypes = {
   tissueSummary: PropTypes.shape().isRequired,
   checkedTissues: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -220,35 +204,13 @@ GetAssayTypes.propTypes = {
 };
 
 class FormElements extends Component {
-  constructor(props) {
-    super(props);
-    this.initialFormState = {
-      disease: {},
-      genomeAssembly: {},
-      platform: {},
-      libraryFormat: {},
-      tissue: {},
-      assayType: {},
-      diseaseStatus: {},
-      minReadLength: 10,
-      maxReadLength: 100,
-      minMBases: 10,
-      maxMBases: 100000,
-      age: {},
-      doi: '',
-    };
-
-    this.state = {
-      data: null,
-      form: this.initialFormState,
-    };
-  }
-
   componentDidMount() {
     // Try retrieving DB summary if it's absent
     const { summary } = this.props;
-    if (Object.keys(summary || {}).length === 0)
-      this.props.dispatchGetDbSummary();
+    if (Object.keys(summary || {}).length === 0) {
+      const { dispatchGetDbSummary } = this.props;
+      dispatchGetDbSummary();
+    }
 
     // initialization
     const {
@@ -264,68 +226,6 @@ class FormElements extends Component {
     }
   }
 
-  // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
-  callBackendAPI = async () => {
-    const [data, samples, platforms, publications] = await Promise.all([
-      request('/data'),
-      request('/samples'),
-      request('/samples/platforms'),
-      request('/publications'),
-    ]);
-
-    this.setState({
-      diseases: data.diseases,
-      platforms,
-      tissues: data.tissues,
-      assayTypes: data.assayTypes,
-      libraryFormats: data.libraryFormats,
-      readLengths: data.readLengths,
-      dois: data.dois,
-      mbases: data.mbases,
-      publications,
-      samples,
-    });
-  };
-
-  fetchSamples = async () => {
-    const samples = await request('/samples' + this.formToQueryString());
-    this.setState({
-      samples,
-    });
-  };
-
-  formToQueryString = () => {
-    const {
-      minReadLength,
-      maxReadLength,
-      doi,
-      minMBases,
-      maxMBases,
-    } = this.state.form;
-    let qs = '?';
-    const attrs = [
-      'platform',
-      'disease',
-      'tissue',
-      'libraryFormat',
-      'assayType',
-    ];
-
-    for (const attr of attrs) {
-      const filterString = this.getFilterForAttr(attr);
-      if (filterString.length) {
-        qs += `${attr}=${filterString}&`;
-      }
-    }
-
-    qs += 'doi=' + doi + '&';
-    qs += 'mbases=' + minMBases + ',' + maxMBases + '&';
-    qs += 'readLength=' + minReadLength + ',' + maxReadLength + '&';
-
-    console.log(qs);
-    return qs;
-  };
-
   getFilterForAttr = (attr) => {
     const { form } = this.state;
 
@@ -334,22 +234,6 @@ class FormElements extends Component {
     return Object.keys(form[attr])
       .filter((key) => form[attr][key])
       .join(',');
-  };
-
-  updateFormMultipleValues = (name, value) => () => {
-    console.log(this.state.form);
-    this.setState(
-      {
-        form: {
-          ...this.state.form,
-          [name]: {
-            ...this.state.form[name],
-            [value]: !this.state.form[name][value],
-          },
-        },
-      },
-      () => this.fetchSamples()
-    );
   };
 
   // Select/deselect an entry for visualization
@@ -412,35 +296,11 @@ class FormElements extends Component {
 
     const { dispatchSetQueryTerms } = this.props;
     dispatchSetQueryTerms(newTerms);
-
-    // const newQueryTerms = this.props.query.this.setState(
-    //   {
-    //     form: {
-    //       ...this.state.form,
-    //       [e.target.name]: e.target.value,
-    //     },
-    //   },
-    //   () => this.fetchSamples()
-    // );
   };
 
   resetForm = () => {
     const { dispatchSetQueryTerms, dispatchQuerySeqrun } = this.props;
-    const defaultQueryTerms = {
-      search: '',
-      assay: [],
-      enableReadlen: false,
-      minReadlen: 10,
-      maxReadlen: 160,
-      enableMbases: false,
-      minMbases: 100,
-      maxMbases: 10000,
-      tissue: [],
-      disease: [],
-      instrument: [],
-      publication: [],
-      offset: 0,
-    };
+    const defaultQueryTerms = defaultSeqrunQueryTerms;
     dispatchSetQueryTerms(defaultQueryTerms);
     dispatchQuerySeqrun(defaultQueryTerms);
   };
@@ -477,8 +337,6 @@ class FormElements extends Component {
   goVisualize = () => {
     const {
       query: { selected: selectedEntries },
-      dispatchResetBrowserEntries,
-      dispatchFetchFragmentSizeSeries,
       history,
     } = this.props;
 
@@ -494,6 +352,11 @@ class FormElements extends Component {
     // dispatchResetBrowserEntries(defaultAssembly, selectedEntries);
 
     history.push(url);
+  };
+
+  goDownloads = () => {
+    const { history } = this.props;
+    history.push('/downloads');
   };
 
   getVisualizeUrl = () => {
@@ -531,8 +394,11 @@ class FormElements extends Component {
     let queryTermsPatch = {};
     if (type === 'readlen') {
       queryTermsPatch = isMin ? { minReadlen: numVal } : { maxReadlen: numVal };
-    } else if (type === 'mbases') {
-      queryTermsPatch = isMin ? { minMbases: numVal } : { maxMbases: numVal };
+    } else if (type === 'fragNum') {
+      const fragNum = parseInt(numVal * 1e6, 10);
+      queryTermsPatch = isMin
+        ? { minFragNum: fragNum }
+        : { maxFragNum: fragNum };
     }
     const newQueryTerms = { ...queryTerms, ...queryTermsPatch };
 
@@ -540,7 +406,7 @@ class FormElements extends Component {
     dispatchQuerySeqrun(newQueryTerms);
   };
 
-  toggleRangeChagne = (type, isChecked) => {
+  toggleRangeChange = (type, isChecked) => {
     const { dispatchQuerySeqrun, dispatchSetQueryTerms } = this.props;
     const {
       query: { terms: queryTerms },
@@ -549,13 +415,18 @@ class FormElements extends Component {
     let queryTermsPatch = {};
     if (type === 'readlen') {
       queryTermsPatch = { enableReadlen: isChecked };
-    } else if (type === 'mbases') {
-      queryTermsPatch = { enableMbases: isChecked };
+    } else if (type === 'fragNum') {
+      queryTermsPatch = { enableFragNum: isChecked };
     }
     const newQueryTerms = { ...queryTerms, ...queryTermsPatch };
 
     dispatchSetQueryTerms(newQueryTerms);
     dispatchQuerySeqrun(newQueryTerms);
+  };
+
+  handleAddDownloadItem = (entries, isAdding) => {
+    const { dispatchAddDownloadItems } = this.props;
+    dispatchAddDownloadItems(entries, isAdding);
   };
 
   // handleReadlenChange = (value, isMin) => {
@@ -592,7 +463,7 @@ class FormElements extends Component {
 
     console.log('render query page');
 
-    const { summary } = this.props;
+    const { summary, downloads } = this.props;
 
     const {
       summary: { seqRunCnt, sampleCnt, disease, publication, tissue, assay },
@@ -616,8 +487,6 @@ class FormElements extends Component {
       },
     } = this.props;
 
-    const { dispatchResetBrowserEntries } = this.props;
-
     return (
       <SiteWrapper>
         <Page.Content title="Search Samples">
@@ -636,34 +505,6 @@ class FormElements extends Component {
               <Card>
                 <Table className="card-table table-vcenter">
                   <Table.Body>
-                    {/* <Table.Row>
-                      <Table.Col>
-                        <Form.Group label="Human Reference Genome">
-                          <Form.SelectGroup>
-                            <Form.SelectGroupItem
-                              name="device"
-                              label="hg19 (GRCh37)"
-                              value="hg19"
-                              checked={form.genomeAssembly['hg19']}
-                              onChange={this.updateFormMultipleValues(
-                                'genomeAssembly',
-                                'hg19'
-                              )}
-                            />
-                            <Form.SelectGroupItem
-                              name="device"
-                              label="hg38 (GRCh38)"
-                              value="hg39"
-                              checked={form.genomeAssembly['hg38']}
-                              onChange={this.updateFormMultipleValues(
-                                'genomeAssembly',
-                                'hg38'
-                              )}
-                            />
-                          </Form.SelectGroup>
-                        </Form.Group>
-                      </Table.Col>
-                    </Table.Row> */}
                     <Table.Row>
                       <Table.Col>
                         <Form.Group label="Search">
@@ -681,14 +522,7 @@ class FormElements extends Component {
                       instrumentSummary={summary.instrument}
                       checkedInstruments={queryTerms.instrument}
                       onChange={this.updateCheckboxValues}
-                      // checked={form.platform}
-                      // onChange={this.updateFormMultipleValues}
                     />
-                    {/* <GetLibraryFormats
-                      libraryFormats={['SINGLE', 'PAIRED']}
-                      checked={form.libraryFormat}
-                      onChange={this.updateFormMultipleValues}
-                    /> */}
                     <GetAssayTypes
                       assaySummary={summary.assay}
                       checkedAssays={queryTerms.assay}
@@ -704,12 +538,72 @@ class FormElements extends Component {
                               isInline
                               label=" "
                               value=" "
+                              checked={queryTerms.enableFragNum}
+                              onChange={(e) => {
+                                const {
+                                  target: { checked },
+                                } = e;
+                                this.toggleRangeChange('fragNum', checked);
+                              }}
+                            />
+                          </Grid.Col>
+                          <Grid.Col>
+                            <Form.Group label="Min # of fragments (M)">
+                              <Form.Input
+                                disabled={!queryTerms.enableFragNum}
+                                name="minFragNum"
+                                placeholder={10}
+                                type="number"
+                                value={
+                                  Math.round(queryTerms.minFragNum / 1e5) / 10
+                                }
+                                onChange={(e) =>
+                                  this.handleRangeChange(
+                                    'fragNum',
+                                    e.target.value,
+                                    true
+                                  )
+                                }
+                              />
+                            </Form.Group>
+                          </Grid.Col>
+                          <Grid.Col>
+                            <Form.Group label="Max # of fragments (M)">
+                              <Form.Input
+                                disabled={!queryTerms.enableFragNum}
+                                name="maxFragNum"
+                                placeholder={100}
+                                type="number"
+                                value={
+                                  Math.round(queryTerms.maxFragNum / 1e5) / 10
+                                }
+                                onChange={(e) =>
+                                  this.handleRangeChange(
+                                    'fragNum',
+                                    e.target.value,
+                                    false
+                                  )
+                                }
+                              />
+                            </Form.Group>
+                          </Grid.Col>
+                        </Grid.Row>
+                      </Table.Col>
+                    </Table.Row>
+                    <Table.Row>
+                      <Table.Col>
+                        <Grid.Row>
+                          <Grid.Col width={1} size="sm" className="mt-6">
+                            <Form.Checkbox
+                              isInline
+                              label=" "
+                              value=" "
                               checked={queryTerms.enableReadlen}
                               onChange={(e) => {
                                 const {
                                   target: { checked },
                                 } = e;
-                                this.toggleRangeChagne('readlen', checked);
+                                this.toggleRangeChange('readlen', checked);
                               }}
                             />
                           </Grid.Col>
@@ -742,62 +636,6 @@ class FormElements extends Component {
                                 onChange={(e) =>
                                   this.handleRangeChange(
                                     'readlen',
-                                    e.target.value,
-                                    false
-                                  )
-                                }
-                              />
-                            </Form.Group>
-                          </Grid.Col>
-                        </Grid.Row>
-                      </Table.Col>
-                    </Table.Row>
-                    <Table.Row>
-                      <Table.Col>
-                        <Grid.Row>
-                          <Grid.Col width={1} size="sm" className="mt-6">
-                            <Form.Checkbox
-                              isInline
-                              label=" "
-                              value=" "
-                              checked={queryTerms.enableMbases}
-                              onChange={(e) => {
-                                const {
-                                  target: { checked },
-                                } = e;
-                                this.toggleRangeChagne('mbases', checked);
-                              }}
-                            />
-                          </Grid.Col>
-                          <Grid.Col>
-                            <Form.Group label="Min MBases">
-                              <Form.Input
-                                disabled={!queryTerms.enableMbases}
-                                name="minMBases"
-                                placeholder={10}
-                                type="number"
-                                value={queryTerms.minMbases}
-                                onChange={(e) =>
-                                  this.handleRangeChange(
-                                    'mbases',
-                                    e.target.value,
-                                    true
-                                  )
-                                }
-                              />
-                            </Form.Group>
-                          </Grid.Col>
-                          <Grid.Col>
-                            <Form.Group label="Max MBases">
-                              <Form.Input
-                                disabled={!queryTerms.enableMbases}
-                                name="maxMBases"
-                                placeholder={100}
-                                type="number"
-                                value={queryTerms.maxMbases}
-                                onChange={(e) =>
-                                  this.handleRangeChange(
-                                    'mbases',
                                     e.target.value,
                                     false
                                   )
@@ -849,6 +687,7 @@ class FormElements extends Component {
               <Grid.Row>
                 <Grid.Col width={4}>
                   <Button
+                    icon="eye"
                     color={(() => {
                       const selNum = (selectedEntries || []).length;
                       if (selNum === 0) return 'secondary';
@@ -864,6 +703,20 @@ class FormElements extends Component {
                     Visualize
                   </Button>
                 </Grid.Col>
+                <Grid.Col width={5} />
+                <Grid.Col width={3}>
+                  <Button
+                    icon="download"
+                    disabled={downloads.downloadList.length === 0}
+                    size="lg"
+                    className="mb-4"
+                    block
+                    color="primary"
+                    onClick={this.goDownloads}
+                  >
+                    Download
+                  </Button>
+                </Grid.Col>
               </Grid.Row>
               {selectedEntries.length <= 3 ? null : (
                 <Grid.Row className="mx-1 mb-2">
@@ -874,28 +727,21 @@ class FormElements extends Component {
               )}
               {/* </div> */}
               <Card cards justifyContent="flex-end">
-                <Table
-                  responsive
-                  highlightRowOnHover
-                  hasOutline
-                  verticalAlign="center"
-                  cards
-                  className="text-nowrap"
-                >
-                  <SamplesTable
-                    entries={queryResults.entries}
-                    selectedEntries={selectedEntries}
-                    paging={{
-                      offset: queryResults.offset,
-                      total: queryResults.total,
-                      rowCount: queryResults.entries.length,
-                    }}
-                    visualizeUrl={this.getVisualizeUrl()}
-                    isQuery
-                    handleSelectEntry={this.selectEntry}
-                    handlePaging={this.gotoPage}
-                  />
-                </Table>
+                <SamplesTable
+                  entries={queryResults.entries}
+                  downloads={downloads}
+                  selectedEntries={selectedEntries}
+                  paging={{
+                    offset: queryResults.offset,
+                    total: queryResults.total,
+                    rowCount: queryResults.entries.length,
+                  }}
+                  visualizeUrl={this.getVisualizeUrl()}
+                  isQuery
+                  handleSelectEntry={this.selectEntry}
+                  handlePaging={this.gotoPage}
+                  handleAddDownloadItem={this.handleAddDownloadItem}
+                />
               </Card>
             </Grid.Col>
           </Grid.Row>
@@ -906,8 +752,6 @@ class FormElements extends Component {
 }
 
 FormElements.propTypes = {
-  dispatchResetBrowserEntries: PropTypes.func.isRequired,
-  dispatchFetchFragmentSizeSeries: PropTypes.func.isRequired,
   dispatchGetDbSummary: PropTypes.func.isRequired,
   dispatchSetQueryTerms: PropTypes.func.isRequired,
   dispatchQuerySeqrun: PropTypes.func.isRequired,
@@ -921,6 +765,18 @@ FormElements.propTypes = {
     }),
     selected: PropTypes.arrayOf(PropTypes.shape()),
   }).isRequired,
+  summary: PropTypes.shape({
+    // summary: { seqRunCnt, sampleCnt, disease, publication, tissue, assay },
+    seqRunCnt: PropTypes.number,
+    sampleCnt: PropTypes.number,
+    instrument: PropTypes.shape(),
+    disease: PropTypes.shape(),
+    publication: PropTypes.arrayOf(PropTypes.shape()),
+    tissue: PropTypes.shape(),
+    assay: PropTypes.shape(),
+  }).isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  history: PropTypes.object.isRequired,
 };
 
 // export default FormElements;
@@ -938,6 +794,8 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(toggleSelectedSeqruns(entry, isSelected)),
   dispatchSetReadlenInput: (value, isMin) =>
     dispatch(setReadlenInput(value, isMin)),
+  dispatchAddDownloadItems: (entries, isAdding) =>
+    dispatch(addDownloadItems(entries, isAdding)),
 });
 
 const mapStateToProps = (state) => ({
@@ -947,6 +805,7 @@ const mapStateToProps = (state) => ({
     results: state.query.seqrunQueryResults,
     selected: state.query.selectedSeqruns,
   },
+  downloads: state.downloads,
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(FormElements);

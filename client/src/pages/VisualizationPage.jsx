@@ -15,6 +15,7 @@ import {
   // setFragmentSizeSeries,
   setDisplayRegion,
 } from '../redux/actions/epiBrowserActions';
+import { addDownloadItems } from '../redux/actions/downloadListActions';
 
 import SiteWrapper from './SiteWrapper';
 import SamplesTable from '../components/SamplesTable';
@@ -24,11 +25,13 @@ import Charts from '../components/FragmentSizesChart';
 
 class FormElements extends Component {
   componentDidMount() {
-    const { dispatchResetBrowserEntries } = this.props;
-
     const {
       query: { selected: selectedEntries },
+      history,
     } = this.props;
+    if (!selectedEntries || selectedEntries.length === 0) history.push('/');
+
+    const { dispatchResetBrowserEntries } = this.props;
 
     const selNum = (selectedEntries || []).length;
     if (selNum > 3) {
@@ -66,15 +69,22 @@ class FormElements extends Component {
   };
 
   shouldComponentUpdate = (nextProps) => {
-    const { assembly, entries, fragSizeSeries } = this.props;
+    const {
+      assembly,
+      entries,
+      fragSizeSeries,
+      downloads: { downloadList },
+    } = this.props;
     const {
       assembly: nextAssembly,
       entries: nextEntries,
       fragSizeSeries: nextFragSizeSeries,
+      downloads: { downloadList: nextDownloadList },
     } = nextProps;
 
     const shouldUpdate =
       assembly !== nextAssembly ||
+      downloadList !== nextDownloadList ||
       JSON.stringify(entries.map((entry) => entry.id).sort()) !==
         JSON.stringify(nextEntries.map((entry) => entry.id).sort()) ||
       JSON.stringify(
@@ -92,10 +102,15 @@ class FormElements extends Component {
     return shouldUpdate;
   };
 
+  handleAddDownloadItem = (entries, isAdding) => {
+    const { dispatchAddDownloadItems } = this.props;
+    dispatchAddDownloadItems(entries, isAdding);
+  };
+
   render() {
     console.log('VisualizationPage render');
 
-    const { fragSizeSeries = [] } = this.props;
+    const { fragSizeSeries = [], downloads } = this.props;
 
     const samples = [];
     const {
@@ -158,7 +173,8 @@ class FormElements extends Component {
                 >
                   <SamplesTable
                     entries={displayedEntries}
-                    assembly={assembly}
+                    downloads={downloads}
+                    handleAddDownloadItem={this.handleAddDownloadItem}
                   />
                 </Table>
               </Card>
@@ -187,6 +203,8 @@ class FormElements extends Component {
 }
 
 FormElements.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
+  history: PropTypes.object.isRequired,
   fragSizeSeries: PropTypes.arrayOf(
     PropTypes.shape({
       dataPts: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
@@ -227,6 +245,8 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(resetBrowserEntries(assembly, entries, callback)),
   dispatchFetchFragmentSizeSeries: (fragSizeSeries) =>
     dispatch(fetchFragmentSizeSeries(fragSizeSeries)),
+  dispatchAddDownloadItems: (entries, isAdding) =>
+    dispatch(addDownloadItems(entries, isAdding)),
 });
 
 const mapStateToProps = (state) => {
@@ -236,6 +256,7 @@ const mapStateToProps = (state) => {
     query: {
       selected: state.query.selectedSeqruns,
     },
+    downloads: state.downloads,
   };
 };
 

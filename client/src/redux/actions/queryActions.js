@@ -18,9 +18,9 @@ export const querySeqrun = (queryTerms) => (dispatch) => {
     enableReadlen,
     minReadlen,
     maxReadlen,
-    enableMbases,
-    minMbases,
-    maxMbases,
+    enableFragNum,
+    minFragNum,
+    maxFragNum,
     disease,
     tissue,
     // gender,
@@ -33,8 +33,8 @@ export const querySeqrun = (queryTerms) => (dispatch) => {
     query.push(`assay=${encodeURI(assay.join(','))}`);
   if (minReadlen && maxReadlen && enableReadlen)
     query.push(`readlen=${minReadlen},${maxReadlen}`);
-  if (minMbases && maxMbases && enableMbases)
-    query.push(`mbases=${minMbases},${maxMbases}`);
+  if (minFragNum && maxFragNum && enableFragNum)
+    query.push(`frag_num=${minFragNum},${maxFragNum}`);
 
   // if (minMbases && maxMbases) query.push(`mbases=${minMbases},${maxMbases}`);
   if (disease && disease.length > 0) query.push(`disease=${disease.join(',')}`);

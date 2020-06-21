@@ -16,7 +16,7 @@
     "SharedArrayBuffer": "readonly"
   },
   // "parser": "@typescript-eslint/parser",
-  // "parser": "babel-eslint",
+  "parser": "babel-eslint",
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
@@ -30,6 +30,7 @@
     // "@typescript-eslint"
   ],
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": false, "peerDependencies": false}]
   }
 }

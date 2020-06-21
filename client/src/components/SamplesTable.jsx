@@ -1,30 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Table,
-  Card,
-  Grid,
-  Button,
-  Text,
-  Form,
-  Icon,
-  Dropdown,
-  Tab,
-} from 'tabler-react';
+import { Table, Grid, Button, Text, Form, Dropdown, Icon } from 'tabler-react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { addDownload, removeDownload } from '../redux/downloads/actions';
+// import { addDownload, removeDownload } from '../redux/downloads/actions';
 import { s3Bucket } from '../settings';
 
 const SamplesTableControl = ({ offset, total, rowCount, handlePaging }) => (
   <div>
-    {/* <Grid.Row>
-        <Grid.Col width={4} offset={4}>
-          <Button color="blue" onClick={handleVisualizing}>
-            Visualize
-          </Button>
-        </Grid.Col>
-      </Grid.Row> */}
     <Grid.Row size="lg" className="mx-1 my-2">
       <Grid.Col width={1}>
         <Button link icon="arrow-left" onClick={() => handlePaging(true)} />
@@ -55,17 +37,16 @@ SamplesTableControl.defaultProps = {
 };
 
 const SamplesTableRow = ({
-  downloads,
   // sample,
   entry,
-  assembly: selectedAssembly,
+  downloads,
   isSelected,
   isQuery,
   onChange,
-  addDownload,
-  removeDownload,
+  handleAddDownloadItem,
+  // addDownload,
+  // removeDownload,
 }) => {
-  console.log(`SampleRow assembly ${selectedAssembly}`);
   const { sample = {} } = entry;
 
   const {
@@ -77,11 +58,11 @@ const SamplesTableRow = ({
   const canonicalEntryId = sraId || `EE${entryId}`;
   const canonicalSampleName = sampleName; // || geoId;
 
-  const sampleInBasket = downloads.find(
-    (download) => download.sraId === sample.sraId
-  );
-  const addToBasket = () => addDownload(sample);
-  const removeFromBasket = () => removeDownload(sample.sraId);
+  // const sampleInBasket = downloads.find(
+  //   (download) => download.sraId === sample.sraId
+  // );
+  // const addToBasket = () => addDownload(sample);
+  // const removeFromBasket = () => removeDownload(sample.sraId);
 
   // const disease = sample.disease || '';
   const disease = (entry.sample || {}).disease || '';
@@ -89,65 +70,70 @@ const SamplesTableRow = ({
   const truncatedDisease =
     disease.length > 20 ? `${disease.substring(0, 20)}  ...` : disease;
 
-  const genDownloadList = (downloadedEntry) => {
-    const fileLists = (selectedAssembly
-      ? [selectedAssembly]
-      : ['hg19', 'hg38']
-    ).map((assembly) =>
-      ((downloadedEntry.analysis || {})[assembly] || []).reduce((acc, item) => {
-        if (item.type === 'txt' && item.desc === 'fragment size')
-          return [
-            ...acc,
-            {
-              desc: `Fragment size distribution (${assembly})`,
-              url: `${s3Bucket}/${item.key}`,
-            },
-          ];
-        if (item.type === 'bedGraph' && item.desc === 'coverage')
-          return [
-            ...acc,
-            {
-              desc: `Fragment coverage (${assembly})`,
-              url: `${s3Bucket}/${item.key}`,
-            },
-          ];
-        if (item.type === 'bedGraph' && item.desc === 'fragment profile')
-          return [
-            ...acc,
-            {
-              desc: `Fragment size profile (${assembly})`,
-              url: `${s3Bucket}/${item.key}`,
-            },
-          ];
-        if (item.type === 'bedGraph' && item.desc === 'WPS')
-          return [
-            ...acc,
-            {
-              desc: `Windowed Protection Score (WPS) (${assembly})`,
-              url: `${s3Bucket}/${item.key}`,
-            },
-          ];
-        if (item.type === 'tsv' && item.desc === 'fragment')
-          return [
-            ...acc,
-            {
-              desc: `Fragment .tsv file (${assembly})`,
-              url: `${s3Bucket}/${item.key}`,
-            },
-          ];
+  // Check if entry is in downloadlist
+  const isInDownloadList = ((downloads || {}).downloadList || []).find(
+    (item) => item.entry.id === entry.id
+  );
 
-        return acc;
-      }, [])
-    );
-    console.log(fileLists);
-    return fileLists[0].concat(fileLists[1] || []).map((item) => ({
-      value: (
-        <a href={item.url} download _target="blank" rel="noreferrer">
-          {item.desc}
-        </a>
-      ),
-    }));
-  };
+  // const genDownloadList = (downloadedEntry) => {
+  //   const fileLists = (selectedAssembly
+  //     ? [selectedAssembly]
+  //     : ['hg19', 'hg38']
+  //   ).map((assembly) =>
+  //     ((downloadedEntry.analysis || {})[assembly] || []).reduce((acc, item) => {
+  //       if (item.type === 'txt' && item.desc === 'fragment size')
+  //         return [
+  //           ...acc,
+  //           {
+  //             desc: `Fragment size distribution (${assembly})`,
+  //             url: `${s3Bucket}/${item.key}`,
+  //           },
+  //         ];
+  //       if (item.type === 'bedGraph' && item.desc === 'coverage')
+  //         return [
+  //           ...acc,
+  //           {
+  //             desc: `Fragment coverage (${assembly})`,
+  //             url: `${s3Bucket}/${item.key}`,
+  //           },
+  //         ];
+  //       if (item.type === 'bedGraph' && item.desc === 'fragment profile')
+  //         return [
+  //           ...acc,
+  //           {
+  //             desc: `Fragment size profile (${assembly})`,
+  //             url: `${s3Bucket}/${item.key}`,
+  //           },
+  //         ];
+  //       if (item.type === 'bedGraph' && item.desc === 'WPS')
+  //         return [
+  //           ...acc,
+  //           {
+  //             desc: `Windowed Protection Score (WPS) (${assembly})`,
+  //             url: `${s3Bucket}/${item.key}`,
+  //           },
+  //         ];
+  //       if (item.type === 'tsv' && item.desc === 'fragment')
+  //         return [
+  //           ...acc,
+  //           {
+  //             desc: `Fragment .tsv file (${assembly})`,
+  //             url: `${s3Bucket}/${item.key}`,
+  //           },
+  //         ];
+
+  //       return acc;
+  //     }, [])
+  //   );
+  //   console.log(fileLists);
+  //   return fileLists[0].concat(fileLists[1] || []).map((item) => ({
+  //     value: (
+  //       <a href={item.url} download _target="blank" rel="noreferrer">
+  //         {item.desc}
+  //       </a>
+  //     ),
+  //   }));
+  // };
 
   return (
     <Table.Row style={isQuery && isSelected ? { background: 'lavender' } : {}}>
@@ -183,8 +169,18 @@ const SamplesTableRow = ({
       <Table.Col>{sample.tissue || ''}</Table.Col>
       <Table.Col>
         <Text size="sm" muted>
-          {(entry.seqConfig || {}).readlen || ''} <br />
-          {entry.mbases || ''}
+          {(() => {
+            const fragNumInM =
+              Math.round(
+                Math.max(...Object.values(entry.fragNum || {})) / 1e5
+              ) / 10;
+            // If entry.fragNum is empty, fragNumInM would be -Infinity
+            return !fragNumInM || fragNumInM === -Infinity
+              ? ''
+              : `${fragNumInM}M`;
+          })()}{' '}
+          <br />
+          {(entry.seqConfig || {}).readlen || ''}
         </Text>
       </Table.Col>
       <Table.Col>
@@ -208,46 +204,24 @@ const SamplesTableRow = ({
           </Text>
         </a>
       </Table.Col>
-      <Table.Col>
-        <Dropdown arrow icon="download" itemsObject={genDownloadList(entry)} />
-        {/* <Button link size="sm" icon="download"></Button> */}
-      </Table.Col>
-
-      {/* <Table.Col alignContent="center">
-        <Form.Group>
-          <Form.InputGroup append>
-            <Button.Dropdown>
-              <Dropdown.Item>
-                <Button
-                  link
-                  onClick={sampleInBasket ? removeFromBasket : addToBasket}
-                >
-                  Direct Download
-                </Button>
-              </Dropdown.Item>
-              <Dropdown.Item>
-                <Button
-                  link
-                  onClick={sampleInBasket ? removeFromBasket : addToBasket}
-                >
-                  Add to download list
-                </Button>
-              </Dropdown.Item>
-              <Dropdown.ItemDivider />
-              <Dropdown.Item>
-                <Link to={`/visualization/${sample.sraId}`}>
-                  <Button link>Visualization</Button>
-                </Link>
-              </Dropdown.Item>
-              <Dropdown.Item>
-                <Button link RootComponent="a" href={sample.publication.link}>
-                  See Publication
-                </Button>
-              </Dropdown.Item>
-            </Button.Dropdown>
-          </Form.InputGroup>
-        </Form.Group>
-      </Table.Col> */}
+      {isInDownloadList ? (
+        <Table.Col>
+          <Button icon="check" className="download-icon-green" />
+          <Button
+            icon="minus"
+            className="download-icon-red"
+            onClick={() => handleAddDownloadItem([entry], false)}
+          />
+        </Table.Col>
+      ) : (
+        <Table.Col>
+          <Button
+            icon="plus"
+            className="download-icon-green"
+            onClick={() => handleAddDownloadItem([entry], true)}
+          />
+        </Table.Col>
+      )}
     </Table.Row>
   );
 };
@@ -263,29 +237,33 @@ SamplesTableRow.propTypes = {
       age: PropTypes.number,
     }),
   }).isRequired,
+  downloads: PropTypes.shape({
+    downloadList: PropTypes.arrayOf(PropTypes.shape()),
+  }).isRequired,
   isSelected: PropTypes.bool.isRequired,
   isQuery: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = (state) => ({
-  downloads: state.downloads.downloads,
-});
+// const mapStateToProps = (state) => ({
+//   downloads: state.downloads.downloads,
+// });
 
-const SamplesTableRowConnected = connect(mapStateToProps, {
-  addDownload,
-  removeDownload,
-})(SamplesTableRow);
+// const SamplesTableRowConnected = connect(mapStateToProps, {
+//   addDownload,
+//   removeDownload,
+// })(SamplesTableRow);
 
 const SamplesTable = ({
   entries,
-  assembly,
+  downloads,
   paging,
   visualizeUrl,
   selectedEntries,
   isQuery,
   handleSelectEntry,
   handlePaging,
+  handleAddDownloadItem,
 }) => {
   let tableControl;
   if (isQuery) {
@@ -316,12 +294,15 @@ const SamplesTable = ({
         </Table.ColHeader>
         <Table.ColHeader>Tissue</Table.ColHeader>
         <Table.ColHeader>
-          Read length <br /> Mbases{' '}
+          # of fragments <br /> Read length{' '}
         </Table.ColHeader>
         <Table.ColHeader>Platform</Table.ColHeader>
         <Table.ColHeader>Assay</Table.ColHeader>
         <Table.ColHeader>Study</Table.ColHeader>
-        <Table.ColHeader></Table.ColHeader>
+        <Table.ColHeader>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <Icon prefix="fe" name="download" />
+        </Table.ColHeader>
         {/* <Table.ColHeader>Platform</Table.ColHeader> */}
 
         {/* <Table.ColHeader>Other</Table.ColHeader> */}
@@ -336,14 +317,15 @@ const SamplesTable = ({
     (selectedEntry) => !currentEntryIds.includes(selectedEntry.id)
   );
   const entry2row = (entry) => (
-    <SamplesTableRowConnected
+    <SamplesTableRow
       key={entry.id}
       entry={entry}
-      assembly={assembly}
+      downloads={downloads}
       isSelected={selectedEntryIds.includes(entry.id)}
       sample={entry.sample}
       isQuery={isQuery}
       onChange={handleSelectEntry}
+      handleAddDownloadItem={handleAddDownloadItem}
     />
   );
   const pinned =
@@ -355,34 +337,20 @@ const SamplesTable = ({
   return (
     <div>
       {tableControl}
-      {header}
-      <Table.Body>
-        {pinned}
-        {/* {pinned ? (
-          <hr
-            style={{
-              color: 'gray',
-              backgroundColor: 'gray',
-              height: 5,
-            }}
-          />
-        ) : null} */}
-        {content}
-        {/* <Table.Row>
-          <Card className="m-2">
-          <Table className="card-table table-vcenter">
-            <Table.Header>
-              <Table.Row>
-                <Table.ColHeader>
-                  Haha
-                </Table.ColHeader>
-                <Table.ColHeader>BY</Table.ColHeader>
-              </Table.Row>
-            </Table.Header>
-          </Table>
-          </Card>
-        </Table.Row> */}
-      </Table.Body>
+      <Table
+        responsive
+        highlightRowOnHover
+        hasOutline
+        verticalAlign="center"
+        cards
+        className="text-nowrap"
+      >
+        {header}
+        <Table.Body>
+          {pinned}
+          {content}
+        </Table.Body>
+      </Table>
     </div>
   );
 };

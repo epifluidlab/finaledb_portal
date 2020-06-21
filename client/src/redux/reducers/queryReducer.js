@@ -1,19 +1,7 @@
+import { defaultSeqrunQueryTerms } from '../../settings';
+
 const initialState = {
-  seqrunQueryTerms: {
-    search: '',
-    assay: [],
-    enableReadlen: false,
-    minReadlen: 10,
-    maxReadlen: 160,
-    enableMbases: false,
-    minMbases: 100,
-    maxMbases: 10000,
-    tissue: [],
-    disease: [],
-    instrument: [],
-    publication: [],
-    offset: 0,
-  },
+  seqrunQueryTerms: defaultSeqrunQueryTerms,
   seqrunQueryResults: { total: 0, entries: [], offset: 0 },
   // seqrun entries selected for visualization
   selectedSeqruns: [],

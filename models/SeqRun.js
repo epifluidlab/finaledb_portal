@@ -20,6 +20,7 @@ SeqRun.init(
     mbases: DataTypes.INTEGER,
     analysis: DataTypes.JSON,
     seqConfig: DataTypes.JSON,
+    fragNum: DataTypes.JSONB,
 
     // comment: DataTypes.TEXT,
     // publication: {

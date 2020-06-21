@@ -13,3 +13,23 @@ body {
   width: 600px;
   padding-left: 0px;
 }
+
+.download-icon-green {
+  color: forestgreen;
+  background-color: transparent;
+  background-image: none;
+  /* border-color: #467fcf; */
+}
+
+.download-icon-red {
+  color: crimson;
+  background-color: transparent;
+  background-image: none;
+  /* border-color: #467fcf; */
+}
+
+.download-clear {
+  color: #fff;
+  background-color: crimson;
+  border-color: crimson;
+}
