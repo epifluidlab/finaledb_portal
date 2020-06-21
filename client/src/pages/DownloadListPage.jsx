@@ -21,12 +21,8 @@ import {
 
 class DownloadList extends Component {
   componentDidMount() {
-    const {
-      downloads: { downloadList = [] } = {},
-      history,
-      dispatchInitDownloadListStash,
-    } = this.props;
-    if (downloadList.length === 0) history.push('/query');
+    const { summary, history, dispatchInitDownloadListStash } = this.props;
+    if (!summary || Object.keys(summary).length === 0) history.push('/query');
 
     dispatchInitDownloadListStash();
   }
@@ -177,6 +173,7 @@ class DownloadList extends Component {
 }
 
 DownloadList.propTypes = {
+  summary: PropTypes.shape().isRequired,
   history: PropTypes.func.isRequired,
   downloads: PropTypes.shape({
     downloadList: PropTypes.arrayOf(PropTypes.shape()),
@@ -200,6 +197,7 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 const mapStateToProps = (state) => ({
+  summary: state.summary,
   downloads: state.downloads,
   stash: state.downloads.downloadListStash,
 });
