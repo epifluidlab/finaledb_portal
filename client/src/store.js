@@ -1,7 +1,7 @@
-import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
-import logger from 'redux-logger';
+import { createStore, applyMiddleware, combineReducers } from 'redux';
+// import logger from 'redux-logger';
 import thunk from 'redux-thunk';
-import { composeWithDevTools } from 'redux-devtools-extension';
+// import { composeWithDevTools } from 'redux-devtools-extension';
 
 import downloadsReducer from './redux/downloads/reducer';
 import epiBrowserReducer from './redux/reducers/epiBrowserReducer';
@@ -20,20 +20,12 @@ const rootReducer = combineReducers({
   query: queryReducer,
 });
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+// const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(
   rootReducer,
   initialState,
-  composeEnhancers(applyMiddleware(...middleware))
+  applyMiddleware(...middleware)
+  // composeWithDevTools(applyMiddleware(...middleware))
 );
-
-// const createStoreWithInitialState = (state) =>
-//   createStore(
-//     rootReducer,
-//     state,
-//     composeWithDevTools(applyMiddleware(...middleware))
-//   );
-
-// const store = createStoreWithInitialState(initialState);
 
 export default store;

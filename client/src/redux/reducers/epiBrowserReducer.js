@@ -30,7 +30,8 @@ const initialState = {
   fragSizeSeries: [],
   dataCache: {},
   // // initial display region
-  displayRegion: 'chr2:29028122-29057276',
+  // displayRegion: 'chr2:29028122-29057276',
+  displayRegion: 'chr11:19713334-20121601',
 };
 
 // Each entry may have multiple analysis entities, or tracks, however,
