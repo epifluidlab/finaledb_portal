@@ -25,6 +25,11 @@ const navBarItems = [
     to: '/downloads',
     LinkComponent: withRouter(NavLink),
   },
+  {
+    value: 'Help',
+    icon: 'help-circle',
+    to: 'https://finaledb.gitbook.io/finaledb-documentation/',
+  },
   // {
   //   value: "Help",
   //   icon: "help-circle",
