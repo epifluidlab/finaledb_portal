@@ -84,24 +84,39 @@ class Home extends Component {
             <Grid.Col lg={9}>
               <Card>
                 <Card.Header>
-                  <Card.Title>About cfDB</Card.Title>
+                  <Card.Title>About FinaleDB</Card.Title>
                 </Card.Header>
                 <Card.Body>
-                  With the recent surge in cfDNA studies and datasets, a
-                  platform to collect and uniformly process published data is
-                  needed. Through a publicly accessible database that makes all
-                  datasets from current published and preprint studies reusable
-                  and comparable, researchers will be able to further understand
-                  the genetics and epigenetics behind cfDNA and its diagnostic
-                  implications. Here, we developed a comprehensive cfDNA
-                  database, cfDB, dedicated to integrating, analyzing, and
-                  visualizing cfDNA data for the benefit of the cfDNA research
-                  community. Beginning with a large collection of raw sequence
-                  data from available studies and uniformly processing this raw
-                  data for effective presentation and interpretation, cfDNA
-                  database provides a user-friendly web interface with powerful
-                  browse and search capacities, as well as data visualization
-                  and downloading functions.
+                  FinaleDB refers to <b>F</b>ragmentat<b>I</b>o<b>N</b> <b>A</b>
+                  na<b>L</b>ysis of c<b>E</b>ll-free DNA DataBase. It is a
+                  comprehensive cell-free DNA (cfDNA) fragmentation pattern
+                  database to host uniformly processed and quality controlled
+                  2579 paired-end cfDNA WGS datasets from 2505 samples across 23
+                  different pathological conditions in the existing public
+                  domain. <br />
+                  <br />
+                  cfDNA fragmentation patterns inspired much interest in the
+                  research community. The fragmentation is a nucleosome-guided
+                  non-random process. Its patterns have been demonstrated to be
+                  closely related to diseases such as cancer, and have the
+                  potential as blood-based biomarkers that provide diagnostic
+                  and prognostic insight in a number of pathological conditions.
+                  However, a centralized database hosting publicly-available
+                  cfDNA fragmentation data does not yet exist. In addition, due
+                  to the protection of genotype information of patients, which
+                  in fact is not needed for the fragmentation analysis,
+                  databases such as dbGap and EGA requires special application
+                  procedure in terms of data access, and getting approvals can
+                  be burdensome. Lastly, different cfDNA studies usually employ
+                  different data processing workflows, resulting in possibly
+                  inconsistent cfDNA datasets. <br /> <br />
+                  FinaleDB curates cfDNA fragmentation data by collecting
+                  published WGS datasets and remove the original sequences to
+                  de-identify the sensitive genotype information. All the
+                  datasets are uniquely processed by an in-house developed
+                  workflow (see data collection and prcoessing). FinaleDB users
+                  can conveniently browse, query and visualize the datasets
+                  through FinaleDB web portal.
                 </Card.Body>
               </Card>
 

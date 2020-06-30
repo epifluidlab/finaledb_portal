@@ -56,7 +56,7 @@ const SiteWrapper = (props) => {
       headerProps={{
         href: '/',
         alt: 'cfDNA DB',
-        imageURL: '/demo/brand/logo.svg',
+        imageURL: '/demo/brand/logo.png',
         // navItems: [<Download />],
       }}
       navProps={{ itemsObjects: totNavBarItems }}
