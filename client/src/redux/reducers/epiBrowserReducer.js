@@ -26,6 +26,8 @@ const initialState = {
       genome: 'hg38',
     },
   ],
+  // Tracks imported from an external genome browser
+  externalTracks: [],
   tracks: [],
   fragSizeSeries: [],
   dataCache: {},
@@ -312,50 +314,19 @@ const reduceResetBrowserEntries = (state, payload) => {
 };
 
 export default (state = initialState, action) => {
-  const newState = {
-    ...state,
-  };
-
   switch (action.type) {
-    // case 'CHANGE_GENOME_ASSEMBLY': {
-    //   const assembly = action.payload;
-    //   if (state.assembly !== assembly) {
-    //     newState.assembly = assembly;
-    //     // The new refGene track
-    //     const newAssemblyTrack = {
-    //       ...state.refTracks[1],
-    //       genome: assembly,
-    //     };
-    //     // [ruler, refGene]
-    //     newState.refTracks = [state.refTracks[0], newAssemblyTrack];
-    //     newState.displayedEntryIds = getDisplayedEntryIds(
-    //       assembly,
-    //       newState.entries
-    //     );
-    //     newState.tracks = getTracks(assembly, newState.entries);
-    //     newState.fragSizeSeries = buildFragmentSizeSeries(
-    //       assembly,
-    //       newState.entries
-    //     );
-    //     newState.revision += 1;
-    //   }
-    //   break;
-    // }
     case 'RESET_BROWSER_ENTRIES':
       return reduceResetBrowserEntries(state, action.payload);
     case 'SET_FRAGMENT_SIZE_SERIES': {
       return reduceSetFragSizeSeries(state, action.payload);
     }
-    case 'SET_DISPLAY_REGION': {
-      if (state.displayRegion !== action.payload) {
-        newState.displayRegion = action.payload;
-        newState.revision += 1;
-      }
-      break;
+    case 'SET_EXTERNAL_TRACKS': {
+      const { externalTracks } = action.payload;
+      const { revision } = state;
+      return { ...state, externalTracks, revision: revision + 1 };
     }
     default:
       break;
   }
-
-  return newState;
+  return state;
 };

@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { Component } from 'react';
 import { Page, Card, Grid, Table, Form } from 'tabler-react';
-// import { Document, Page as PdfPage, pdfjs } from "react-pdf";
 
 import { connect } from 'react-redux';
 import log from 'loglevel';
@@ -21,6 +20,7 @@ import SiteWrapper from './SiteWrapper';
 import SamplesTable from '../components/SamplesTable';
 // import Browser from '../components/Browser';
 import EpiBrowser from '../containers/EpiBrowser';
+import EpiBrowserSessionUploader from '../containers/EpiBrowserSessionUploader';
 import Charts from '../components/FragmentSizesChart';
 
 class FormElements extends Component {
@@ -186,6 +186,12 @@ class FormElements extends Component {
               <Card>
                 <Charts series={fragSizeSeries} />
               </Card>
+            </Grid.Col>
+          </Grid.Row>
+
+          <Grid.Row>
+            <Grid.Col width={5}>
+              <EpiBrowserSessionUploader />
             </Grid.Col>
           </Grid.Row>
 

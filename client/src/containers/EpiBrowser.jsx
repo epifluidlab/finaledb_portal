@@ -118,7 +118,13 @@ class EpiBrowser extends React.Component {
   }
 
   renderBrowser(props) {
-    const { assembly, displayRegion, refTracks, tracks } = props;
+    const {
+      assembly,
+      displayRegion,
+      refTracks,
+      externalTracks,
+      tracks,
+    } = props;
     log.info(`Render browser: ${assembly} : ${displayRegion}`);
 
     // const dataTracks = EpiBrowser.processTracks(assembly, entries);
@@ -133,7 +139,7 @@ class EpiBrowser extends React.Component {
       displayRegion,
       trackLegendWidth: 120,
       isShowingNavigator: true,
-      tracks: refTracks.concat(tracks),
+      tracks: refTracks.concat(externalTracks, tracks),
       metadataTerms: ['Sample'],
       regionSets: [],
       regionSetViewIndex: -1,
@@ -170,7 +176,7 @@ const mapStateToProps = (state) => ({
 EpiBrowser.propTypes = {
   revision: PropTypes.number.isRequired,
   // assembly: PropTypes.string.isRequired,
-  displayRegion: PropTypes.string.isRequired,
+  // displayRegion: PropTypes.string.isRequired,
 };
 
 export default connect(mapStateToProps)(EpiBrowser);
