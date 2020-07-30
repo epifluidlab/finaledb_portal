@@ -1,9 +1,9 @@
-const samples = require('./seqrun');
-const publications = require('./publications');
+const seqrun = require('./seqrun');
+const publication = require('./publication');
 const summary = require('./summary');
 
 module.exports = {
-  samples,
-  publications,
+  seqrun,
+  publication,
   summary,
 };

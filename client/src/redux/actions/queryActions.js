@@ -46,7 +46,7 @@ export const querySeqrun = (queryTerms) => (dispatch) => {
 
   query.push(`offset=${offset}`);
 
-  const url = `/samples?${query.join('&')}`;
+  const url = `/api/v1/seqrun?${query.join('&')}`;
   console.log(url);
   const fetchPromise = fetch(url);
   return fetchPromise

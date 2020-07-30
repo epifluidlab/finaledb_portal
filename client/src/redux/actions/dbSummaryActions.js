@@ -1,9 +1,9 @@
 export default function getDbSummary() {
   return (dispatch) => {
-    const promiseSummary = fetch('/summary').then((response) =>
+    const promiseSummary = fetch('/api/v1/summary').then((response) =>
       response.json()
     );
-    const promisePublication = fetch('/publications').then((response) =>
+    const promisePublication = fetch('/api/v1/publication').then((response) =>
       response.json()
     );
 
