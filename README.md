@@ -1,7 +1,7 @@
 ## Startup
 
 ```
-git clone https://bitbucket.org/zhu1lx/express_react.git
+git clone https://github.com/epifluidlab/finaledb_portal
 ```
 
 Install and update missing dependencies
