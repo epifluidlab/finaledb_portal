@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 // const db = require('./queries')
 
-const { seqrun, publication, summary } = require('./routes');
+const { seqrun, publication, summary, s3public, misc } = require('./routes');
 
 const port = process.env.PORT || 5000;
 
@@ -24,6 +24,8 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 app.use('/api/v1/seqrun', seqrun);
 app.use('/api/v1/publication', publication); // http://localhost:3000/visualization/c91952a9b48f32a8f26a.worker.js
 app.use('/api/v1/summary', summary);
+app.use('/api/v1/misc', misc);
+app.use('/data', s3public);
 
 WORKER_SCRIPTS = {}
 
