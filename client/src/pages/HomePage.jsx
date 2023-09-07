@@ -95,6 +95,11 @@ class Home extends Component {
                   different pathological conditions in the existing public
                   domain. <br />
                   <br />
+                  <b> Our lab is moving to Northwestern University. The server is currently
+                  down. Please use globus.org (check https://docs.globus.org/how-to/get-started/)
+                    and search the endpoint named FinaleDB_northwestern_2023
+                  (url: https://app.globus.org/file-manager?origin_id=68c86914-a133-4e16-963d-028cc5f60cea&origin_path=%2F)
+                  to download all the files.</b> <br /> <br />
                   cfDNA fragmentation patterns inspired much interest in the
                   research community. The fragmentation is a nucleosome-guided
                   non-random process. Its patterns have been demonstrated to be
