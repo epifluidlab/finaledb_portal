@@ -126,17 +126,24 @@ class DownloadList extends Component {
                     block
                     color="primary"
                     className="mb-4"
-                    onClick={() => {
+                    onClick={async () => {
+                      const fetchPromise = fetch('/api/v1/misc');
+                      const miscPromise = fetchPromise.then((response) => response.json());
+                      const misc = await miscPromise;
+                      const s3Bucket = misc.s3;
+                
                       const downloadFiles = stash
-                        .filter((item) => item.checked)
-                        .reduce((acc, downloadItem) => {
-                          const urls = downloadItem.downloads
-                            .filter((ele) => ele.checked)
-                            .map((ele) => ele.url);
-                          return [...acc, ...urls];
-                        }, []);
-                      multiDownload(downloadFiles);
-                    }}
+                                        .filter((item) => item.checked)
+                                        .reduce((acc, downloadItem) => {
+                                          const urls = downloadItem.downloads
+                                            .filter((ele) => ele.checked)
+                                            .map((ele) => {
+                                              const path = ele.url.replace(/^\/data\//, "/");
+                                              return `${s3Bucket}${path}`;
+                                            });
+                                          return [...acc, ...urls];
+                                        }, []);
+                                        multiDownload(downloadFiles);}}
                   >
                     Download Selected
                   </Button>

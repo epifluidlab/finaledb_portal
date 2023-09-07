@@ -86,27 +86,31 @@ function addDownloadItems(state, entries) {
     //     key: item.key,
     //     checked: true,
     //   };
-    if (item.type === 'bedGraph' && item.desc === 'coverage')
-      return {
-        desc: `Fragment coverage (${assembly})`,
-        url: `${s3Bucket}/${item.key}`,
-        key: item.key,
-        checked: true,
-      };
-    if (item.type === 'bedGraph' && item.desc === 'fragment profile')
-      return {
-        desc: `Fragment size profile (${assembly})`,
-        url: `${s3Bucket}/${item.key}`,
-        key: item.key,
-        checked: true,
-      };
-    if (item.type === 'bedGraph' && item.desc === 'WPS')
-      return {
-        desc: `Windowed Protection Score (WPS) (${assembly})`,
-        url: `${s3Bucket}/${item.key}`,
-        key: item.key,
-        checked: true,
-      };
+    
+    // No matter what tracks are associated with the sample, we only provide fragment
+    // file downloading
+
+    // if (item.type === 'bedGraph' && item.desc === 'coverage')
+    //   return {
+    //     desc: `Fragment coverage (${assembly})`,
+    //     url: `${s3Bucket}/${item.key}`,
+    //     key: item.key,
+    //     checked: true,
+    //   };
+    // if (item.type === 'bedGraph' && item.desc === 'fragment profile')
+    //   return {
+    //     desc: `Fragment size profile (${assembly})`,
+    //     url: `${s3Bucket}/${item.key}`,
+    //     key: item.key,
+    //     checked: true,
+    //   };
+    // if (item.type === 'bedGraph' && item.desc === 'WPS')
+    //   return {
+    //     desc: `Windowed Protection Score (WPS) (${assembly})`,
+    //     url: `${s3Bucket}/${item.key}`,
+    //     key: item.key,
+    //     checked: true,
+    //   };
     if (item.type === 'tsv' && item.desc === 'fragment')
       return {
         desc: `Fragment .tsv file (${assembly})`,
