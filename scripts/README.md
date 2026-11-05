@@ -58,10 +58,14 @@ python3 scripts/finaledb_entries.py hide EE85723 --dry-run
    ```
 
    The real run reuses the files the dry run converted. It shows the plan and
-   asks for confirmation. Then it backs up the database, uploads the files,
-   adds the entries in a single transaction, and checks that the website serves
-   them. Add `--hidden` if you want to review the entries before they appear on
-   the portal, then show them with `unhide`.
+   asks for confirmation. Then it backs up the database and reserves the EE
+   IDs by saving the entries hidden. Next it uploads the files, makes the
+   entries visible and checks that the website serves them. If an upload fails,
+   it removes that batch's files and reserved entries, so you can just run it
+   again. Because the IDs are reserved before anything is uploaded, two people
+   adding batches at the same time can't overwrite each other's files. Add
+   `--hidden` to review the entries before they appear on the portal, then show
+   them with `unhide`.
 
 The run ends with a record of what was added, in
 `finaledb_upload/added_<date>.tsv` inside the batch folder. It lists each EE ID,

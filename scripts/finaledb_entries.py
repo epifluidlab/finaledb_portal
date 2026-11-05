@@ -17,17 +17,19 @@ until every step before it has succeeded):
      fragment file;
   2. checks the batch against the live database (duplicate runs or samples,
      unknown publications, misspelled disease/tissue/instrument/assay names)
-     and reserves the next free EE IDs;
+     and picks the next free EE IDs;
   3. converts each fragment file to FinaleDB's format (5 columns: chrom, start,
      end, MAPQ, strand; FinaleDB chromosome names), names it
      EE<id>.<assembly>.frag.tsv.bgz, indexes it with tabix and writes the
      fragment-size histogram EE<id>.<assembly>.insert_size_metrics.txt;
   4. (--dry-run stops here: it runs the database changes inside a transaction
      and rolls them back, so you can check everything first);
-  5. backs up the database, uploads the files to the public S3 bucket and
-     inserts the new rows in one transaction, then checks the entries are
-     served by the website. The portal reads the database directly, so the
-     new entries, counts and filter values appear right away.
+  5. backs up the database, reserves the EE IDs by saving the entries hidden
+     (one transaction), uploads the files to the public S3 bucket, then makes
+     the entries visible and checks the website serves them. Because the IDs
+     are reserved before anything is uploaded, two batches added at the same
+     time can't overwrite each other's files. The portal reads the database
+     directly, so the new entries, counts and filter values appear right away.
 
 Requires python3 (3.8+), the aws CLI (with write access to the bucket), ssh
 access to the database server, bgzip and tabix (htslib), gzip, sort and curl.
@@ -672,7 +674,7 @@ SELECT json_build_object(
  'max_publication', (SELECT max(id) FROM dev.publication),
  'samples', (SELECT coalesce(json_agg(json_build_object('id', id, 'name', name, 'disease', disease, 'tissue', tissue)), '[]'::json)
              FROM dev.sample WHERE name = ANY({qarray(names, 'text')})),
- 'runs', (SELECT coalesce(json_agg(json_build_object('id', id, 'original', alt_id->>'original', 'sra', alt_id->>'SRA')), '[]'::json)
+ 'runs', (SELECT coalesce(json_agg(json_build_object('id', id, 'original', alt_id->>'original', 'sra', alt_id->>'SRA', 'hidden', hidden)), '[]'::json)
           FROM dev.seqrun WHERE alt_id->>'original' = ANY({qarray(run_ids, 'text')})
                              OR alt_id->>'SRA' = ANY({qarray(sra_ids, 'text')})),
  'publications', (SELECT coalesce(json_agg(json_build_object('id', id, 'label', label, 'cite_short', cite_short) ORDER BY id), '[]'::json)
@@ -716,7 +718,8 @@ def resolve_against_db(runs, new_pubs, snap, args):
     errors, notes = [], []
     for r in snap["runs"]:
         clash = r["original"] if r["original"] in {x["run_id"] for x in runs} else r["sra"]
-        errors.append(f"run {clash} is already in FinaleDB as EE{r['id']}")
+        errors.append(f"run {clash} is already in FinaleDB as EE{r['id']}"
+                      + (" (hidden; it may be left over from an interrupted run)" if r.get("hidden") else ""))
     existing_samples = {s["name"]: s for s in snap["samples"]}
     for name, s in existing_samples.items():
         if args.allow_existing_samples:
@@ -792,13 +795,23 @@ def resolve_against_db(runs, new_pubs, snap, args):
 # --------------------------------------------------------------------------
 # Database changes
 # --------------------------------------------------------------------------
-def build_insert_sql(runs, samples, pubs, stats, hidden, commit):
+def txn(statements, commit):
+    """Wrap SQL statements in one transaction, committed or rolled back."""
+    return "\n".join(
+        ["SET standard_conforming_strings = on;", "BEGIN;"] + statements + ["COMMIT;" if commit else "ROLLBACK;"]
+    ) + "\n"
+
+
+def reserve_statements(runs, samples, pubs, stats, update_sequences):
+    """Insert the batch with every entry hidden. A real run commits this
+    before uploading anything, which reserves the EE IDs: another batch that
+    picked the same IDs at the same time fails here, before it uploads, so
+    it can never overwrite this batch's files. The entries are made visible
+    once all their files are uploaded."""
     entry_ids = [r["entry_id"] for r in runs]
     sample_ids = [s["id"] for s in samples]
     pub_ids = [p["id"] for p in pubs]
     out = [
-        "SET standard_conforming_strings = on;",
-        "BEGIN;",
         "LOCK TABLE dev.publication, dev.sample, dev.seqrun IN SHARE ROW EXCLUSIVE MODE;",
         f"""DO $finaledb$
 BEGIN
@@ -853,9 +866,9 @@ $finaledb$;""",
             "comment, seq_config, hidden, resgroup_id, frag_num) "
             f"VALUES ({q(eid)}, {qjson(alt)}, {q(r['pub']['id'] if r['pub'] else None)}, {q(r['sample_id'])}, "
             f"{q(r['mbases'])}, {q(r['num_reads'])}, {q(r['assay'])}, {qjson(analysis)}, {q(comment)}, "
-            f"{qjson(seq_config)}, {q(hidden)}, NULL, {qjson(frag_num, 'jsonb')});"
+            f"{qjson(seq_config)}, {q(True)}, NULL, {qjson(frag_num, 'jsonb')});"
         )
-    if commit:
+    if update_sequences:
         # This script picks IDs itself; keep the ID sequences in step so other
         # tools that rely on the column defaults don't hit existing IDs.
         # (Not done in a dry run: sequence changes are never rolled back.)
@@ -869,11 +882,40 @@ $finaledb$;""")
         "SELECT json_build_object("
         f"'entries', (SELECT coalesce(json_agg(id ORDER BY id), '[]'::json) FROM dev.seqrun WHERE id = ANY({qarray(entry_ids, 'int')})), "
         f"'samples', (SELECT count(*) FROM dev.sample WHERE id = ANY({qarray(sample_ids, 'int')})), "
-        f"'publications', (SELECT count(*) FROM dev.publication WHERE id = ANY({qarray(pub_ids, 'int')})), "
-        "'visible_entries', (SELECT count(*) FROM dev.seqrun WHERE hidden IS NOT TRUE))::jsonb;"
+        f"'publications', (SELECT count(*) FROM dev.publication WHERE id = ANY({qarray(pub_ids, 'int')})))::jsonb;"
     )
-    out.append("COMMIT;" if commit else "ROLLBACK;")
-    return "\n".join(out) + "\n"
+    return out
+
+
+def publish_statements(runs):
+    """Make the batch's entries visible, once all their files are uploaded."""
+    ids = qarray([r["entry_id"] for r in runs], "int")
+    run_ids = qarray([r["run_id"] for r in runs], "text")
+    return [
+        f"UPDATE dev.seqrun SET hidden = false WHERE id = ANY({ids}) AND alt_id->>'original' = ANY({run_ids});",
+        "SELECT json_build_object("
+        f"'published', (SELECT coalesce(json_agg(id ORDER BY id), '[]'::json) FROM dev.seqrun "
+        f"WHERE id = ANY({ids}) AND hidden IS NOT TRUE), "
+        "'visible_entries', (SELECT count(*) FROM dev.seqrun WHERE hidden IS NOT TRUE))::jsonb;",
+    ]
+
+
+def release_statements(runs, samples, pubs):
+    """Undo a reservation whose upload failed: remove this batch's entries
+    (still hidden) and the samples and publications it created, if nothing
+    else uses them."""
+    ids = qarray([r["entry_id"] for r in runs], "int")
+    run_ids = qarray([r["run_id"] for r in runs], "text")
+    sample_ids = qarray([s["id"] for s in samples], "int")
+    pub_ids = qarray([p["id"] for p in pubs], "int")
+    return [
+        f"DELETE FROM dev.seqrun WHERE id = ANY({ids}) AND hidden AND alt_id->>'original' = ANY({run_ids});",
+        f"DELETE FROM dev.sample s WHERE s.id = ANY({sample_ids}) "
+        "AND NOT EXISTS (SELECT 1 FROM dev.seqrun r WHERE r.sample_id = s.id);",
+        f"DELETE FROM dev.publication p WHERE p.id = ANY({pub_ids}) "
+        "AND NOT EXISTS (SELECT 1 FROM dev.seqrun r WHERE r.publication_id = p.id);",
+        f"SELECT to_jsonb((SELECT count(*) FROM dev.seqrun WHERE id = ANY({ids})));",
+    ]
 
 
 def backup_database(path):
@@ -891,11 +933,14 @@ def backup_database(path):
         raise DBError(f"database backup looks too small: {path}")
 
 
-def entries_in_db(entry_ids):
-    """True/False if any of the entries exist; None if the database can't be asked."""
+def reservation_saved(runs):
+    """Whether this batch's entries are in the database: True or False, or
+    None if the database can't be asked."""
+    ids = qarray([r["entry_id"] for r in runs], "int")
+    run_ids = qarray([r["run_id"] for r in runs], "text")
     try:
-        res = psql_json(f"SELECT to_jsonb(EXISTS (SELECT 1 FROM dev.seqrun WHERE id = ANY({qarray(entry_ids, 'int')})));")
-        return bool(res)
+        return psql_json(f"SELECT to_jsonb((SELECT count(*) FROM dev.seqrun WHERE id = ANY({ids}) "
+                         f"AND alt_id->>'original' = ANY({run_ids})));") > 0
     except Exception:  # noqa: BLE001
         return None
 
@@ -1006,15 +1051,17 @@ def cmd_add(args):
     total_bytes = sum(os.path.getsize(p) for p, _ in uploads)
 
     stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    sql = build_insert_sql(runs, samples, new_pubs, stats, args.hidden, commit=not args.dry_run)
+    reserve_sql = txn(reserve_statements(runs, samples, new_pubs, stats, update_sequences=not args.dry_run),
+                      commit=not args.dry_run)
+    publish_sql = txn(publish_statements(runs), commit=True)
     sql_path = os.path.join(staging, f"{'dryrun' if args.dry_run else 'added'}_{stamp}.sql")
     with open(sql_path, "w") as fh:
-        fh.write(sql)
+        fh.write(reserve_sql if args.dry_run or args.hidden else reserve_sql + publish_sql)
 
     if args.dry_run:
         log("")
         log("Dry run: running the database changes in a transaction and rolling them back")
-        result = psql_json(sql)
+        result = psql_json(reserve_sql)
         if result["entries"] != [r["entry_id"] for r in runs]:
             raise DBError(f"unexpected dry-run result: {result}")
         log(f"  OK: the database accepted {len(result['entries'])} entries, {result['samples']} sample(s), "
@@ -1052,6 +1099,24 @@ def cmd_add(args):
     except RuntimeError as e:
         log(f"  WARNING: could not copy the backup to S3 (the local copy is kept): {e}")
 
+    # Reserve the IDs before uploading anything. The entries are committed
+    # hidden, so a batch that picked the same IDs at the same time fails here
+    # instead of overwriting this batch's files.
+    entry_list = " ".join(f"EE{r['entry_id']}" for r in runs)
+    log(f"Reserving {entry_list} (saving the entries hidden until their files are uploaded)")
+    try:
+        reserved = psql_json(reserve_sql)
+        log(f"  saved {len(reserved['entries'])} entries, {reserved['samples']} sample(s), "
+            f"{reserved['publications']} publication(s)")
+    except DBError:
+        saved = reservation_saved(runs)
+        if saved is None:
+            log("  Could not tell whether the entries were saved. If they are in the database "
+                "(hidden), remove them before retrying.")
+        if not saved:
+            raise
+        log("  the database reported an error, but the entries were saved; continuing")
+
     log(f"Uploading {len(uploads)} files")
     done = []
     try:
@@ -1059,25 +1124,33 @@ def cmd_add(args):
             run(["aws", "s3", "cp", path, f"s3://{CFG['bucket']}/{key}", "--only-show-errors"])
             done.append(key)
             log(f"  {key}")
-        log("Adding the entries to the database")
-        out = psql(sql)
     except BaseException:
-        if done:
-            committed = entries_in_db([r["entry_id"] for r in runs])
-            if committed is False:
-                log("Something failed; removing the files uploaded by this run so the batch can be retried")
-                for key in done:
-                    try:
-                        run(["aws", "s3", "rm", f"s3://{CFG['bucket']}/{key}", "--only-show-errors"])
-                    except RuntimeError as e:
-                        log(f"  could not remove s3://{CFG['bucket']}/{key}: {e}")
-            else:
-                log("Something failed and it is unclear whether the database changes were saved; "
-                    "the uploaded files were left in place. Check the entries before retrying.")
+        # This run owns the reserved IDs, so these files and rows are its own.
+        log("The upload failed; removing this batch's uploaded files and reserved entries so it can be retried")
+        for key in done:
+            try:
+                run(["aws", "s3", "rm", f"s3://{CFG['bucket']}/{key}", "--only-show-errors"])
+            except RuntimeError as e:
+                log(f"  could not remove s3://{CFG['bucket']}/{key}: {e}")
+        try:
+            left = psql_json(txn(release_statements(runs, samples, new_pubs), commit=True))
+            if left:
+                log(f"  WARNING: {left} reserved entries could not be removed; they stay hidden")
+        except Exception as e:  # noqa: BLE001
+            log(f"  could not remove the reserved entries (they stay hidden): {e}")
         raise
-    result = json.loads([ln for ln in out.splitlines() if ln.strip()][-1])
-    log(f"  committed: {len(result['entries'])} entries, {result['samples']} sample(s), "
-        f"{result['publications']} publication(s); visible entries now {result['visible_entries']}")
+
+    if args.hidden:
+        log(f"Leaving the entries hidden (--hidden). Show them with: python3 {sys.argv[0]} unhide {entry_list}")
+    else:
+        log("Making the entries visible on the portal")
+        try:
+            published = psql_json(publish_sql)
+        except DBError as e:
+            raise DBError(f"the files are uploaded and the entries saved, but they could not be made visible ({e}). "
+                          f"Run: python3 {sys.argv[0]} unhide {entry_list}")
+        log(f"  {len(published['published'])} entries visible; the portal now lists "
+            f"{published['visible_entries']} entries")
 
     manifest = os.path.join(staging, f"added_{stamp}.tsv")
     with open(manifest, "w") as fh:
